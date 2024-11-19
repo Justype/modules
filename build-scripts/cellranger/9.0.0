@@ -5,7 +5,7 @@
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You can write your own scripts in region BUILD SCRIPT (line 57)
+# You need to change the line 62: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
@@ -43,8 +43,8 @@ fi
 run_command() {
     "$@"
     if [ $? -ne 0 ]; then
-        echo "[`date +"%Y-%m-%d %T"`] Command failed: $@"
-        echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
+        echo "[`date +"%Y-%m-%d %T"`] Link expired! Get the link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
+        echo "[`date +"%Y-%m-%d %T"`] And change the line 62"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
         exit 1
@@ -55,11 +55,35 @@ run_command() {
 printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 
 #region BUILD SCRIPT
-mkdir -p "$target_dir"
 
+# pwd: modules/
+echo [`date +"%Y-%m-%d %T"`] Downloading cellranger-${version}.tar.gz
+run_command wget -O cellranger-9.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz?Expires=1732092276&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=UijFtHYX1dFJO8sYXDWFxY3eIXn1iUhMsSmcIGzkewJ4u164R~w16luwLbyrklkf8csJQeX7mguIZ1U1CqSzKZTUtrcTHMfmFBr0vmXmY4JPWRWw4X2PUWTCRKsFIbkImOo1wlgKjK3U8WQZKt~wkj4IFsuIesRY1IL51PkA3tzWQXqmx-cF21LD86UzKyDSAhce-KihvzDN6u4bxWvJ7hlEH67a23usHalSqaMn5QMTwdkrOWIq7Et42vtmj-g7hhijml8DichF4DvhynOTCzbEUq171NJkAzbjAl~SzNa3CkA5K5z~tn6xZBxfE3EH-6vVvcOV6gRHTBsLO9vAbQ__"
 
+tar xf ./cellranger-${version}.tar.gz
+rm ./cellranger-${version}.tar.gz
 
+# move to software/version folder
+mkdir -p cellranger
+mv cellranger-${version}/ cellranger/${version}
 #endregion BUILD SCRIPT
+
+# Cell Ranger References
+mkdir -p cellranger/ref
+echo [`date +"%Y-%m-%d %T"`] Downloading Cell Ranger Reference if needed
+
+if ! [ -d "cellranger/ref/refdata-gex-GRCh38-2024-A" ]; then
+    echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCh38-2024-A
+    wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz"
+    tar xf refdata-gex-GRCh38-2024-A.tar.gz -C cellranger/ref
+    rm refdata-gex-GRCh38-2024-A.tar.gz
+fi
+if ! [ -d "cellranger/ref/refdata-gex-GRCm39-2024-A" ]; then
+    echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCm39-2024-A
+    wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCm39-2024-A.tar.gz"
+    tar xf refdata-gex-GRCm39-2024-A.tar.gz -C cellranger/ref
+    rm refdata-gex-GRCm39-2024-A.tar.gz
+fi
 
 #region Copying modulefiles
 printf "[`date +"%Y-%m-%d %T"`] Copying modulefiles\n"

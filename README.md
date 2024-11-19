@@ -1,4 +1,4 @@
-# Environment Module
+# Environment Module for Bioinfo Research
 
 There are two similar environment-control softwares: [Environment Modules](https://modules.sourceforge.net/) and [Lmod](https://lmod.readthedocs.io/en/latest/index.html)
 
@@ -13,7 +13,21 @@ There are two similar environment-control softwares: [Environment Modules](https
   - `module unload cellranger/8.0.1`
   - `module purge` unload all modules
 
-## Setup
+## How to Build Custom Modules
+
+1. go into `modules` folder
+2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1`
+
+Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply copy the old one to a file named that version.
+
+For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
+
+## Version Dependent Packages
+
+- [Cell Ranger](build-scripts/cellranger/8.0.1)
+  - You need key-pair to download the it. If it fails, change the link.
+
+## Setup Environment Modules
 
 It is installed by default on Redhat. In Ubuntu, you need to install and init it.
 
@@ -32,11 +46,25 @@ fi
 
 If you have custom modulefiles, You can add `module use`.
 
-## Directory Structure
+## How it works?
 
-- root directory is `module`
-- apps and versions are under `module`
-- corresponding modulefiles are under `module/modulefiles`
+You can config the environment variables in modulefile.
+
+```tcl
+# add app bin at the beginning of the PATH
+prepend-path PATH $app_root/bin
+
+# set custom environment variable
+setenv CELLRANGER_REF $ref_root
+```
+
+When you run `module load/unload`, modules can help use set or unset `PATH` and other variables.
+
+### Directory Structure
+
+- root directory is `modules`
+- apps and versions are under `modules`
+- corresponding modulefiles are under `modules/modulefiles`
 
 Example Directory Structure
 
@@ -46,10 +74,8 @@ modules/
 │   ├── cellranger/
 │   │   ├── 7.0.1
 │   │   └── 8.0.1
-│   ├── sra-tools
+│   └── sra-tools
 │   │   └── 3.1.1
-│   └── template
-│       └── 1.0.0
 ├── cellranger/
 │   ├── 7.0.1/
 │   │   ├── bin/
@@ -65,7 +91,7 @@ modules/
         └──  bin/
 ```
 
-## Relative Path in Modulefile
+### Relative Path in Modulefile
 
 ```tcl
 # get absolute path of this module file, like /share/apps/modulefiles/
@@ -73,12 +99,18 @@ set abs_path [file normalize [info script]]
 
 # get the path to modulefiles
 set app_full_name [module-info name]
+
+# get parent directory from a path
+set app_modulefiles_dir [file dirname $abs_path]
+
+# get file or dir name from a path
+set name [file tail $abs_path]
 ```
 
 ## Template script
 
-- [modulefile template](modulefiles/template/1.0.0)
-- [Lmod template.lua](modulefiles/template/1.0.0.lua)
+- [modulefile template](build-scripts/template)
+- [Lmod template.lua](build-scripts/template.lua)
 
 Where to store:
 

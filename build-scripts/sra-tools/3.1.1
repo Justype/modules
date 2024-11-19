@@ -33,22 +33,29 @@ script_path="${modules_root}/modulefiles/${relative_path}"
 printf "[`date +"%Y-%m-%d %T"`] Target App Path: $target_dir\n"
 printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
 
-mkdir -p "$target_dir"
-mkdir -p "$script_base_dir"
-
-if [ -f "${modules_root}/build-scripts/${soft_name}/template" ]; then
-    printf "[`date +"%Y-%m-%d %T"`] $soft_name specific template exists. Use it.\n"
-    cp "${modules_root}/build-scripts/${soft_name}/template" "$script_path"
-    cp "${modules_root}/build-scripts/${soft_name}/template.lua" "${script_path}.lua"
-else
-    printf "[`date +"%Y-%m-%d %T"`] $soft_name specific template does exist. Use default template.\n"
-    cp "${modules_root}/build-scripts/template" "$script_path"
-    cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
+if [ -d "$target_dir" ]; then
+    printf printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
+    printf printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
+    exit
 fi
+
+# Function to run a command and exit if it fails
+run_command() {
+    "$@"
+    if [ $? -ne 0 ]; then
+        echo "[`date +"%Y-%m-%d %T"`] Command failed: $@"
+        echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
+        echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
+        rm -rf "$target_dir"
+        exit 1
+    fi
+}
 #endregion CONFIGS
 
-#region BUILD SCRIPT
 printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
+
+#region BUILD SCRIPT
+mkdir -p "$target_dir"
 
 tmp_dir="${modules_root}/tmp"
 mkdir -p "$tmp_dir"
@@ -67,7 +74,7 @@ mv "${vdb_path}-${version}" "${vdb_path}"
 # modules/tmp/ncbi-vdb
 cd "${vdb_path}"
 ./configure --build-prefix="${tmp_dir}/build"
-make
+run_command make
 
 # modules/tmp
 cd ..
@@ -83,13 +90,27 @@ mv "${sra_path}-${version}" "${sra_path}"
 # modules/tmp/sra-tools
 cd "${sra_path}"
 ./configure --build-prefix="${tmp_dir}/build" --prefix="${target_dir}"
-make # make sure ncbi-vdb in the same parent folder
+run_command make # make sure ncbi-vdb in the same parent folder
 make install
 #endregion
-#endregion BUILD SCRIPT
 
 echo [`date +"%Y-%m-%d %T"`] Cleaning tmp directory
 cd "${modules_root}"
 rm -rf "${tmp_dir}"
+#endregion BUILD SCRIPT
+
+#region Copying modulefiles
+printf "[`date +"%Y-%m-%d %T"`] Copying modulefiles\n"
+mkdir -p "$script_base_dir"
+if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
+    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template exists. Use it.\n"
+    cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
+    cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
+else
+    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does exist. Use default template.\n"
+    cp "${modules_root}/build-scripts/template" "$script_path"
+    cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
+fi
+#endregion
 
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
