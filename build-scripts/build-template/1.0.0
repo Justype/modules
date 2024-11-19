@@ -5,7 +5,7 @@
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You can write your own scripts in region BUILD SCRIPT (line 57)
+# You can write your own scripts in region BUILD SCRIPT (line 55)
 ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
@@ -51,8 +51,6 @@ run_command() {
     fi
 }
 #endregion CONFIGS
-
-printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 
 #region BUILD SCRIPT
 mkdir -p "$target_dir"
