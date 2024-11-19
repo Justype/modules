@@ -1,0 +1,8 @@
+# Ignore everything by default
+*
+
+# Include files
+!.gitignore
+!README.md
+!build-scripts/
+!build-scripts/**

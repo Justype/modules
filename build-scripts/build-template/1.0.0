@@ -1,0 +1,54 @@
+#!/usr/bin/bash
+#SBATCH --cpus-per-task=1
+#SBATCH --time=6:00:00
+#SBATCH --mem=2GB
+#SBATCH --job-name=make
+#SBATCH --output=build_%j.out
+
+# This script will create and delete tmp folder!
+ncpu=${SLURM_CPUS_PER_TASK:-4} # number of cores to use
+
+#region CONFIGS
+# Define color codes
+RED='\033[0;31m'
+NC='\033[0m'     # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n"
+    printf "And make sure you have your scripts in build-scripts folder.\n"
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n"
+    exit
+fi
+
+modules_root="$(pwd -P)"
+script_path="$(realpath "$0")"
+relative_path="${script_path#*/build-scripts/}"
+soft_name="${relative_path%/*}"
+version="${relative_path##*/}"
+printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
+
+target_path="${modules_root}/${relative_path}"
+script_base_dir="${modules_root}/modulefiles/${soft_name}"
+script_path="${modules_root}/modulefiles/${relative_path}"
+printf "[`date +"%Y-%m-%d %T"`] Target App Path: $target_path\n"
+printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
+
+mkdir -p "$target_path"
+mkdir -p "$script_base_dir"
+
+if [ -f "${modules_root}/build-scripts/${soft_name}/template" ]; then
+    printf "[`date +"%Y-%m-%d %T"`] $soft_name specific template exists. Use it.\n"
+    cp "${modules_root}/build-scripts/${soft_name}/template" "$script_path"
+    cp "${modules_root}/build-scripts/${soft_name}/template.lua" "${script_path}.lua"
+else
+    printf "[`date +"%Y-%m-%d %T"`] $soft_name specific template does exist. Use default template.\n"
+    cp "${modules_root}/build-scripts/template" "$script_path"
+    cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
+fi
+#endregion CONFIGS
+
+#region BUILD SCRIPT
+
+#endregion BUILD SCRIPT
+
+printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
