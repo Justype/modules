@@ -34,8 +34,8 @@ printf "[`date +"%Y-%m-%d %T"`] Target App Directory: $target_dir\n"
 printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
 
 if [ -d "$target_dir" ]; then
-    printf printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
-    printf printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
+    printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
+    printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
     exit
 fi
 

@@ -22,20 +22,20 @@ fi
 
 modules_root="$(pwd -P)"
 script_path="$(realpath "$0")"
-relative_path="${script_path#*/build-scripts/}"
-soft_name="${relative_path%/*}"
-version="${relative_path##*/}"
-printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
+app_name_version="${script_path#*/build-scripts/}"
+app_name="${app_name_version%/*}"
+version="${app_name_version##*/}"
+printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 
-target_dir="${modules_root}/${relative_path}"
-script_base_dir="${modules_root}/modulefiles/${soft_name}"
-script_path="${modules_root}/modulefiles/${relative_path}"
-printf "[`date +"%Y-%m-%d %T"`] Target App Path: $target_dir\n"
+target_dir="${modules_root}/${app_name_version}"
+script_base_dir="${modules_root}/modulefiles/${app_name}"
+script_path="${modules_root}/modulefiles/${app_name_version}"
+printf "[`date +"%Y-%m-%d %T"`] Target App Directory: $target_dir\n"
 printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
 
 if [ -d "$target_dir" ]; then
-    printf printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
-    printf printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
+    printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
+    printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
     exit
 fi
 
@@ -53,48 +53,79 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$target_dir"
+soft_dir="${modules_root}/${app_name}"
+mkdir -p "$soft_dir"
 
-tmp_dir="${modules_root}/tmp"
-mkdir -p "$tmp_dir"
+# if this machine is x64 and fedora based or debian based, directly install the binary
+flag_install_binary=false
 
-# modules/tmp
-cd $tmp_dir
+if [ "$(uname -m)" == "x86_64" ]; then
+    distro=$(grep -E '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
+    if [ "$distro" == "fedora" ]; then
+        printf "[`date +"%Y-%m-%d %T"`] This is a x64 Fedora based machine. Install binary directly.\n"
+        flag_install_binary=true
+        url="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${version}/sratoolkit.${version}-centos_linux64.tar.gz"
+        run_command wget --no-verbose -O "sratoolkit.${version}-centos_linux64.tar.gz" "$url" # download binary
+        tar xfz "sratoolkit.${version}-centos_linux64.tar.gz" --overwrite
+        rm -rf "sratoolkit.${version}-centos_linux64.tar.gz"
+        mv "sratoolkit.${version}-centos_linux64" "${soft_dir}/${version}"
 
-#region ncbi-vdb
-echo [`date +"%Y-%m-%d %T"`] Building ncbi/ncbi-vdb $version
+    elif [ "$distro" == "debian" ]; then
+        printf "[`date +"%Y-%m-%d %T"`] This is a x64 Debian based machine. Install binary directly.\n"
+        flag_install_binary=true
+        url="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${version}/sratoolkit.${version}-ubuntu64.tar.gz"
+        run_command wget --no-verbose -O "sratoolkit.${version}-ubuntu64.tar.gz" "$url" # download binary
+        tar xfz "sratoolkit.${version}-ubuntu64.tar.gz" --overwrite
+        rm -rf "sratoolkit.${version}-ubuntu64.tar.gz"
+        mv "sratoolkit.${version}-ubuntu64" "${soft_dir}/${version}"
+    fi
+fi
 
-vdb_path="ncbi-vdb"
-wget --no-verbose -O "${vdb_path}.tar.gz" "https://github.com/ncbi/ncbi-vdb/archive/refs/tags/${version}.tar.gz"
-tar xfz "${vdb_path}.tar.gz" --overwrite
-mv "${vdb_path}-${version}" "${vdb_path}"
+# if the binary is installed, skip the source code installation
+if [ "$flag_install_binary" != true ]; then
+    printf "[`date +"%Y-%m-%d %T"`] This is not a x64 Fedora or Debian based machine. Install from source code.\n"
 
-# modules/tmp/ncbi-vdb
-cd "${vdb_path}"
-./configure --build-prefix="${tmp_dir}/build"
-run_command make
+    tmp_dir="${modules_root}/tmp"
+    mkdir -p "$tmp_dir"
 
-# modules/tmp
-cd ..
-#endregion
+    # modules/tmp
+    cd $tmp_dir
 
-#region sra-tools
-echo [`date +"%Y-%m-%d %T"`] Building ncbi/sra-tools $version
-sra_path="sra-tools"
-wget --no-verbose -O "${sra_path}.tar.gz" "https://github.com/ncbi/sra-tools/archive/refs/tags/${version}.tar.gz"
-tar xfz "${sra_path}.tar.gz" --overwrite
-mv "${sra_path}-${version}" "${sra_path}"
+    #region ncbi-vdb
+    echo [`date +"%Y-%m-%d %T"`] Building ncbi/ncbi-vdb $version
 
-# modules/tmp/sra-tools
-cd "${sra_path}"
-./configure --build-prefix="${tmp_dir}/build" --prefix="${target_dir}"
-run_command make # make sure ncbi-vdb in the same parent folder
-make install
-#endregion
+    vdb_path="ncbi-vdb"
+    wget --no-verbose -O "${vdb_path}.tar.gz" "https://github.com/ncbi/ncbi-vdb/archive/refs/tags/${version}.tar.gz"
+    tar xfz "${vdb_path}.tar.gz" --overwrite
+    mv "${vdb_path}-${version}" "${vdb_path}"
 
-echo [`date +"%Y-%m-%d %T"`] Cleaning tmp directory
-cd "${modules_root}"
-rm -rf "${tmp_dir}"
+    # modules/tmp/ncbi-vdb
+    cd "${vdb_path}"
+    ./configure --build-prefix="${tmp_dir}/build"
+    run_command make
+
+    # modules/tmp
+    cd ..
+    #endregion
+
+    #region sra-tools
+    echo [`date +"%Y-%m-%d %T"`] Building ncbi/sra-tools $version
+    sra_path="sra-tools"
+    wget --no-verbose -O "${sra_path}.tar.gz" "https://github.com/ncbi/sra-tools/archive/refs/tags/${version}.tar.gz"
+    tar xfz "${sra_path}.tar.gz" --overwrite
+    mv "${sra_path}-${version}" "${sra_path}"
+
+    # modules/tmp/sra-tools
+    cd "${sra_path}"
+    ./configure --build-prefix="${tmp_dir}/build" --prefix="${target_dir}"
+    run_command make # make sure ncbi-vdb in the same parent folder
+    make install
+    #endregion
+
+    echo [`date +"%Y-%m-%d %T"`] Cleaning tmp directory
+    cd "${modules_root}"
+    rm -rf "${tmp_dir}"
+fi
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles
@@ -111,4 +142,4 @@ else
 fi
 #endregion
 
-printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${soft_name}${NC} version ${RED}${version}${NC}\n"
+printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
