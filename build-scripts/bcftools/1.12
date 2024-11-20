@@ -1,12 +1,12 @@
 #!/usr/bin/bash
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=4
 #SBATCH --time=6:00:00
 #SBATCH --mem=2GB
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You can write your own scripts in region BUILD SCRIPT (line 102)
-ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
+# Bcftools build script
+ncpu=${SLURM_CPUS_PER_TASK:-4} # number of cores to use
 
 #region CONFIGS
 # Define color codes
@@ -100,11 +100,32 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-# mkdir -p "$app_base_dir"
-mkdir -p "$target_dir"
+mkdir -p "$app_base_dir"  # modules/app
 
+# Build the samtools from source
+mkdir -p tmp
+cd tmp
+printf "[`date +"%Y-%m-%d %T"`] Downloading bcftools-${version}.tar.bz2\n"
+run_command wget -nv -O bcftools-${version}.tar.bz2 https://github.com/samtools/bcftools/releases/download/${version}/bcftools-${version}.tar.bz2
 
+printf "[`date +"%Y-%m-%d %T"`] Extracting bcftools-${version}.tar.bz2\n"
+run_command tar -xjf bcftools-${version}.tar.bz2
+cd bcftools-${version}
 
+printf "[`date +"%Y-%m-%d %T"`] Building bcftools-${version}\n"
+
+autoheader && autoconf && ./configure --enable-libgsl --enable-perl-filters --prefix="$target_dir" # recommanded options
+make -j $ncpu
+if [ $? -ne 0 ]; then
+    echo "[`date +"%Y-%m-%d %T"`] ${RED}Recommended options failed. Trying default options.${NC}"
+    ./configure --prefix="$target_dir"
+    run_command make -j $ncpu
+fi
+make install
+
+printf "[`date +"%Y-%m-%d %T"`] Cleaning up\n"
+cd $modules_root
+rm -rf tmp
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles
@@ -115,10 +136,22 @@ if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
     cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
     cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
 else
-    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does exist. Use default template.\n"
+    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does not exist. Use default template.\n"
     cp "${modules_root}/build-scripts/template" "$script_path"
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
+
+printf "[`date +"%Y-%m-%d %T"`] bcftools plugin directory: $target_dir/libexec/bcftools\n"
+printf "[`date +"%Y-%m-%d %T"`] Edit the modulefile\n"
+# Edit the modulefile
+echo '
+# set BCFTOOLS_PLUGINS environment variable
+setenv BCFTOOLS_PLUGINS "$app_root/libexec/bcftools"
+' >> "$script_path"
+echo '
+-- set BCFTOOLS_PLUGINS environment variable
+setenv("BCFTOOLS_PLUGINS", pathJoin(app_root, "libexec/bcftools"))
+' >> "${script_path}.lua"
 #endregion
 
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"

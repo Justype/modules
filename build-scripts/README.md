@@ -20,6 +20,12 @@ For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/
 2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
    - `-d` for deleting
 
+## BCFtools
+
+BCFtools's plugins are under `bcftools/version/libexec/bcftools`. You need to set `$BCFTOOLS_PLUGINS` to that directory so that BCFtools can find the plugins.
+
+e.g. 
+
 ## Cell Ranger
 
 Since the link from 10X is only valid for **one** day, you will need to change the link to make it work.

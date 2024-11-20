@@ -100,7 +100,7 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$app_base_dir"
+mkdir -p "$app_base_dir"  # modules/app
 
 printf "[`date +"%Y-%m-%d %T"`] Downloading ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 # Get main version from the version string
@@ -129,7 +129,7 @@ if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
     cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
     cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
 else
-    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does exist. Use default template.\n"
+    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does not exist. Use default template.\n"
     cp "${modules_root}/build-scripts/template" "$script_path"
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi

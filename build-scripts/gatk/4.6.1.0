@@ -101,7 +101,7 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$target_dir"
+mkdir -p "$target_dir" # modules/app/version
 # Download GATK from github with specific version
 printf "[`date +"%Y-%m-%d %T"`] Downloading GATK version ${version}\n"
 run_command wget -nv -O "gatk-${version}.zip" "https://github.com/broadinstitute/gatk/releases/download/${version}/gatk-${version}.zip"
@@ -120,7 +120,7 @@ if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
     cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
     cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
 else
-    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does exist. Use default template.\n"
+    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does not exist. Use default template.\n"
     cp "${modules_root}/build-scripts/template" "$script_path"
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
