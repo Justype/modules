@@ -2,6 +2,8 @@
 
 Make sure you run `module use /somewhere/modules` to use these modules.
 
+---
+
 There are two similar environment-control softwares: [Environment Modules](https://modules.sourceforge.net/) and [Lmod](https://lmod.readthedocs.io/en/latest/index.html)
 
 - Lmod uses the Lua, while Environment Modules uses Tcl module scripts (similar to shell script)
@@ -31,7 +33,7 @@ For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/
 ### Remove
 
 1. go into `modules` folder
-2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
+2. run build scripts with `-d` parameter, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
    - `-d` for deleting
 
 ## Version Dependent Packages
@@ -90,7 +92,7 @@ modules/
 │   │   ├── 7.0.1
 │   │   └── 8.0.1
 │   └── sra-tools
-│   │   └── 3.1.1
+│       └── 3.1.1
 ├── cellranger/
 │   ├── 7.0.1/
 │   │   ├── bin/
