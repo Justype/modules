@@ -5,7 +5,8 @@
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You can write your own scripts in region BUILD SCRIPT (line 102)
+# GATK script, jdk required
+# This script will edit the default modulefile to include the jdk module
 ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
@@ -100,10 +101,14 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-# mkdir -p "$app_base_dir"
 mkdir -p "$target_dir"
-
-
+# Download GATK from github with specific version
+printf "[`date +"%Y-%m-%d %T"`] Downloading GATK version ${version}\n"
+run_command wget -nv -O "gatk-${version}.zip" "https://github.com/broadinstitute/gatk/releases/download/${version}/gatk-${version}.zip"
+printf "[`date +"%Y-%m-%d %T"`] Unzipping GATK version ${version}\n"
+run_command unzip -q "gatk-${version}.zip"        # quiet unzip
+mv "gatk-${version}" "${target_dir}/bin"  # move to target directory
+rm "gatk-${version}.zip"
 
 #endregion BUILD SCRIPT
 
@@ -120,5 +125,28 @@ else
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
 #endregion
+
+printf "[`date +"%Y-%m-%d %T"`] GATK requires a proper Java version to run!\n"
+
+# get the latest version of jdk/version in build-scripts
+jdk_latest=$(ls -d ${modules_root}/build-scripts/jdk/* | tail -n 1)
+jdk_version=$(basename $jdk_latest)
+# detect if modules/jdk/jdk_version exists
+if ! [ -d "${modules_root}/jdk/${jdk_version}" ]; then
+    printf "[`date +"%Y-%m-%d %T"`] ${RED}JDK version ${jdk_version} does not exist! Install it!${NC}\n"
+    run_command bash build-scripts/jdk/${jdk_version}
+fi
+
+printf "[`date +"%Y-%m-%d %T"`] Editing the modulefile to include the jdk/${jdk_version} module\n"
+
+# edit the modulefile to include the jdk module
+echo "
+# load the required jdk module
+module load jdk/${jdk_version}
+" >> "${script_path}"
+echo "
+-- load the required jdk module
+load('jdk/${jdk_version}')
+" >> "${script_path}.lua"
 
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"

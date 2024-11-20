@@ -5,7 +5,7 @@
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You need to change the line 58: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
+# You need to change the line 104: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
@@ -25,18 +25,64 @@ script_path="$(realpath "$0")"
 app_name_version="${script_path#*/build-scripts/}" # app/version
 app_name="${app_name_version%/*}"                  # app
 version="${app_name_version##*/}"                  # version
-printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 
-target_dir="${modules_root}/${app_name_version}"
-script_base_dir="${modules_root}/modulefiles/${app_name}"
-script_path="${modules_root}/modulefiles/${app_name_version}"
+app_base_dir="${modules_root}/${app_name}"         # modules/app
+target_dir="${modules_root}/${app_name_version}"   # modules/app/version
+script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
+script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
+
+# Parse the parameters
+while getopts ":hd" opt; do
+    case ${opt} in
+        h )
+            echo "Usage: bash $0 [-h]"
+            echo "Options:"
+            echo "  -h  Display this help message."
+            echo "  -d  Delete the target module."
+            exit 0
+            ;;
+        d )
+            printf "[`date +"%Y-%m-%d %T"`] Deleting the target module: $target_dir\n"
+            # if target directory does not exist, exit 1
+            if [ ! -d "$target_dir" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app does not exist!\n"  1>&2
+                printf "[`date +"%Y-%m-%d %T"`] Exit Removing\n"
+                exit 1
+            fi
+            
+            # modules/app/version
+            rm -rf "$target_dir"
+            # modulefiles/app/version
+            rm -rf "$script_path"
+            rm -rf "${script_path}.lua"
+
+            # If the app directory is empty, remove it
+            if [ -z "$(ls -A $app_base_dir)" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] App directory is empty. Removing $app_base_dir\n"
+                rm -rf "$app_base_dir"
+            fi
+            # If the modulefiles/app directory is empty, remove it
+            if [ -z "$(ls -A $script_base_dir)" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
+                rm -rf "$script_base_dir"
+            fi
+            exit
+            ;;
+        \? )
+            echo "Invalid Option: -$OPTARG" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 printf "[`date +"%Y-%m-%d %T"`] Target App Directory: $target_dir\n"
 printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
 
 if [ -d "$target_dir" ]; then
-    printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
+    printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app exists!\n"  1>&2
     printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
-    exit
+    exit 1
 fi
 
 # Function to run a command and exit if it fails
@@ -44,7 +90,7 @@ run_command() {
     "$@"
     if [ $? -ne 0 ]; then
         echo "[`date +"%Y-%m-%d %T"`] Link expired! Get the link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
-        echo "[`date +"%Y-%m-%d %T"`] And change the line 58"
+        echo "[`date +"%Y-%m-%d %T"`] And change the line 104"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
         exit 1
@@ -57,6 +103,7 @@ run_command() {
 echo [`date +"%Y-%m-%d %T"`] Downloading cellranger-${version}.tar.gz
 run_command wget -O cellranger-8.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz?Expires=1732092276&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=j4on2kCnkGzV~GgnygJ21-DkUFxQ2E88JMiSpim6oZXLAorssg0aKxh88bsvltfrYMvERuWrXFzTC8LSdS2UlP854L~~RIsApKZAbAlgY2r7lGvTMkd0R80nYivUAFGE4VDYGD9I9DC6tG-gz~jpuCC8OALKzOmXsvd0bJDQ2FkgXiQS3RtCYQdtO0uOaCgyWCTbskcXG98gpgKQnEzbwsY-9OjBa9st0~xU4R4htUnfMEEm-WDeOytjdjEkGoE3TRtbLq6HV3UHuLRGVt8AXH1GleB99BDOgdfmwh1OEn~l~88TYS2LQ3LoFjGWpO4bEnmsLFmho0L7WbI2LYEovA__"
 
+printf "[`date +"%Y-%m-%d %T"`] Extracting cellranger-${version}.tar.gz\n"
 tar xf ./cellranger-${version}.tar.gz
 rm ./cellranger-${version}.tar.gz
 

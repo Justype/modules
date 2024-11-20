@@ -5,7 +5,7 @@
 #SBATCH --job-name=make
 #SBATCH --output=build_%j.out
 
-# You can write your own scripts in region BUILD SCRIPT (line 102)
+# jdk
 ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
@@ -100,11 +100,25 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-# mkdir -p "$app_base_dir"
-mkdir -p "$target_dir"
+mkdir -p "$app_base_dir"
 
+printf "[`date +"%Y-%m-%d %T"`] Downloading ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
+# Get main version from the version string
+main_version=${version%%.*}
 
+# Determine the machine architecture
+machine_arch=$(uname -m)
+if [ "$machine_arch" == "x86_64" ]; then
+    machine_arch="x64"
+fi
 
+url="https://download.oracle.com/java/${main_version}/archive/jdk-${version}_linux-${machine_arch}_bin.tar.gz"
+run_command wget -nv -O "jdk-${version}_linux-${machine_arch}_bin.tar.gz" "$url"
+
+printf "[`date +"%Y-%m-%d %T"`] Unzipping ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
+tar xf "jdk-${version}_linux-${machine_arch}_bin.tar.gz"
+mv "jdk-${version}" "${target_dir}"
+rm "jdk-${version}_linux-${machine_arch}_bin.tar.gz"
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles

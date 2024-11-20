@@ -22,21 +22,67 @@ fi
 
 modules_root="$(pwd -P)"
 script_path="$(realpath "$0")"
-app_name_version="${script_path#*/build-scripts/}"
-app_name="${app_name_version%/*}"
-version="${app_name_version##*/}"
-printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
+app_name_version="${script_path#*/build-scripts/}" # app/version
+app_name="${app_name_version%/*}"                  # app
+version="${app_name_version##*/}"                  # version
 
-target_dir="${modules_root}/${app_name_version}"
-script_base_dir="${modules_root}/modulefiles/${app_name}"
-script_path="${modules_root}/modulefiles/${app_name_version}"
+app_base_dir="${modules_root}/${app_name}"         # modules/app
+target_dir="${modules_root}/${app_name_version}"   # modules/app/version
+script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
+script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
+
+# Parse the parameters
+while getopts ":hd" opt; do
+    case ${opt} in
+        h )
+            echo "Usage: bash $0 [-h]"
+            echo "Options:"
+            echo "  -h  Display this help message."
+            echo "  -d  Delete the target module."
+            exit 0
+            ;;
+        d )
+            printf "[`date +"%Y-%m-%d %T"`] Deleting the target module: $target_dir\n"
+            # if target directory does not exist, exit 1
+            if [ ! -d "$target_dir" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app does not exist!\n"  1>&2
+                printf "[`date +"%Y-%m-%d %T"`] Exit Removing\n"
+                exit 1
+            fi
+
+            # modules/app/version
+            rm -rf "$target_dir"
+            # modulefiles/app/version
+            rm -rf "$script_path"
+            rm -rf "${script_path}.lua"
+
+            # If the app directory is empty, remove it
+            if [ -z "$(ls -A $app_base_dir)" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] App directory is empty. Removing $app_base_dir\n"
+                rm -rf "$app_base_dir"
+            fi
+            # If the modulefiles/app directory is empty, remove it
+            if [ -z "$(ls -A $script_base_dir)" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
+                rm -rf "$script_base_dir"
+            fi
+            exit
+            ;;
+        \? )
+            echo "Invalid Option: -$OPTARG" 1>&2
+            exit 1
+            ;;
+    esac
+done
+
+printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 printf "[`date +"%Y-%m-%d %T"`] Target App Directory: $target_dir\n"
 printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
 
 if [ -d "$target_dir" ]; then
-    printf "[`date +"%Y-%m-%d %T"`] WARNING: Target app exists!\n"
+    printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app exists!\n"  1>&2
     printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
-    exit
+    exit 1
 fi
 
 # Function to run a command and exit if it fails
@@ -44,6 +90,7 @@ run_command() {
     "$@"
     if [ $? -ne 0 ]; then
         echo "[`date +"%Y-%m-%d %T"`] Command failed: $@"
+        echo "[`date +"%Y-%m-%d %T"`] Possible Reason: Missing dependencies or Expired links"
         echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"

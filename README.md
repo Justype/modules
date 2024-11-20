@@ -1,19 +1,22 @@
 # Environment Module for Bioinfo Research
 
+Make sure you run `module use /somewhere/modules` to use these modules.
+
 There are two similar environment-control softwares: [Environment Modules](https://modules.sourceforge.net/) and [Lmod](https://lmod.readthedocs.io/en/latest/index.html)
 
 - Lmod uses the Lua, while Environment Modules uses Tcl module scripts (similar to shell script)
-  - You can use ChatGPT to convert them interchangeably.
 - They have the same usage:
   - `module use /somewhere/modulefiles` use custom modulefiles
-    - modulefiles starts with `#%Module1.0`
-    - Lmod file name ends with `.lua`
+    - modulefile's content starts with `#%Module1.0`
+    - Lmod filename ends with `.lua`
   - `module avail [name]` check all modules, name is optional
   - `module load cellranger/8.0.1`
   - `module unload cellranger/8.0.1`
   - `module purge` unload all modules
 
 ## How to Build Custom Modules
+
+### Install
 
 1. go into `modules` folder
 2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1`
@@ -25,10 +28,19 @@ Most of my scripts are **version independent**. It will automatically download t
 
 For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
 
+### Remove
+
+1. go into `modules` folder
+2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
+   - `-d` for deleting
+
 ## Version Dependent Packages
 
-- [Cell Ranger](build-scripts/cellranger/8.0.1)
+goto [build-scripts README](build-scripts/README.md) for detailed
+
+- [Cell Ranger](build-scripts/README.md#cell-ranger)
   - You need key-pair to download the it. If it fails, change the link.
+  - https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 
 ## Setup Environment Modules
 
