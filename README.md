@@ -1,6 +1,6 @@
 # Environment Module for Bioinfo Research
 
-Make sure you run `module use /somewhere/modules` to use these modules.
+Make sure you run `module use /somewhere/modules/modulefiles` to use these modules.
 
 ---
 
@@ -34,7 +34,7 @@ For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/
 
 1. go into `modules` folder
 2. run build scripts with `-d` parameter, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
-   - `-d` for deleting
+   - `-d` for delete
 
 ## Version Dependent Packages
 
@@ -51,17 +51,9 @@ It is installed by default on Redhat. In Ubuntu, you need to install and init it
 ```bash
 sudo apt update -y
 sudo apt install -y environment-modules
-
-# add to global settings
-sudo sh -c 'echo "
-# Enable Environment Modules
-if [ -f /etc/profile.d/modules.sh ]; then
-    . /etc/profile.d/modules.sh
-fi
-" >> /etc/bash.bashrc'
 ```
 
-If you have custom modulefiles, You can add `module use`.
+If you have custom modulefiles, You can add `module use` to your `$HOME/.bashrc`.
 
 ## How it works?
 

@@ -37,7 +37,7 @@ while getopts ":hd" opt; do
         h )
             echo "Usage: bash $0 [-h]"
             echo "Options:"
-            echo "  -h  Display this help message."
+            echo "  -h  Help message."
             echo "  -d  Delete the target module."
             exit 0
             ;;

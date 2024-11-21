@@ -22,9 +22,11 @@ For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/
 
 ## BCFtools
 
+[BCFtools Howtos](https://samtools.github.io/bcftools/howtos/index.html)
+
 BCFtools's plugins are under `bcftools/version/libexec/bcftools`. You need to set `$BCFTOOLS_PLUGINS` to that directory so that BCFtools can find the plugins.
 
-e.g. 
+e.g. `setenv BCFTOOLS_PLUGINS "$app_root/libexec/bcftools"` in `modulefiles/bcftools/version`
 
 ## Cell Ranger
 
