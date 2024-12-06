@@ -45,3 +45,7 @@ Go to 10X and get the link: https://www.10xgenomics.com/support/software/cell-ra
 GATK requires Java Environment to run. So In the building script, the latest jdk in my list will be downloaded. And the modulefiles also be edited to load jdk.
 
 e.g. `load jdk/latest_version` in `modulefiles/gatk/version`
+
+## ORAD (ORA Decompress Tool)
+
+According to [Illumina instruction](https://help.ora.illumina.com/product-guides/dragen-ora-decompression/software-installation), `orad` needs `$ORA_REF_PATH/refbin` to decompress. So My script edit the `ORA_REF_PATH` env variable.

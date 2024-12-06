@@ -100,16 +100,13 @@ run_command() {
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$app_base_dir"  # modules/app
+# mkdir -p "$app_base_dir"  # modules/app
 # mkdir -p "$target_dir"    # modules/app/version
-wget https://s3.amazonaws.com/webdata.illumina.com/downloads/software/dragen-decompression/orad.${version}.linux.tar.gz
-tar -xzf orad.${version}.linux.tar.gz
-rm orad.${version}.linux.tar.gz
-mv orad.${version}.linux "$target_dir"
 
-# orad is under module folder, move it to bin
 mkdir -p "$target_dir/bin"
-mv "$target_dir/orad" "$target_dir/bin"
+wget -O "$target_dir/bin/vg" "https://github.com/vgteam/vg/releases/download/v${version}/vg"
+chmod +x "$target_dir/bin/vg"
+
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles
@@ -125,19 +122,5 @@ else
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
 #endregion
-
-# edit the modulefile to export ORA_REF_PATH ($app_root/oradata)
-printf "[`date +"%Y-%m-%d %T"`] Editing modulefile to export ORA_REF_PATH\n"
-echo "
-# export ORA_REF_PATH
-set ora_ref_path [file join \$app_root oradata]
-setenv ORA_REF_PATH \$ora_ref_path
-" >> "${script_path}"
-echo "
--- export ORA_REF_PATH
-local ora_ref_path = pathJoin(app_root, 'oradata')
-prepend_path('ORA_REF_PATH', ora_ref_path)
-" >> "${script_path}.lua"
-
 
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
