@@ -4,37 +4,37 @@ Make sure you run `module use /somewhere/modules/modulefiles` to use these modul
 
 ---
 
-There are two similar environment-control softwares: [Environment Modules](https://modules.sourceforge.net/) and [Lmod](https://lmod.readthedocs.io/en/latest/index.html)
+Usage: `bash build-scripts/app_name/version [options]`
 
-- Lmod uses the Lua, while Environment Modules uses Tcl module scripts (similar to shell script)
-- They have the same usage:
-  - `module use /somewhere/modulefiles` use custom modulefiles
-    - modulefile's content starts with `#%Module1.0`
-    - Lmod filename ends with `.lua`
-  - `module avail [name]` check all modules, name is optional
-  - `module load cellranger/8.0.1`
-  - `module unload cellranger/8.0.1`
-  - `module purge` unload all modules
+options:
+
+- `-i`  Install the target module.
+- `-d`  Delete the target module.
+- `-s`  Set this version as the default version. (Environment Modules Only, not working with Lmod)
+- `-h`  Help message.
 
 ## How to Build Custom Modules
 
 ### Install
 
 1. go into `modules` folder
-2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1`
-   - Do not run `sbatch build-scripts/sra-tools/3.1.1`, otherwise the script cannot catch the script name
-      - like `/opt/slurm/data/slurmd/job53753702/slurm_script`
-   - Use a script to wrap it or use `srun --time=6:00:00 bash build-scripts/sra-tools/3.1.1`
+2. run build scripts with `-i`, e.g. `bash build-scripts/sra-tools/3.1.1 -i`
 
 Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply copy the old one to a file named that version.
 
 For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
 
+#### Do use `sbatch` to install
+
+- My script use its name and path to find version and installation path.
+- The `sbatch` will save this script to its own directory:
+  - like `/opt/slurm/data/slurmd/job53753702/slurm_script`
+- Use a script to wrap it or use `srun`
+
 ### Remove
 
 1. go into `modules` folder
-2. run build scripts with `-d` parameter, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
-   - `-d` for delete
+2. run build scripts with `-d`, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
 
 ## Version Dependent Packages
 

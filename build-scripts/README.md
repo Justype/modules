@@ -1,24 +1,18 @@
-# Build Scripts
+# Package Notes
 
-## How to Build Custom Modules
+## Environment Modules and Lmod
 
-### Install
+There are two similar environment-control softwares: [Environment Modules](https://modules.sourceforge.net/) and [Lmod](https://lmod.readthedocs.io/en/latest/index.html)
 
-1. go into `modules` folder
-2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1`
-   - Do not run `sbatch build-scripts/sra-tools/3.1.1`, otherwise the script cannot catch the script name
-      - like `/opt/slurm/data/slurmd/job53753702/slurm_script`
-   - Use a script to wrap it or use `srun --time=6:00:00 bash build-scripts/sra-tools/3.1.1`
-
-Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply copy the old one to a file named that version.
-
-For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
-
-### Remove
-
-1. go into `modules` folder
-2. run build scripts, e.g. `bash build-scripts/sra-tools/3.1.1 -d`
-   - `-d` for deleting
+- Lmod uses the Lua, while Environment Modules uses Tcl module scripts (similar to shell script)
+- They have the same usage:
+  - `module use /somewhere/modulefiles` use custom modulefiles
+    - modulefile's content starts with `#%Module1.0`
+    - Lmod filename ends with `.lua`
+  - `module avail [name]` check all modules, name is optional
+  - `module load cellranger/8.0.1`
+  - `module unload cellranger/8.0.1`
+  - `module purge` unload all modules
 
 ## BCFtools
 
@@ -32,7 +26,7 @@ e.g. `setenv BCFTOOLS_PLUGINS "$app_root/libexec/bcftools"` in `modulefiles/bcft
 
 Since the link from 10X is only valid for **one** day, you will need to change the link to make it work.
 
-In `cellranger/x.y.z` line 104:
+In `cellranger/x.y.z` line 127:
 
 ```bash
 run_command wget -O cellranger-9.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz"

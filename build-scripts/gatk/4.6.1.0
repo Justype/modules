@@ -14,11 +14,26 @@ ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 RED='\033[0;31m'
 NC='\033[0m'     # No Color
 
+help_message() {
+    echo "Usage: bash $0 [options]"
+    echo "Options:"
+    echo "  -i  Install the target module."
+    echo "  -d  Delete the target module."
+    echo "  -s  Set this version as the default version."
+    echo "  -h  Help message."
+    exit 0
+}
+
 if ! [ -d build-scripts ]; then
     printf "Please run this script under ${RED}modules${NC} directory.\n"
     printf "And make sure you have your scripts in build-scripts folder.\n"
     printf "    e.g. bash build-scripts/sra-tools/3.1.1\n"
     exit
+fi
+
+if [ "$#" -eq 0 ]; then
+    help_message
+    exit 0
 fi
 
 modules_root="$(pwd -P)"
@@ -33,15 +48,9 @@ script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/a
 script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
 
 # Parse the parameters
-while getopts ":hd" opt; do
+while getopts ":idhs" opt; do
     case ${opt} in
-        h )
-            echo "Usage: bash $0 [-h]"
-            echo "Options:"
-            echo "  -h  Help message."
-            echo "  -d  Delete the target module."
-            exit 0
-            ;;
+        h ) help_message ;;
         d )
             printf "[`date +"%Y-%m-%d %T"`] Deleting the target module: $target_dir\n"
             # if target directory does not exist, exit 1
@@ -67,6 +76,20 @@ while getopts ":hd" opt; do
                 printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
                 rm -rf "$script_base_dir"
             fi
+            exit
+            ;;
+        s )
+            printf "[`date +"%Y-%m-%d %T"`] Setting this version as the default version: $target_dir\n"
+            # if target directory does not exist, exit 1
+            if [ ! -d "$target_dir" ]; then
+                printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app does not exist!\n"  1>&2
+                printf "[`date +"%Y-%m-%d %T"`] Exit Setting Default\n"
+                exit 1
+            fi
+
+            # Create .version file under modulefiles/app
+            echo "#%Module" > "${script_base_dir}/.version"
+            echo "set ModulesVersion $version" >> "${script_base_dir}/.version"
             exit
             ;;
         \? )
