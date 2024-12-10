@@ -10,7 +10,7 @@ options:
 
 - `-i`  Install the target module.
 - `-d`  Delete the target module.
-- `-s`  Set this version as the default version. (Environment Modules Only, not working with Lmod)
+- `-s`  Set this version as the default version. (Not working if `tclsh` is missing)
 - `-h`  Help message.
 
 ## How to Build Custom Modules
