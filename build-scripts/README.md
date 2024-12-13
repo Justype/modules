@@ -40,6 +40,14 @@ GATK requires Java Environment to run. So In the building script, the latest jdk
 
 e.g. `load jdk/latest_version` in `modulefiles/gatk/version`
 
+## GDC-Client
+
+[GDC client](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool) is used to transfer data from/to Genomic Data Commons.
+
+Version `2.x.x` requires `glibc 2.29` to run. If the `glibc` on your machine is below `2.29`, install version `1.6.1`.
+
+Use `ldd --version` to get `glibc` version.
+
 ## ORAD (ORA Decompress Tool)
 
 According to [Illumina instruction](https://help.ora.illumina.com/product-guides/dragen-ora-decompression/software-installation), `orad` needs `$ORA_REF_PATH/refbin` to decompress. So My script edit the `ORA_REF_PATH` env variable.
