@@ -43,3 +43,7 @@ e.g. `load jdk/latest_version` in `modulefiles/gatk/version`
 ## ORAD (ORA Decompress Tool)
 
 According to [Illumina instruction](https://help.ora.illumina.com/product-guides/dragen-ora-decompression/software-installation), `orad` needs `$ORA_REF_PATH/refbin` to decompress. So My script edit the `ORA_REF_PATH` env variable.
+
+## Picard
+
+[Picard](https://broadinstitute.github.io/picard/) is a `jar` not a program. Set `PICARD` env to the path of `jar`. And use `alias picard='java -jar $PICARD'` to set `picard` alias.
