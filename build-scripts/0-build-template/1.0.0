@@ -46,6 +46,8 @@ target_dir="${modules_root}/${app_name_version}"   # modules/app/version
 script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
 script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
 
+tmp_dir="${modules_root}/tmp" # tmp directory
+
 # Parse the parameters
 while getopts ":idhs" opt; do
     case ${opt} in
@@ -108,6 +110,12 @@ if [ -d "$target_dir" ]; then
     exit 1
 fi
 
+# Function to clean up the temporary directory
+clean_up () {
+    printf "[`date +"%Y-%m-%d %T"`] Removing temporary directory: $tmp_dir\n"
+    cd "$modules_root"
+    rm -rf "$tmp_dir"
+}
 # Function to run a command and exit if it fails
 run_command() {
     "$@"
@@ -117,6 +125,7 @@ run_command() {
         echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
+        clean_up
         exit 1
     fi
 }
@@ -125,7 +134,8 @@ run_command() {
 #region BUILD SCRIPT
 # mkdir -p "$app_base_dir"  # modules/app
 mkdir -p "$target_dir"    # modules/app/version
-
+mkdir -p "$tmp_dir"       # tmp directory
+cd "$tmp_dir"
 
 
 #endregion BUILD SCRIPT
@@ -144,4 +154,5 @@ else
 fi
 #endregion
 
+clean_up
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
