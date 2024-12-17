@@ -46,6 +46,8 @@ target_dir="${modules_root}/${app_name_version}"   # modules/app/version
 script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
 script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
 
+tmp_dir="${modules_root}/tmp" # tmp directory
+
 # Parse the parameters
 while getopts ":idhs" opt; do
     case ${opt} in
@@ -117,13 +119,19 @@ run_command() {
         echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
+        echo "[`date +"%Y-%m-%d %T"`] Removing tmp directory: $tmp_dir"
+        cd "$modules_root"
+        rm -rf "$tmp_dir"
         exit 1
     fi
 }
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$app_base_dir"  # modules/app
+# mkdir -p "$app_base_dir"  # modules/app
+mkdir -p "$target_dir"    # modules/app/version
+mkdir -p "$tmp_dir"
+cd "$tmp_dir"
 
 printf "[`date +"%Y-%m-%d %T"`] Downloading ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
 # Get main version from the version string
@@ -135,13 +143,14 @@ if [ "$machine_arch" == "x86_64" ]; then
     machine_arch="x64"
 fi
 
-url="https://download.oracle.com/java/${main_version}/archive/jdk-${version}_linux-${machine_arch}_bin.tar.gz"
-run_command wget -nv -O "jdk-${version}_linux-${machine_arch}_bin.tar.gz" "$url"
+# Oracle JDK (need to accept the license, cannot download version 11)
+# url="https://download.oracle.com/java/${main_version}/archive/jdk-${version}_linux-${machine_arch}_bin.tar.gz" 
+url="https://aka.ms/download-jdk/microsoft-jdk-${version}-linux-${machine_arch}.tar.gz" # Switch to Microsoft OpenJDK
+run_command wget -nv -O "jdk-${version}_linux-${machine_arch}.tar.gz" "$url"
 
 printf "[`date +"%Y-%m-%d %T"`] Unzipping ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
-tar xf "jdk-${version}_linux-${machine_arch}_bin.tar.gz"
-mv "jdk-${version}" "${target_dir}"
-rm "jdk-${version}_linux-${machine_arch}_bin.tar.gz"
+tar xf "jdk-${version}_linux-${machine_arch}.tar.gz"
+mv *jdk-${version}*/* "$target_dir"
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles
@@ -157,5 +166,9 @@ else
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
 #endregion
+
+# Clean up
+cd "$modules_root"
+rm -rf "$tmp_dir"
 
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
