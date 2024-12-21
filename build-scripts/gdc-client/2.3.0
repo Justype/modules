@@ -32,7 +32,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 modules_root="$(pwd -P)"
-script_path="$(realpath "$0")"
+script_path="$(realpath --no-symlinks "$0")"
 app_name_version="${script_path#*/build-scripts/}" # name/version
 app_name="${app_name_version%/*}"                  # name
 version="${app_name_version##*/}"                  # version

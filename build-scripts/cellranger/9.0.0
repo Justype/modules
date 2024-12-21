@@ -31,7 +31,7 @@ if [ "$#" -eq 0 ]; then
 fi
 
 modules_root="$(pwd -P)"
-script_path="$(realpath "$0")"
+script_path="$(realpath --no-symlinks "$0")"
 app_name_version="${script_path#*/build-scripts/}" # name/version
 app_name="${app_name_version%/*}"                  # name
 version="${app_name_version##*/}"                  # version
@@ -139,24 +139,6 @@ tar xf ./cellranger-${version}.tar.gz
 # move to apps/name/version folder
 mv cellranger-${version}/ "$target_dir"
 #endregion BUILD SCRIPT
-
-# Cell Ranger References
-cellranger_ref_dir="${modules_root}/apps/cellranger/ref"
-mkdir -p "$cellranger_ref_dir"
-echo [`date +"%Y-%m-%d %T"`] Downloading Cell Ranger Reference if needed
-
-if ! [ -d "$cellranger_ref_dir/refdata-gex-GRCh38-2024-A" ]; then
-    echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCh38-2024-A
-    wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz"
-    tar xf refdata-gex-GRCh38-2024-A.tar.gz -C $cellranger_ref_dir
-    rm refdata-gex-GRCh38-2024-A.tar.gz
-fi
-if ! [ -d "$cellranger_ref_dir/refdata-gex-GRCm39-2024-A" ]; then
-    echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCm39-2024-A
-    wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCm39-2024-A.tar.gz"
-    tar xf refdata-gex-GRCm39-2024-A.tar.gz -C $cellranger_ref_dir
-    rm refdata-gex-GRCm39-2024-A.tar.gz
-fi
 
 #region Copying modulefiles
 printf "[`date +"%Y-%m-%d %T"`] Copying modulefiles\n"

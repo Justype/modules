@@ -20,9 +20,9 @@ options:
 1. go into `modules` folder
 2. run build scripts with `-i`, e.g. `bash build-scripts/sra-tools/3.1.1 -i`
 
-Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply copy the old one to a file named that version.
+Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply create a symlink to the old one.
 
-For example, `sra-tools` version `3.2.1` comes out. `cp build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script. (You can also use hard link, symlink will not work)
+For example, `sra-tools` version `3.2.1` comes out. `ln -s build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script. (You can also use hard link, symlink will not work)
 
 #### Do use `sbatch` to install
 
