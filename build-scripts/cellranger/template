@@ -1,8 +1,11 @@
 #%Module1.0
-# Cell Ranger Module
 # Author: Ziyue Cheng
+# Almost all of them are automated, you can modify whatis, ModulesHelp, and APP_HOME as needed.
+# Search TOCHANGE to find the targets.
+# You can also load other modules in this modulefile.
+#   module load java/17.0.12
 
-# abs path of this file, like /aaa/modules/modulefiles/app/x.x.x
+# abs path of this file, like /somewhere/modules/modulefiles/app/x.x.x
 set abs_path [file normalize [info script]]
 # full name of this module, like app/x.x.x
 set app_full_name [module-info name]
@@ -10,25 +13,25 @@ set app_full_name [module-info name]
 set app_name [file dirname $app_full_name]
 # version of this app, like x.x.x
 set app_version [file tail $app_full_name]
-# abs path of modules, like /aaa/modules
+# abs path of modules, like /somewhere/modules
 set module_root [file dirname [file dirname [file dirname $abs_path]]]
-# abs path of the app/x.x.x , like /aaa/modules/app/x.x.x
-set app_root [file join $module_root $app_full_name]
+# abs path of the apps/app/x.x.x , like /somewhere/modules/apps/app/x.x.x
+set app_root [file join $module_root [file join apps $app_full_name]]
 # record current date time
 set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %T"]
 
-set ref_root [file join [file join $module_root $app_name] ref]
+# TOCHANGE: A brief description using module-whatis
+module-whatis "Loads $app_name version $app_version"
 
-module-whatis "Single-cell Analysis Tool from 10X (version: $app_version)"
-
+# TOCHANGE: Detailed Help Section
 proc ModulesHelp { } {
-    puts stderr "This module loads Cell Ranger version $app_version"
+    # cannot use variables here
+    puts stderr "Placeholder for the usage of this module."
 }
 
 # Display a help message when loading this module
 if { [module-info mode] == "load" } {
     puts stderr "\[$current_datetime\] Loading module $app_full_name"
-    puts stderr "References are under: \$CELLRANGER_REF ($ref_root)"
 }
 # Message when unloading
 if { [module-info mode] == "unload" } {
@@ -49,8 +52,7 @@ if {[file isdirectory "$app_root/share/man"]} {
 }
 
 # TOCHANGE: Set custom environment variables
-# setenv CELLRANGER_HOME $app_root
-setenv CELLRANGER_REF $ref_root
+# setenv APP_HOME $app_root
 
 # Handle conflicts with other versions
 conflict $app_name

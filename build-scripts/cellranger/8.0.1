@@ -1,12 +1,7 @@
 #!/usr/bin/bash
-#SBATCH --cpus-per-task=1
-#SBATCH --time=6:00:00
-#SBATCH --mem=2GB
-#SBATCH --job-name=make
-#SBATCH --output=build_%j.out
 
-# You need to change the line 127: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
-ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
+# You need to change the download link at line 134
+# https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 
 #region CONFIGS
 # Define color codes
@@ -37,14 +32,16 @@ fi
 
 modules_root="$(pwd -P)"
 script_path="$(realpath "$0")"
-app_name_version="${script_path#*/build-scripts/}" # app/version
-app_name="${app_name_version%/*}"                  # app
+app_name_version="${script_path#*/build-scripts/}" # name/version
+app_name="${app_name_version%/*}"                  # name
 version="${app_name_version##*/}"                  # version
 
-app_base_dir="${modules_root}/${app_name}"         # modules/app
-target_dir="${modules_root}/${app_name_version}"   # modules/app/version
-script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
-script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
+app_base_dir="${modules_root}/apps/${app_name}"         # modules/apps/name
+target_dir="${modules_root}/apps/${app_name_version}"   # modules/apps/name/version
+script_base_dir="${modules_root}/modulefiles/${app_name}"      # modules/modulefiles/name
+script_path="${modules_root}/modulefiles/${app_name_version}"  # modules/modulefiles/name/version
+
+tmp_dir="${modules_root}/tmp" # tmp directory
 
 # Parse the parameters
 while getopts ":idhs" opt; do
@@ -59,18 +56,18 @@ while getopts ":idhs" opt; do
                 exit 1
             fi
 
-            # modules/app/version
+            # modules/apps/name/version
             rm -rf "$target_dir"
-            # modulefiles/app/version
+            # modulefiles/name/version
             rm -rf "$script_path"
             rm -rf "${script_path}.lua"
 
-            # If the app directory is empty, remove it
+            # If the modules/apps/name directory is empty, remove it
             if [ -z "$(ls -A $app_base_dir)" ]; then
                 printf "[`date +"%Y-%m-%d %T"`] App directory is empty. Removing $app_base_dir\n"
                 rm -rf "$app_base_dir"
             fi
-            # If the modulefiles/app directory is empty, remove it
+            # If the modulefiles/name directory is empty, remove it
             if [ -z "$(ls -A $script_base_dir)" ]; then
                 printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
                 rm -rf "$script_base_dir"
@@ -86,7 +83,7 @@ while getopts ":idhs" opt; do
                 exit 1
             fi
 
-            # Create .version file under modulefiles/app
+            # Create .version file under modulefiles/name
             echo "#%Module" > "${script_base_dir}/.version"
             echo "set ModulesVersion $version" >> "${script_base_dir}/.version"
             exit
@@ -108,47 +105,56 @@ if [ -d "$target_dir" ]; then
     exit 1
 fi
 
+# Function to clean up the temporary directory
+clean_up () {
+    printf "[`date +"%Y-%m-%d %T"`] Removing temporary directory: $tmp_dir\n"
+    cd "$modules_root"
+    rm -rf "$tmp_dir"
+}
 # Function to run a command and exit if it fails
 run_command() {
     "$@"
     if [ $? -ne 0 ]; then
         echo "[`date +"%Y-%m-%d %T"`] Link expired! Get the link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
-        echo "[`date +"%Y-%m-%d %T"`] And change the line 127"
+        echo "[`date +"%Y-%m-%d %T"`] And change the line 134"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
+        clean_up
         exit 1
     fi
 }
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-# pwd: modules/
+mkdir -p "$app_base_dir"  # modules/apps/name
+mkdir -p "$tmp_dir"       # tmp directory
+cd "$tmp_dir"
+
 echo [`date +"%Y-%m-%d %T"`] Downloading cellranger-${version}.tar.gz
-run_command wget -O cellranger-8.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz?Expires=1732092276&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=j4on2kCnkGzV~GgnygJ21-DkUFxQ2E88JMiSpim6oZXLAorssg0aKxh88bsvltfrYMvERuWrXFzTC8LSdS2UlP854L~~RIsApKZAbAlgY2r7lGvTMkd0R80nYivUAFGE4VDYGD9I9DC6tG-gz~jpuCC8OALKzOmXsvd0bJDQ2FkgXiQS3RtCYQdtO0uOaCgyWCTbskcXG98gpgKQnEzbwsY-9OjBa9st0~xU4R4htUnfMEEm-WDeOytjdjEkGoE3TRtbLq6HV3UHuLRGVt8AXH1GleB99BDOgdfmwh1OEn~l~88TYS2LQ3LoFjGWpO4bEnmsLFmho0L7WbI2LYEovA__"
+run_command wget -O cellranger-8.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz"
 
 printf "[`date +"%Y-%m-%d %T"`] Extracting cellranger-${version}.tar.gz\n"
 tar xf ./cellranger-${version}.tar.gz
-rm ./cellranger-${version}.tar.gz
 
-# move to software/version folder
-mkdir -p cellranger
-mv cellranger-${version}/ cellranger/${version}
+# move to apps/name/version folder
+mv cellranger-${version}/ "$target_dir"
 #endregion BUILD SCRIPT
 
 # Cell Ranger References
-mkdir -p cellranger/ref
+cellranger_ref_dir="${modules_root}/apps/cellranger/ref"
+mkdir -p "$cellranger_ref_dir"
 echo [`date +"%Y-%m-%d %T"`] Downloading Cell Ranger Reference if needed
 
-if ! [ -d "cellranger/ref/refdata-gex-GRCh38-2024-A" ]; then
+if ! [ -d "$cellranger_ref_dir/refdata-gex-GRCh38-2024-A" ]; then
     echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCh38-2024-A
     wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz"
-    tar xf refdata-gex-GRCh38-2024-A.tar.gz -C cellranger/ref
+    tar xf refdata-gex-GRCh38-2024-A.tar.gz -C $cellranger_ref_dir
     rm refdata-gex-GRCh38-2024-A.tar.gz
 fi
-if ! [ -d "cellranger/ref/refdata-gex-GRCm39-2024-A" ]; then
+if ! [ -d "$cellranger_ref_dir/refdata-gex-GRCm39-2024-A" ]; then
     echo [`date +"%Y-%m-%d %T"`] Downloading refdata-gex-GRCm39-2024-A
     wget -nv "https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCm39-2024-A.tar.gz"
-    tar xf refdata-gex-GRCm39-2024-A.tar.gz -C cellranger/ref
+    tar xf refdata-gex-GRCm39-2024-A.tar.gz -C $cellranger_ref_dir
     rm refdata-gex-GRCm39-2024-A.tar.gz
 fi
 
@@ -166,4 +172,5 @@ else
 fi
 #endregion
 
+clean_up
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"

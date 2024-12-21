@@ -72,7 +72,7 @@ When you run `module load/unload`, modules can help use set or unset `PATH` and 
 ### Directory Structure
 
 - root directory is `modules`
-- apps and versions are under `modules`
+- apps and versions are under `modules/apps`
 - corresponding modulefiles are under `modules/modulefiles`
 
 Example Directory Structure
@@ -85,19 +85,20 @@ modules/
 │   │   └── 8.0.1
 │   └── sra-tools
 │       └── 3.1.1
-├── cellranger/
-│   ├── 7.0.1/
-│   │   ├── bin/
-│   │   └── lib/
-│   ├── 8.0.1/
-│   │   ├── bin/
-│   │   └── lib/
-│   └── ref/
-│       ├── refdata-gex-GRCh38-2020-A/
-│       └── refdata-gex-GRCh38-2024-A/
-└── sra-tools/
-    └── 3.1.1/
-        └──  bin/
+└── apps/
+    ├── cellranger/
+    │   ├── 7.0.1/
+    │   │   ├── bin/
+    │   │   └── lib/
+    │   ├── 8.0.1/
+    │   │   ├── bin/
+    │   │   └── lib/
+    │   └── ref/
+    │       ├── refdata-gex-GRCh38-2020-A/
+    │       └── refdata-gex-GRCh38-2024-A/
+    └── sra-tools/
+        └── 3.1.1/
+            └──  bin/
 ```
 
 ### Relative Path in Modulefile
@@ -123,7 +124,5 @@ set name [file tail $abs_path]
 
 Where to store:
 
-- It should be stored in `somewhere/modulefiles/app/x.y.z` (file)
-- Target app is in `somewhere/app/x.y.z/` (directory)
-
-
+- It should be stored in `somewhere/modulefiles/name/x.y.z` (file)
+- Target app is in `somewhere/apps/name/x.y.z/` (directory)

@@ -10,7 +10,7 @@ local app_full_name = myModuleFullName()        -- full name of module, app/x.y.
 local app_name = app_full_name:match("^(.+)/")  -- app name, app
 local app_version = myModuleVersion()           -- app version, x.y.z
 local module_root = abs_path:match("^(.+)/.+/.+/")    -- abs path of modules, /somewhere/modules
-local app_root = pathJoin(module_root, app_full_name) -- abs path of target app, /somewhere/modules/app/x.y.z
+local app_root = pathJoin(module_root, pathJoin("apps", app_full_name)) -- abs path of target app, /somewhere/modules/apps/app/x.y.z
 local current_datetime = os.date("%Y-%m-%d %H:%M:%S") -- Record current datetime
 
 -- TOCHANGE: A brief description using whatis

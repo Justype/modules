@@ -1,13 +1,7 @@
 #!/usr/bin/bash
-#SBATCH --cpus-per-task=1
-#SBATCH --time=6:00:00
-#SBATCH --mem=2GB
-#SBATCH --job-name=make
-#SBATCH --output=build_%j.out
 
 # Picard script, jdk required
 # This script will edit the default modulefile to include the jdk module
-ncpu=${SLURM_CPUS_PER_TASK:-1} # number of cores to use
 
 #region CONFIGS
 # Define color codes
@@ -38,14 +32,16 @@ fi
 
 modules_root="$(pwd -P)"
 script_path="$(realpath "$0")"
-app_name_version="${script_path#*/build-scripts/}" # app/version
-app_name="${app_name_version%/*}"                  # app
+app_name_version="${script_path#*/build-scripts/}" # name/version
+app_name="${app_name_version%/*}"                  # name
 version="${app_name_version##*/}"                  # version
 
-app_base_dir="${modules_root}/${app_name}"         # modules/app
-target_dir="${modules_root}/${app_name_version}"   # modules/app/version
-script_base_dir="${modules_root}/modulefiles/${app_name}"        # modulefiles/app
-script_path="${modules_root}/modulefiles/${app_name_version}"    # modulefiles/app/version
+app_base_dir="${modules_root}/apps/${app_name}"         # modules/apps/name
+target_dir="${modules_root}/apps/${app_name_version}"   # modules/apps/name/version
+script_base_dir="${modules_root}/modulefiles/${app_name}"      # modules/modulefiles/name
+script_path="${modules_root}/modulefiles/${app_name_version}"  # modules/modulefiles/name/version
+
+tmp_dir="${modules_root}/tmp" # tmp directory
 
 # Parse the parameters
 while getopts ":idhs" opt; do
@@ -60,18 +56,18 @@ while getopts ":idhs" opt; do
                 exit 1
             fi
 
-            # modules/app/version
+            # modules/apps/name/version
             rm -rf "$target_dir"
-            # modulefiles/app/version
+            # modulefiles/name/version
             rm -rf "$script_path"
             rm -rf "${script_path}.lua"
 
-            # If the app directory is empty, remove it
+            # If the modules/apps/name directory is empty, remove it
             if [ -z "$(ls -A $app_base_dir)" ]; then
                 printf "[`date +"%Y-%m-%d %T"`] App directory is empty. Removing $app_base_dir\n"
                 rm -rf "$app_base_dir"
             fi
-            # If the modulefiles/app directory is empty, remove it
+            # If the modulefiles/name directory is empty, remove it
             if [ -z "$(ls -A $script_base_dir)" ]; then
                 printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
                 rm -rf "$script_base_dir"
@@ -87,7 +83,7 @@ while getopts ":idhs" opt; do
                 exit 1
             fi
 
-            # Create .version file under modulefiles/app
+            # Create .version file under modulefiles/name
             echo "#%Module" > "${script_base_dir}/.version"
             echo "set ModulesVersion $version" >> "${script_base_dir}/.version"
             exit
@@ -109,6 +105,12 @@ if [ -d "$target_dir" ]; then
     exit 1
 fi
 
+# Function to clean up the temporary directory
+clean_up () {
+    printf "[`date +"%Y-%m-%d %T"`] Removing temporary directory: $tmp_dir\n"
+    cd "$modules_root"
+    rm -rf "$tmp_dir"
+}
 # Function to run a command and exit if it fails
 run_command() {
     "$@"
@@ -118,13 +120,17 @@ run_command() {
         echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
         echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
         rm -rf "$target_dir"
+        clean_up
         exit 1
     fi
 }
 #endregion CONFIGS
 
 #region BUILD SCRIPT
-mkdir -p "$target_dir" # modules/app/version
+mkdir -p "$target_dir"    # modules/apps/name/version
+mkdir -p "$tmp_dir"       # tmp directory
+cd "$tmp_dir"
+
 # Download Picard from github with specific version
 printf "[`date +"%Y-%m-%d %T"`] Downloading Picard version ${version}\n"
 run_command wget -q https://github.com/broadinstitute/picard/releases/download/${version}/picard.jar
@@ -170,4 +176,5 @@ echo "
 load('jdk/${jdk_version}')
 " >> "${script_path}.lua"
 
+clean_up
 printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
