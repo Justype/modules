@@ -30,7 +30,7 @@ if [ "$#" -eq 0 ]; then
     exit 0
 fi
 
-modules_root="$(pwd -P)"
+modules_root="$PWD"
 script_path="$(realpath --no-symlinks "$0")"
 app_name_version="${script_path#*/build-scripts/}" # name/version
 app_name="${app_name_version%/*}"                  # name
