@@ -29,14 +29,10 @@ if (mode() == "load") then
         io.stderr:write("      or use picard alias (java -jar $PICARD)\n")
         io.stderr:write("-----------------------------------------------\n")
     end
-end
 
 -- Display a message when unloading the module
-if (mode() == "unload") then
-    -- only display message if not in SLURM
-    -- if os.getenv("SLURM_JOB_ID") == nil then
-    --     io.stderr:write("[" .. current_datetime .. "] Unloading module " .. app_full_name .. "\n")
-    -- end
+elseif (mode() == "unload") then
+    -- io.stderr:write("[" .. current_datetime .. "] Unloading module " .. app_full_name .. "\n")
 end
 
 -- Set custom environment variables and aliases

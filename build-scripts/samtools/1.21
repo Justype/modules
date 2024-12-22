@@ -8,21 +8,25 @@ ncpu=${SLURM_CPUS_PER_TASK:-4} # number of cores to use
 RED='\033[0;31m'
 NC='\033[0m'     # No Color
 
+print_stderr() {
+    printf "[`date +"%Y-%m-%d %T"`] $1\n" 1>&2
+}
+
 help_message() {
-    echo "Usage: bash $0 [options]"
-    echo "Options:"
-    echo "  -i  Install the target module."
-    echo "  -d  Delete the target module."
-    echo "  -s  Set this version as the default version."
-    echo "  -h  Help message."
+    echo "Usage: bash $0 [options]" 1>&2
+    echo "Options:" 1>&2
+    echo "  -i  Install the target module." 1>&2
+    echo "  -d  Delete the target module." 1>&2
+    echo "  -s  Set this version as the default version." 1>&2
+    echo "  -h  Help message." 1>&2
     exit 0
 }
 
 if ! [ -d build-scripts ]; then
-    printf "Please run this script under ${RED}modules${NC} directory.\n"
-    printf "And make sure you have your scripts in build-scripts folder.\n"
-    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n"
-    exit
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
 fi
 
 if [ "$#" -eq 0 ]; then
@@ -41,18 +45,18 @@ target_dir="${modules_root}/apps/${app_name_version}"   # modules/apps/name/vers
 script_base_dir="${modules_root}/modulefiles/${app_name}"      # modules/modulefiles/name
 script_path="${modules_root}/modulefiles/${app_name_version}"  # modules/modulefiles/name/version
 
-tmp_dir="${modules_root}/tmp" # tmp directory
+tmp_dir="${modules_root}/tmp/${app_name_version}" # tmp directory
 
 # Parse the parameters
 while getopts ":idhs" opt; do
     case ${opt} in
         h ) help_message ;;
         d )
-            printf "[`date +"%Y-%m-%d %T"`] Deleting the target module: $target_dir\n"
+            print_stderr "Deleting the target module: $target_dir"
             # if target directory does not exist, exit 1
             if [ ! -d "$target_dir" ]; then
-                printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app does not exist!\n"  1>&2
-                printf "[`date +"%Y-%m-%d %T"`] Exit Removing\n"
+                print_stderr "${RED}ERROR${NC}: Target app does not exist!"
+                print_stderr "Exit Removing"
                 exit 1
             fi
 
@@ -64,22 +68,22 @@ while getopts ":idhs" opt; do
 
             # If the modules/apps/name directory is empty, remove it
             if [ -z "$(ls -A $app_base_dir)" ]; then
-                printf "[`date +"%Y-%m-%d %T"`] App directory is empty. Removing $app_base_dir\n"
+                print_stderr "App directory is empty. Removing $app_base_dir"
                 rm -rf "$app_base_dir"
             fi
             # If the modulefiles/name directory is empty, remove it
             if [ -z "$(ls -A $script_base_dir)" ]; then
-                printf "[`date +"%Y-%m-%d %T"`] Modulefiles directory is empty. Removing $script_base_dir\n"
+                print_stderr "Modulefiles directory is empty. Removing $script_base_dir"
                 rm -rf "$script_base_dir"
             fi
             exit
             ;;
         s )
-            printf "[`date +"%Y-%m-%d %T"`] Setting this version as the default version: $target_dir\n"
+            print_stderr "Setting this version as the default version: $target_dir"
             # if target directory does not exist, exit 1
             if [ ! -d "$target_dir" ]; then
-                printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app does not exist!\n"  1>&2
-                printf "[`date +"%Y-%m-%d %T"`] Exit Setting Default\n"
+                print_stderr "${RED}ERROR${NC}: Target app does not exist!"
+                print_stderr "Exit Setting Default"
                 exit 1
             fi
 
@@ -95,32 +99,59 @@ while getopts ":idhs" opt; do
     esac
 done
 
-printf "[`date +"%Y-%m-%d %T"`] Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
-printf "[`date +"%Y-%m-%d %T"`] Target App Directory: $target_dir\n"
-printf "[`date +"%Y-%m-%d %T"`] Target Module Script Path: $script_path\n"
+print_stderr "Start building ${RED}${app_name}${NC} version ${RED}${version}${NC}"
+print_stderr "Target App Directory: $target_dir"
+print_stderr "Target Module Script Path: $script_path"
 
 if [ -d "$target_dir" ]; then
-    printf "[`date +"%Y-%m-%d %T"`] ${RED}ERROR${NC}: Target app exists!\n"  1>&2
-    printf "[`date +"%Y-%m-%d %T"`] Exit Building\n"
+    print_stderr "${RED}ERROR${NC}: Target app exists!"
+    print_stderr "Exit Building"
     exit 1
 fi
 
 # Function to clean up the temporary directory
 clean_up () {
-    printf "[`date +"%Y-%m-%d %T"`] Removing temporary directory: $tmp_dir\n"
     cd "$modules_root"
-    rm -rf "$tmp_dir"
+    sleep 1 # wait for the release of the file handle
+    # if $1 is 1, building failed. Do not remove the temporary directory
+    if [ "$1" == 1 ]; then
+        print_stderr "Removing target directory: $target_dir"
+        rm -rf "$target_dir"
+    # successful building. Remove the temporary directory if it exists
+    elif [ -d "$tmp_dir" ]; then
+        print_stderr "Removing temporary directory: $tmp_dir"
+        # keep deleting empty directories until the $module_root dir
+        rm -rf "$tmp_dir"
+        del_dir="$(dirname $tmp_dir)"
+        while [ "$del_dir" != "$modules_root" ]; do
+            if [ -z "$(ls -A $del_dir)" ]; then
+                print_stderr "Parent directory is empty. Removing $del_dir"
+                rmdir "$del_dir"
+                del_dir="$(dirname "$del_dir")"
+            else
+                break
+            fi
+        done
+    fi
+}
+# run the command in a sub shell to avoid issues when cleaning up
+# cp mv wget or other file operations
+sub_shell() {
+    msg=$($@)
+    result=$?
+    if [ -n "$msg" ]; then
+        print_stderr "$msg"
+    fi
+    return $result
 }
 # Function to run a command and exit if it fails
 run_command() {
-    "$@"
+    sub_shell $@
     if [ $? -ne 0 ]; then
-        echo "[`date +"%Y-%m-%d %T"`] Command failed: $@"
-        echo "[`date +"%Y-%m-%d %T"`] Possible Reason: Missing dependencies or Expired links"
-        echo "[`date +"%Y-%m-%d %T"`] PWD: `pwd`"
-        echo "[`date +"%Y-%m-%d %T"`] Removing target directory: $target_dir"
-        rm -rf "$target_dir"
-        clean_up
+        print_stderr "${RED}ERROR${NC}: Command failed: $@"
+        print_stderr "Possible Reason: Missing dependencies or Expired links"
+        print_stderr "PWD: `pwd`"
+        clean_up 1
         exit 1
     fi
 }
@@ -132,32 +163,33 @@ mkdir -p "$tmp_dir"       # tmp directory
 cd "$tmp_dir"
 
 # Build the samtools from source
-printf "[`date +"%Y-%m-%d %T"`] Downloading samtools-${version}.tar.bz2\n"
+print_stderr "Downloading samtools version ${version} source from GitHub"
 run_command wget -nv -O samtools-${version}.tar.bz2 https://github.com/samtools/samtools/releases/download/${version}/samtools-${version}.tar.bz2
 
-printf "[`date +"%Y-%m-%d %T"`] Extracting samtools-${version}.tar.bz2\n"
+print_stderr "Extracting samtools version ${version}"
 tar xf samtools-${version}.tar.bz2
 cd samtools-${version}
 
-printf "[`date +"%Y-%m-%d %T"`] Building samtools-${version}\n"
+print_stderr "Building samtools version ${version}"
 ./configure --prefix="$target_dir"
 run_command make -j $ncpu
 make install
 #endregion BUILD SCRIPT
 
 #region Copying modulefiles
-printf "[`date +"%Y-%m-%d %T"`] Copying modulefiles\n"
+print_stderr "Copying modulefiles"
 mkdir -p "$script_base_dir"
 if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
-    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template exists. Use it.\n"
+    print_stderr "$app_name specific template exists. Use it."
     cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
     cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
 else
-    printf "[`date +"%Y-%m-%d %T"`] $app_name specific template does not exist. Use default template.\n"
+    print_stderr "$app_name specific template does not exist. Use default template."
     cp "${modules_root}/build-scripts/template" "$script_path"
     cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
 fi
 #endregion
 
+print_stderr "Building succeeded."
 clean_up
-printf "[`date +"%Y-%m-%d %T"`] End building ${RED}${app_name}${NC} version ${RED}${version}${NC}\n"
+print_stderr "End building ${RED}${app_name}${NC} version ${RED}${version}${NC}"

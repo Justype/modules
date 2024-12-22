@@ -16,7 +16,7 @@ set app_version [file tail $app_full_name]
 # abs path of modules, like /somewhere/modules
 set module_root [file dirname [file dirname [file dirname $abs_path]]]
 # abs path of the apps/app/x.x.x , like /somewhere/modules/apps/app/x.x.x
-set app_root [file join $module_root [file join apps $app_full_name]]
+set app_root [file join $module_root apps $app_full_name]
 # record current date time
 set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %T"]
 
@@ -32,10 +32,11 @@ proc ModulesHelp { } {
 # Display a help message when loading this module
 if { [module-info mode] == "load" } {
     puts stderr "\[$current_datetime\] Loading module $app_full_name"
-}
-# Message when unloading
-if { [module-info mode] == "unload" } {
-    puts stderr "\[$current_datetime\] Unloading module $app_full_name"
+    # only display message if not in SLURM
+    # if {![info exists ::env(SLURM_JOB_ID)]} {
+    # }
+} elseif { [module-info mode] == "unload" } {
+    # puts stderr "\[$current_datetime\] Unloading module $app_full_name"
 }
 
 # Modify environment variables if the folders exist
@@ -51,8 +52,9 @@ if {[file isdirectory "$app_root/share/man"]} {
     prepend-path MANPATH $app_root/share/man
 }
 
-# TOCHANGE: Set custom environment variables
+# TOCHANGE: Set custom environment variables and aliases
 # setenv APP_HOME $app_root
+# setalias run_app "$app_root/bin/app"
 
 # Handle conflicts with other versions
 conflict $app_name

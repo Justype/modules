@@ -16,7 +16,7 @@ set app_version [file tail $app_full_name]
 # abs path of modules, like /somewhere/modules
 set module_root [file dirname [file dirname [file dirname $abs_path]]]
 # abs path of the apps/app/x.x.x , like /somewhere/modules/apps/app/x.x.x
-set app_root [file join $module_root [file join apps $app_full_name]]
+set app_root [file join $module_root apps $app_full_name]
 # record current date time
 set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %T"]
 
