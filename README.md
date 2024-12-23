@@ -8,9 +8,11 @@ Usage: `bash build-scripts/app_name/version [options]`
 
 options:
 
-- `-i`  Install the target module.
+- `-i`  Install the target module with its dependencies.
+- `-o`  Only install the target module.
 - `-d`  Delete the target module.
 - `-s`  Set this version as the default version. (Not working if `tclsh` is missing)
+- `-l`  List dependencies of target module.
 - `-h`  Help message.
 
 ## How to Build Custom Modules
@@ -64,7 +66,7 @@ You can config the environment variables in modulefile.
 prepend-path PATH $app_root/bin
 
 # set custom environment variable
-setenv CELLRANGER_REF $ref_root
+setenv BCFTOOLS_PLUGINS "$app_root/libexec/bcftools"
 ```
 
 When you run `module load/unload`, modules can help use set or unset `PATH` and other variables.
@@ -90,12 +92,9 @@ modules/
     │   ├── 7.0.1/
     │   │   ├── bin/
     │   │   └── lib/
-    │   ├── 8.0.1/
-    │   │   ├── bin/
-    │   │   └── lib/
-    │   └── ref/
-    │       ├── refdata-gex-GRCh38-2020-A/
-    │       └── refdata-gex-GRCh38-2024-A/
+    │   └── 8.0.1/
+    │       ├── bin/
+    │       └── lib/
     └── sra-tools/
         └── 3.1.1/
             └──  bin/
