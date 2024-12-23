@@ -53,4 +53,15 @@ if ! [ -d build-scripts ]; then
 fi
 
 source "build-scripts/common.sh"
+# Overwrite the run_command function for better prompt
+run_command() {
+    sub_shell $@
+    if [ $? -ne 0 ]; then
+        print_stderr "${RED}ERROR${NC}: Command failed: $@"
+        print_stderr "Link expired! Please get the download link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
+        print_stderr "And change the line 16"
+        clean_up 1
+        exit 1
+    fi
+}
 main $@
