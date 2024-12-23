@@ -2,7 +2,7 @@
 
 Make sure you run `module use /somewhere/modules/modulefiles` to use these modules.
 
----
+## `build-scripts/app/version`
 
 Usage: `bash build-scripts/app_name/version [options]`
 
@@ -14,6 +14,21 @@ options:
 - `-s`  Set this version as the default version. (Not working if `tclsh` is missing)
 - `-l`  List dependencies of target module.
 - `-h`  Help message.
+
+## `utils.py`
+
+Utility script for modules overview and batch operations.
+
+```
+usage: utils.py [-h] [-l] [-n] [-i] [-d]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -l, --list            list all the app/versions and their status
+  -n, --list-newest     list apps with newer version
+  -i, --install-newest  install newest version of each app
+  -d, --delete-all      delete all installed apps
+```
 
 ## How to Build Custom Modules
 
