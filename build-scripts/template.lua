@@ -33,7 +33,7 @@ end
 -- Modify environment variables if the directories exist
 if (isDir(pathJoin(app_root, "bin"))) then
     prepend_path("PATH", pathJoin(app_root, "bin"))
-elseif (mode() == "load" && os.getenv("SLURM_JOB_ID") == nil) then
+elseif (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
     io.stderr:write("WARNING: No bin directory found in " .. app_full_name .. "\n")
 end
 if (isDir(pathJoin(app_root, "lib"))) then
