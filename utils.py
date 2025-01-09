@@ -23,7 +23,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations')
     parser.add_argument('-l', '--list', action='store_true', help='list all the app/versions and their status')
-    parser.add_argument('-n', '--list-newest', action='store_true', help='list apps with newer version')
+    parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
+    parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
     parser.add_argument('-i', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
     args = parser.parse_args()
@@ -36,8 +37,11 @@ def main():
         install_newest()
     elif args.delete_all:
         delete_all()
+    elif args.list_upgradable:
+        list_upgradable()
     else:
         list_all()
+        print("\n")
         parser.print_help()
 
 def get_status()-> dict:
@@ -302,6 +306,20 @@ def install_newest():
         print('Installed:', ", ".join(sorted(success_apps)))
     if failed_apps:
         print('Failed to install:', ", ".join(sorted(failed_apps)))
+
+def list_upgradable():
+    """
+    List the apps that have an upgradable version
+    """
+    status = get_status()
+    status = {app: versions for app, versions in status.items() if any(versions.values())}
+    newer_versions = get_newer_versions(status)
+    upgradable_apps = {app: version for app, version in newer_versions.items() if app in status}
+    len_app = len(max(upgradable_apps.keys(), key=len)) if upgradable_apps else 0
+
+    print('Upgradable apps:')
+    for app in sorted(upgradable_apps.keys()):
+        print(f'{app.ljust(len_app)}: {upgradable_apps[app]}')
 
 if __name__ == '__main__':
     main()
