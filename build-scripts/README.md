@@ -48,6 +48,10 @@ Version `2.x.x` requires `glibc 2.29` to run. If the `glibc` on your machine is 
 
 Use `ldd --version` to get `glibc` version.
 
+## KMC (K mer Counter)
+
+[KMC](https://github.com/refresh-bio/KMC) is a disk-based program for counting k-mers from (possibly gzipped) FASTQ/FASTA files.
+
 ## ORAD (ORA Decompress Tool)
 
 According to [Illumina instruction](https://help.ora.illumina.com/product-guides/dragen-ora-decompression/software-installation), `orad` needs `$ORA_REF_PATH/refbin` to decompress. So My script edit the `ORA_REF_PATH` env variable.
