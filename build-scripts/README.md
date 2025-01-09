@@ -59,3 +59,7 @@ According to [Illumina instruction](https://help.ora.illumina.com/product-guides
 ## Picard
 
 [Picard](https://broadinstitute.github.io/picard/) is a `jar` not a program. Set `PICARD` env to the path of `jar`. And use `alias picard='java -jar $PICARD'` to set `picard` alias.
+
+# Strelka2 Small Variant Caller
+
+[Strelka2](https://github.com/Illumina/strelka) use Python2.

@@ -37,6 +37,7 @@ def main():
     elif args.delete_all:
         delete_all()
     else:
+        list_all()
         parser.print_help()
 
 def get_status()-> dict:
@@ -139,7 +140,7 @@ def list_all():
     max_app_len = len(max(status.keys(), key=len)) if status else 0
     max_version_len = len(max([version for app in status for version in status[app]], key=len)) if status else 0
     # print the header
-    print('App'.ljust(max_app_len), f' (*) installed ( ) not installed {Colorize.blue("D")} dependencies')
+    print('App'.ljust(max_app_len), f' ({Colorize.blue("*")}) installed ( ) not installed {Colorize.blue("D")} dependencies')
     # each line is an app
     for app in sorted(status.keys()):
         print(f'{Colorize.yellow(app.ljust(max_app_len))}:', end=' ')
@@ -147,7 +148,7 @@ def list_all():
         versions = version_order(status[app].keys())
         # each column is a version
         for version in versions:
-            print(f'{"(*)" if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
+            print(f'{("("+Colorize.blue("*")+")") if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
         # print dependencies
         dependencies = get_dependencies_name(app, versions[0])
         print()
