@@ -1,13 +1,9 @@
 #!/usr/bin/bash
-##DEPENDENCY:app_name/version # comment is not allowed
-##DEPENDENCY:jdk/*
 
 #########################################################
-# Template for building a module
-# - You can write your own scripts in function install_app() at line 36
-# - Add dependencies in the header with #DEPENDENCY:app_name/version
-#    - version can be specific or with * wildcard
-#    - e.g. jdk/21.0.5 or jdk/21* or jdk/*
+# Python 2.7.18
+# - Anaconda Build
+# - Version dependent script!
 #########################################################
 
 install_app() {

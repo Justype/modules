@@ -1,19 +1,23 @@
 #!/usr/bin/bash
 
 #########################################################
-# K-mer Counter
-# - https://github.com/refresh-bio/KMC
+# VCF to MAF Converter
+# - https://github.com/mskcc/vcf2maf
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
-    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$target_dir/bin"   # modules/apps/name/version
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -nv -O "KMC.linux.x64.tar.gz" https://github.com/refresh-bio/KMC/releases/download/v${version}/KMC${version}.linux.x64.tar.gz
-    tar xf KMC.linux.x64.tar.gz -C "$target_dir" #--strip-components=1
+    # Available functions: 
+    # run_command <command> <args> # exit if command fails
+    # sub_shell <command> <args>   # run command in subshell
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" https://github.com/mskcc/vcf2maf/archive/refs/tags/v${version}.tar.gz
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir/bin" --strip-components=1
 }
 
 special_modulefiles() {
