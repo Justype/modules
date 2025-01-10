@@ -47,9 +47,9 @@ special_modulefiles() {
 # - script_path:      modules/modulefiles/name/version
 # - tmp_dir:          tmp directory (modules/tmp/name/version)
 
-RED='\033[0;31m'    # Red      WARNING or ERROR
-BLUE='\033[0;34m'   # Blue     Dependency or Modulefile Changes
-YELLOW='\033[0;33m' # Yellow   App Name and/or Version
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
 NC='\033[0m'        # No Color
 
 if ! [ -d build-scripts ]; then

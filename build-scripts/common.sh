@@ -5,9 +5,9 @@
 
 #region VARIABLES
 ncpu=${SLURM_CPUS_PER_TASK:-4} # number of cores to use when building from source
-RED='\033[0;31m'    # Red      WARNING or ERROR
-BLUE='\033[0;34m'   # Blue     Dependency or Modulefile Changes
-YELLOW='\033[0;33m' # Yellow   App Name and/or Version
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
 NC='\033[0m'        # No Color
 
 modules_root="$PWD"
