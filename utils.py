@@ -85,8 +85,31 @@ def get_dependencies(app: str, version: str) -> list:
     with open(f'build-scripts/{app}/{version}') as f:
         for line in f:
             if line.startswith('#DEPENDENCY'):
-                dependencies.append(line.strip().split(":")[1])
+                name, version = line.strip().split(":")[1].split("/")
+                dependencies.append(resolve_app_version(name, version))
     return dependencies
+
+def resolve_app_version(app: str, version_match: str) -> (str, str):
+    """
+    Resolve the app and version from the app and version_match
+
+    Args:
+        app (str): The app name
+        version_match (str): The version match
+
+    Returns:
+        (str, str): The app and version
+    """
+    if "*" not in version_match:
+        return app, version_match
+
+    version_match = version_match.replace("*", "")
+    versions = version_order(os.listdir(f'build-scripts/{app}'))
+    for version in versions:
+        if version.startswith(version_match):
+            return app, version
+
+    return app, None
 
 def get_dependencies_name(app: str, version: str) -> list:
     """
@@ -154,7 +177,9 @@ def list_all():
         for version in versions:
             print(f'{("("+Colorize.blue("*")+")") if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
         # print dependencies
-        dependencies = get_dependencies_name(app, versions[0])
+        # dependencies = get_dependencies_name(app, versions[0])
+        dependency_versions = get_dependencies(app, versions[0])
+        dependencies = [f'{Colorize.yellow(dep[0])}/{dep[1]}' for dep in dependency_versions]
         print()
         if dependencies:
             print(' '*max_app_len, f'     └─ {Colorize.blue("D")}', ", ".join(dependencies))
