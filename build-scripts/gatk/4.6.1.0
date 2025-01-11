@@ -14,8 +14,10 @@ install_app() {
     cd "$tmp_dir"          # cd to tmp directory
 
     # Download GATK from github with specific version
-    print_stderr "Downloading ${YELLOW}${app_name_version}${NC} binaries"
-    run_command wget -nv -O "gatk-${version}.zip" "https://github.com/broadinstitute/gatk/releases/download/${version}/gatk-${version}.zip"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    url="https://github.com/broadinstitute/gatk/releases/download/${version}/gatk-${version}.zip"
+    run_command wget -nv -O "gatk-${version}.zip" "$url"
+
     print_stderr "Unzipping ${app_name_version}"
     run_command unzip -qn "gatk-${version}.zip"          # quiet unzip
     sub_shell mv "gatk-${version}" "${target_dir}/bin"  # move to target directory

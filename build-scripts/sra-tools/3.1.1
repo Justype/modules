@@ -8,7 +8,8 @@
 #########################################################
 
 install_app() {
-    mkdir -p "$target_base_dir"  # modules/apps/name
+    # mkdir -p "$target_base_dir"  # modules/apps/name
+    mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
 
@@ -18,23 +19,23 @@ install_app() {
         distro=$(grep -E '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
         if [ "$distro" == "fedora" ]; then
             print_stderr "This is a x64 Fedora/RedHat based machine. Install binary directly."
-            flag_install_binary=true
             url="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${version}/sratoolkit.${version}-centos_linux64.tar.gz"
-            run_command wget --no-verbose -O "sratoolkit.${version}-centos_linux64.tar.gz" "$url" # download binary
-            tar xfz "sratoolkit.${version}-centos_linux64.tar.gz" --overwrite
-            mv "sratoolkit.${version}-centos_linux64" "$target_dir"
+            flag_install_binary=true
         elif [ "$distro" == "debian" ]; then
             print_stderr "This is a x64 Debian based machine. Install binary directly."
-            flag_install_binary=true
             url="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${version}/sratoolkit.${version}-ubuntu64.tar.gz"
-            run_command wget --no-verbose -O "sratoolkit.${version}-ubuntu64.tar.gz" "$url" # download binary
-            tar xfz "sratoolkit.${version}-ubuntu64.tar.gz" --overwrite
-            mv "sratoolkit.${version}-ubuntu64" "$target_dir"
+            flag_install_binary=true
         fi
     fi
 
     # if the binary is installed, skip the source code installation
-    if [ "$flag_install_binary" != true ]; then
+    if [ "$flag_install_binary" == true ]; then
+        print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+        run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+
+        print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+        tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
+    else
         print_stderr "This is not a x64 Fedora or Debian based machine. Install from source code."
 
         #region ncbi-vdb

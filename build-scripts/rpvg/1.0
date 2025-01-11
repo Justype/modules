@@ -12,11 +12,11 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC} binary from GitHub"
-    run_command wget -nv -N https://github.com/jonassibbesen/rpvg/releases/download/v${version}/rpvg-v${version}_linux.tar.gz
-    print_stderr "Extracting rpvg_v${version}_linux.tar.gz"
-    sub_shell tar xf rpvg-v${version}_linux.tar.gz
-    # only move bin to the target directory
-    sub_shell mv rpvg-v${version}_linux/bin "$target_dir"
+    url="https://github.com/jonassibbesen/rpvg/releases/download/v${version}/rpvg-v${version}_linux.tar.gz"
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

@@ -13,13 +13,11 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -O cellranger-8.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz"
+    url="https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz"
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
-    print_stderr "Extracting cellranger-${version}.tar.gz"
-    tar xf ./cellranger-${version}.tar.gz
-
-    # move to apps/name/version folder
-    sub_shell mv cellranger-${version}/ "$target_dir"
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

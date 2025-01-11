@@ -10,7 +10,11 @@ install_app() {
     mkdir -p "$target_dir/bin"   # modules/apps/name/version/bin
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC} binary from GitHub"
-    run_command wget -nv -O "$target_dir/bin/vg" "https://github.com/vgteam/vg/releases/download/v${version}/vg"
+    case $(uname -m) in
+        x86_64)  url="https://github.com/vgteam/vg/releases/download/v${version}/vg" ;;
+        aarch64) url="https://github.com/vgteam/vg/releases/download/v${version}/vg-arm64" ;;
+    esac
+    run_command wget -nv -O "$target_dir/bin/vg" "$url"
     chmod +x "$target_dir/bin/vg"
 }
 

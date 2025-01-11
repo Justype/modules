@@ -11,10 +11,8 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
-    run_command wget -nv -O "${app_name}_${version}.tar.gz" https://github.com/mskcc/vcf2maf/archive/refs/tags/v${version}.tar.gz
+    url="https://github.com/mskcc/vcf2maf/archive/refs/tags/v${version}.tar.gz"
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.gz" -C "$target_dir/bin" --strip-components=1

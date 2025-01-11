@@ -13,7 +13,8 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -nv -O "${app_name}_${version}.tar.bz2" https://github.com/Illumina/strelka/releases/download/v${version}/strelka-${version}.centos6_x86_64.tar.bz2
+    url="https://github.com/Illumina/strelka/releases/download/v${version}/strelka-${version}.centos6_x86_64.tar.bz2"
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" --strip-components=1

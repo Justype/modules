@@ -13,10 +13,11 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC} Annaconda Build"
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
-    run_command wget -nv -O "${app_name}_${version}.tar.bz2" https://anaconda.org/anaconda/python/2.7.18/download/linux-64/python-2.7.18-h42bf7aa_3.tar.bz2
+    case $(uname -s) in
+        Linux)  url="https://anaconda.org/anaconda/python/2.7.18/download/linux-64/python-2.7.18-h42bf7aa_3.tar.bz2";;
+        Darwin) url="https://anaconda.org/anaconda/python/2.7.18/download/osx-64/python-2.7.18-h441ce09_3.tar.bz2";;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1

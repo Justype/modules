@@ -22,8 +22,7 @@ install_app() {
 
     print_stderr "Loading ${YELLOW}jdk/1.8${NC} and ${YELLOW}ant${NC} modules"
     module purge
-    module load jdk/1.8.0
-    module load ant/1.10.15
+    module load jdk/1.8.0 ant/1.10.15
     
     print_stderr "Building ${YELLOW}${app_name_version}${NC}"
     cd BamQC

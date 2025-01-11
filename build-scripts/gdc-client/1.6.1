@@ -13,8 +13,9 @@ install_app() {
     mkdir -p "$tmp_dir"             # tmp directory
     cd "$tmp_dir"
 
-    print_stderr "Downloading ${YELLOW}${app_name_version}${NC} binary"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     run_command wget -q -N https://gdc.cancer.gov/system/files/public/file/gdc-client_v1.6.1_Ubuntu_x64.zip
+
     print_stderr "Unzipping gdc-client_v1.6.1_Ubuntu_x64.zip"
     sub_shell unzip -q gdc-client_v1.6.1_Ubuntu_x64.zip -d "${target_dir}/bin"
 }

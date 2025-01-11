@@ -17,20 +17,24 @@ install_app() {
     # Get main version from the version string
     main_version=${version%%.*}
 
-    # Determine the machine architecture
-    machine_arch=$(uname -m)
-    if [ "$machine_arch" == "x86_64" ]; then
-        machine_arch="x64"
-    fi
+    os=$(uname -s)
+    arch=$(uname -m)
+    case $os in
+        Linux)  os="linux";;
+        Darwin) os="macos";;
+    esac
+    case $arch in
+        x86_64)  arch="x64";;
+        # aarch64) arch="arm64";;
+    esac
 
     # Oracle JDK (need to accept the license, cannot download version 11)
-    # url="https://download.oracle.com/java/${main_version}/archive/jdk-${version}_linux-${machine_arch}_bin.tar.gz" 
-    url="https://aka.ms/download-jdk/microsoft-jdk-${version}-linux-${machine_arch}.tar.gz" # Switch to Microsoft OpenJDK
-    run_command wget -nv -O "jdk-${version}_linux-${machine_arch}.tar.gz" "$url"
+    # url="https://download.oracle.com/java/${main_version}/archive/jdk-${version}_linux-${arch}_bin.tar.gz" 
+    url="https://aka.ms/download-jdk/microsoft-jdk-${version}-${os}-${arch}.tar.gz" # Switch to Microsoft OpenJDK
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
-    print_stderr "Unzipping ${app_name} version ${version}"
-    tar xf "jdk-${version}_linux-${machine_arch}.tar.gz"
-    sub_shell mv *jdk-${version}*/* "$target_dir"
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

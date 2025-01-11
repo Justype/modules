@@ -13,13 +13,11 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -O cellranger-9.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz?Expires=1734967144&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=TNkBCwyAT7fHy7-L4lqR~PmimVtm7Os1Ov33L8pnt-DsXSbaNJIGZJbhbW~a7anVXqdJv8oE8vHUBJ28nBZnttvfxWM-TwdnTjtqPO462S8KbycUyyjwH5N7gD7G1eclgG193OKP-sXOsRgTqjhoseKCgwBg5Fve~GnRtofTjEyr53VSBIIfpu-WaN8Mu~LWPvNwG4o1ZYRsz9DjfL0CWnOKECNTXPtoBcNbD20ZW2Dr5x8u2~a3yjCT4DqUSv39ytpcQ2uBUWFDi8SMJI05PwmaETVAkrhhv8nL4dUdKVNo9uWhMrc3lC3zoP9xvRXNr3sjS1Jev3ozSOTLYfBX7A__"
+    url="https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz"
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
-    print_stderr "Extracting cellranger-${version}.tar.gz"
-    tar xf ./cellranger-${version}.tar.gz
-
-    # move to apps/name/version folder
-    sub_shell mv cellranger-${version}/ "$target_dir"
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

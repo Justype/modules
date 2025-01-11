@@ -11,9 +11,23 @@ install_app() {
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
 
+    os=$(uname -s)
+    arch=$(uname -m)
+    case $os in
+        Linux)  os="linux";;
+        Darwin) os="mac";;
+    esac
+    case $arch in
+        x86_64)  arch="x64";;
+        aarch64) arch="arm64";;
+    esac
+
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -nv -O "KMC.linux.x64.tar.gz" https://github.com/refresh-bio/KMC/releases/download/v${version}/KMC${version}.linux.x64.tar.gz
-    tar xf KMC.linux.x64.tar.gz -C "$target_dir" #--strip-components=1
+    url="https://github.com/refresh-bio/KMC/releases/download/v${version}/KMC${version}.${os}.${arch}.tar.gz"
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" #--strip-components=1
 }
 
 special_modulefiles() {
