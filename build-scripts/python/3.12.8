@@ -1,0 +1,133 @@
+#!/usr/bin/bash
+
+#########################################################
+# Python 3.12.8
+# - Anaconda Build
+# - Version dependent script!
+#########################################################
+
+install_app() {
+    # mkdir -p "$target_base_dir"  # modules/apps/name
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$tmp_dir"          # tmp directory
+    cd "$tmp_dir"
+
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC} Annaconda Build"
+    case $(uname -s) in
+        Linux)
+            case $(uname -m) in
+                x86_64) url="https://anaconda.org/anaconda/python/3.12.8/download/linux-64/python-3.12.8-h5148396_0.tar.bz2";;
+                aarch64) url="https://anaconda.org/anaconda/python/3.12.8/download/linux-aarch64/python-3.12.8-h8edadfe_0.tar.bz2";;
+            esac;;
+        Darwin)
+            case $(uname -m) in
+                x64) url="https://anaconda.org/anaconda/python/3.12.8/download/osx-64/python-3.12.8-hcd54a6c_0.tar.bz2";;
+                arm64) url="https://anaconda.org/anaconda/python/3.12.8/download/osx-arm64/python-3.12.8-h99e199e_0.tar.bz2";;
+            esac;;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1
+
+    print_stderr "Downloading ${YELLOW}${app_name_version} pip${NC} Anaconda Build"
+    case $(uname -s) in
+        Linux)
+            case $(uname -m) in
+                x86_64) url="https://anaconda.org/anaconda/pip/25.0/download/linux-64/pip-25.0-py312h06a4308_0.tar.bz2";;
+                aarch64) url="https://anaconda.org/anaconda/pip/25.0/download/linux-aarch64/pip-25.0-py312hd43f75c_0.tar.bz2";;
+            esac;;
+        Darwin)
+            case $(uname -m) in
+                x64) url="https://anaconda.org/anaconda/pip/25.0/download/osx-64/pip-25.0-py312hecd8cb5_0.tar.bz2";;
+                arm64) url="https://anaconda.org/anaconda/pip/25.0/download/osx-arm64/pip-25.0-py312hca03da5_0.tar.bz2";;
+            esac;;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    print_stderr "Extracting ${YELLOW}${app_name_version} pip${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1
+
+    print_stderr "Downloading ${YELLOW}${app_name_version} openssl${NC} Anaconda Build"
+    case $(uname -s) in
+        Linux)
+            case $(uname -m) in
+                x86_64) url="https://anaconda.org/anaconda/openssl/3.0.15/download/linux-64/openssl-3.0.15-h5eee18b_0.tar.bz2";;
+                aarch64) url="https://anaconda.org/anaconda/openssl/3.0.15/download/linux-aarch64/openssl-3.0.15-h998d150_0.tar.bz2";;
+            esac;;
+        Darwin)
+            case $(uname -m) in
+                x64) url="https://anaconda.org/anaconda/openssl/3.0.15/download/osx-64/openssl-3.0.15-h46256e1_0.tar.bz2";;
+                arm64) url="https://anaconda.org/anaconda/openssl/3.0.15/download/osx-arm64/openssl-3.0.15-h80987f9_0.tar.bz2";;
+            esac;;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    print_stderr "Extracting ${YELLOW}${app_name_version} openssl${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1
+
+    print_stderr "Downloading ${YELLOW}${app_name_version} packaging${NC} Anaconda Build"
+    case $(uname -s) in
+        Linux)
+            case $(uname -m) in
+                x86_64) url="https://anaconda.org/anaconda/packaging/24.2/download/linux-64/packaging-24.2-py312h06a4308_0.tar.bz2";;
+                aarch64) url="https://anaconda.org/anaconda/packaging/24.2/download/linux-aarch64/packaging-24.2-py312hd43f75c_0.tar.bz2";;
+            esac;;
+        Darwin)
+            case $(uname -m) in
+                x64) url="https://anaconda.org/anaconda/packaging/24.2/download/osx-64/packaging-24.2-py312hecd8cb5_0.tar.bz2";;
+                arm64) url="https://anaconda.org/anaconda/packaging/24.2/download/osx-arm64/packaging-24.2-py312hca03da5_0.tar.bz2";;
+            esac;;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    print_stderr "Extracting ${YELLOW}${app_name_version} packaging${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1
+
+    print_stderr "Downloading ${YELLOW}bzip2${NC} Anaconda Build"
+    case $(uname -s) in
+        Linux)
+            case $(uname -m) in
+                x86_64) url="https://anaconda.org/anaconda/bzip2/1.0.8/download/linux-64/bzip2-1.0.8-h5eee18b_6.tar.bz2";;
+                aarch64) url="https://anaconda.org/anaconda/bzip2/1.0.8/download/linux-aarch64/bzip2-1.0.8-h998d150_6.tar.bz2";;
+            esac;;
+        Darwin)
+            case $(uname -m) in
+                x64) url="https://anaconda.org/anaconda/bzip2/1.0.8/download/osx-64/bzip2-1.0.8-h6c40b1e_6.tar.bz2";;
+                arm64) url="https://anaconda.org/anaconda/bzip2/1.0.8/download/osx-arm64/bzip2-1.0.8-h80987f9_5.tar.bz2";;
+            esac;;
+    esac
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    print_stderr "Extracting ${YELLOW}bzip2${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir" #--strip-components=1
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
+    return
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         name     of the app
+# - version:          version  of the app
+# - app_name_version: name/version
+
+# - target_base_dir:  modules/apps/name
+# - target_dir:       modules/apps/name/version
+# - script_path:      modules/modulefiles/name/version
+# - tmp_dir:          tmp directory (modules/tmp/name/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@
