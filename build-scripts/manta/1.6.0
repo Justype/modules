@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 #DEPENDENCY:python/2*
+#WHATIS:structural variants (SVs) and large indels from paired-end reads
 
 #########################################################
 # Manta Structural Variant Caller

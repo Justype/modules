@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 ##DEPENDENCY:app_name/version # comment is not allowed
 ##DEPENDENCY:jdk/*
+#WHATIS:Template for building a module
 
 #########################################################
 # Template for building a module
@@ -29,13 +30,13 @@ install_app() {
         # aarch64) arch="arm64";;
     esac
 
-    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    ## Add your download link here
-    url=""
-    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+    # print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    # ## Add your download link here
+    # url=""
+    # run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
-    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
+    # print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    # tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

@@ -21,7 +21,7 @@ set app_root [file join $module_root apps $app_full_name]
 set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %T"]
 
 # TOCHANGE: A brief description using module-whatis
-module-whatis "Loads $app_name version $app_version"
+module-whatis "Manipulating seq data and formats"
 
 # TOCHANGE: Detailed Help Section
 proc ModulesHelp { } {

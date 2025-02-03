@@ -1,6 +1,7 @@
 #!/usr/bin/bash
 #DEPENDENCY:jdk/1.8*
 #DEPENDENCY:ant/*
+#WHATIS:Quality control for sam/bam (alignment) files
 
 #########################################################
 # BamQC

@@ -1,5 +1,6 @@
 #!/usr/bin/bash
-#DEPENDENCY:jdk/*
+#DEPENDENCY:jdk/17*
+#WHATIS:Preprocessing, variant calling and filtering Toolkit
 
 #########################################################
 # GATK build script

@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#WHATIS:Utilities for SAM/BAM (Sequence Alignment Map)
 
 #########################################################
 # Samtools build script

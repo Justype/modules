@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 #DEPENDENCY:python/2*
+#WHATIS:Small Variant Caller for tumor/normal pairs 
 
 #########################################################
 # Strelka2 Small Variant Caller

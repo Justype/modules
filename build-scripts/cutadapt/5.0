@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 #DEPENDENCY:python312-venv/20.28.0
+#WHATIS:Remove adapter and unwanted sequences from fastq
 
 #########################################################
 # Cutadapt

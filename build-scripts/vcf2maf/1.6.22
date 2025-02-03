@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#WHATIS:VCF to MAF Converter (MAF for somatic mutation in cancer)
 
 #########################################################
 # VCF to MAF Converter

@@ -22,14 +22,17 @@ def main():
 
     import argparse
     parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations')
-    parser.add_argument('-l', '--list', action='store_true', help='list all the app/versions and their status')
+    parser.add_argument('-l', '--list', dest='name', help='list all the versions and dependencies from given name')
+    parser.add_argument('-la', '--list-all', action='store_true', help='list all the app/versions and their status')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
     parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
     parser.add_argument('-i', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
     args = parser.parse_args()
 
-    if args.list:
+    if args.name is not None:
+        list_dep(args.name)
+    elif args.list_all:
         list_all()
     elif args.list_newest:
         list_newest()
@@ -156,12 +159,10 @@ def resolve_dependencies(apps: list, dependencies: dict) -> list:
     
     return resolved
 
-#region All
-def list_all():
+def print_status(status: dict):
     """
-    Check the version diff between build-scripts and installed apps
+    Print the status of the apps and versions
     """
-    status = get_status()
 
     # get length of the longest app name and version for formatting
     max_app_len = len(max(status.keys(), key=len)) if status else 0
@@ -183,6 +184,33 @@ def list_all():
         print()
         if dependencies:
             print(' '*max_app_len, f'     └─ {Colorize.blue("D")}', ", ".join(dependencies))
+
+def list_dep(app: str):
+    """
+    List the dependencies of the app
+    """
+    status = get_status()
+    if "*" in app:
+        import re
+        re_app = re.compile("^" + app.replace("*", ".*") + "$")
+        apps = [app for app in status if re_app.match(app)]
+        status = {app: status[app] for app in apps}
+    else:
+        if app not in status:
+            print(f'{Colorize.red("Error")}: {app} not found')
+            exit(1)
+        status = {app: status[app] for app in [app]}
+
+    print_status(status)
+
+#region All
+def list_all():
+    """
+    Check the version diff between build-scripts and installed apps
+    """
+    status = get_status()
+
+    print_status(status)
 
 def delete_all():
     """

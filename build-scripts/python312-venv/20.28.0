@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 #DEPENDENCY:python/3.12.8
+#WHATIS:Python virtual environment manager
 
 #########################################################
 # Virtualenv for Python

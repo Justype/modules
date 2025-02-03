@@ -202,6 +202,14 @@ copy_modulefile() {
         echo "depends_on(\"${dep_name}/${dep_version}\")" >> "${script_path}.lua"
     done
 
+    # edit whatis if #WHATIS: is found in the script
+    whatis=$(grep -oP "^#WHATIS:\K.*" "$install_script_path")
+    if [ -n "$whatis" ]; then
+        print_stderr "Editing ${BLUE}whatis${NC} in modulefile"
+        sed -i "s/^module-whatis.*/module-whatis \"${whatis}\"/" "${script_path}"
+        sed -i "s/^whatis(.*/whatis(\"${whatis}\")/" "${script_path}.lua"
+    fi
+
     special_modulefiles
 }
 #endregion

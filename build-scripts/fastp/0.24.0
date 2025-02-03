@@ -1,9 +1,9 @@
 #!/usr/bin/bash
+#WHATIS:QC and adapter/sequence trimming tool for fastq
 
 #########################################################
 # Fastp
 # - https://github.com/OpenGene/fastp
-# - Ultra fast all-in-one preprocessing and quality control for FastQ data
 #########################################################
 
 install_app() {

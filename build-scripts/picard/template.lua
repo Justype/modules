@@ -14,7 +14,7 @@ local app_root = pathJoin(module_root, "apps", app_full_name) -- abs path of tar
 local current_datetime = os.date("%Y-%m-%d %H:%M:%S") -- Record current datetime
 
 -- TOCHANGE: A brief description using whatis
-whatis("Loads " .. app_name .. " version " .. app_version)
+whatis("Manipulating seq data and formats")
 
 -- TOCHANGE: Detailed help section
 help([[Placeholder for the usage of this module.]])
