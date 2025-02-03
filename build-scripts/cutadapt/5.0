@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:python312-venv/*
+#DEPENDENCY:python312-venv/20.28.0
 
 #########################################################
 # Cutadapt
