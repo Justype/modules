@@ -1,14 +1,11 @@
 #!/usr/bin/bash
-##DEPENDENCY:app_name/version # comment is not allowed
-##DEPENDENCY:jdk/*
-#WHATIS:Template for building a module
+#DEPENDENCY:jdk/*
+#WHATIS:QC for seq data (fastq)
 
 #########################################################
-# Template for building a module
-# - You can write your own scripts in function install_app() at line 36
-# - Add dependencies in the header with #DEPENDENCY:app_name/version
-#    - version can be specific or with * wildcard
-#    - e.g. jdk/21.0.5 or jdk/21* or jdk/*
+# FastQC
+# - A quality control tool for sequencing data
+# - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 #########################################################
 
 install_app() {
@@ -16,36 +13,19 @@ install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
-    os=$(uname -s)
-    arch=$(uname -m)
-    case $os in
-        Linux)  os="linux";;
-        Darwin) os="macos";;
-    esac
-    case $arch in
-        x86_64)  arch="x64";;
-        # aarch64) arch="arm64";;
-    esac
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    ## Add your download link here
-    url=""
-    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+    url="https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v${version}.zip"
+    run_command wget -nv -O "${app_name}_${version}.zip" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
+    unzip -q "${app_name}_${version}.zip"
+    mv FastQC "$target_dir/bin"
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    
-    # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
-    # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
-    # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
     return
 }
 
