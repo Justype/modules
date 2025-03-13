@@ -206,8 +206,8 @@ copy_modulefile() {
     whatis=$(grep -oP "^#WHATIS:\K.*" "$install_script_path")
     if [ -n "$whatis" ]; then
         print_stderr "Editing ${BLUE}whatis${NC} in modulefile"
-        sed -i "s/^module-whatis.*/module-whatis \"${whatis}\"/" "${script_path}"
-        sed -i "s/^whatis(.*/whatis(\"${whatis}\")/" "${script_path}.lua"
+        sed -i "s|^module-whatis.*|module-whatis \"${whatis}\"|" "${script_path}"
+        sed -i "s|^whatis.*|whatis(\"${whatis}\")|" "${script_path}.lua"
     fi
 
     special_modulefiles
