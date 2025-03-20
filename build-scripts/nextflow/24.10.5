@@ -1,26 +1,30 @@
 #!/usr/bin/bash
 #DEPENDENCY:jdk/21*
-#WHATIS:Manipulating seq data and formats
+#WHATIS:Pipeline Tools
 
 #########################################################
-# Picard build script
-# - https://broadinstitute.github.io/picard/
-# - picard requires java environment to run
-#   - install the latest version of jdk (jdk is backward compatible)
-# - use Picard's own template
-#   - setenv PICARD $app_root/picard.jar
-#   - set-alias picard "java -jar \$PICARD"
+# Nextflow
+# - https://www.nextflow.io/
+# - Nextflow is widely used for building and sharing pipelines
 #########################################################
 
 install_app() {
-    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$target_dir/bin"       # modules/apps/name/version/bin
+
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -nv -O "${target_dir}/picard.jar" https://github.com/broadinstitute/picard/releases/download/${version}/picard.jar 
+    ## Add your download link here
+    url="https://github.com/nextflow-io/nextflow/releases/download/v${version}/nextflow-${version}-dist"
+    run_command wget -nv -O "$target_dir/bin/nextflow" "$url"
+    chmod +x "$target_dir/bin/nextflow"
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
+    
+    # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
+    # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
+    # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
     return
 }
 

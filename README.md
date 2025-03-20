@@ -20,15 +20,17 @@ options:
 Utility script for modules overview and batch operations.
 
 ```
-usage: utils.py [-h] [-l] [-lu] [-ln] [-i] [-d]
+usage: utils.py [-h] [-l] [-lm NAME] [-lu] [-ln] [-i] [-d]
 
 optional arguments:
-  -h,  --help            show this help message and exit
-  -l,  --list            list all the app/versions and their status
+  -h, --help             show this help message and exit
+  -l, --list-all         list all the app/versions and their status
+  -lm NAME, --list-module NAME
+                         list all the versions and dependencies from given name
   -lu, --list-upgradable list upgradable apps
   -ln, --list-newest     list apps with newer version (even if not installed)
-  -i,  --install-newest  install newest version of each app
-  -d,  --delete-all      delete all installed apps
+  -i, --install-newest   install newest version of each app
+  -d, --delete-all       delete all installed apps
 ```
 
 ## How to Build Custom Modules

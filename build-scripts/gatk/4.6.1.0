@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:jdk/17*
+#DEPENDENCY:jdk/21*
 #WHATIS:Preprocessing, variant calling and filtering Toolkit
 
 #########################################################

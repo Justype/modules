@@ -22,18 +22,18 @@ def main():
 
     import argparse
     parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations')
-    parser.add_argument('-l', '--list', dest='name', help='list all the versions and dependencies from given name')
-    parser.add_argument('-la', '--list-all', action='store_true', help='list all the app/versions and their status')
+    parser.add_argument('-l', '--list-all', action='store_true', help='list all the app/versions and their status')
+    parser.add_argument('-lm', '--list-module', dest='name', help='list all the versions and dependencies from given name')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
     parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
     parser.add_argument('-i', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
     args = parser.parse_args()
 
-    if args.name is not None:
-        list_dep(args.name)
-    elif args.list_all:
+    if args.list_all:
         list_all()
+    elif args.name is not None:
+        list_dep(args.name)
     elif args.list_newest:
         list_newest()
     elif args.install_newest:
