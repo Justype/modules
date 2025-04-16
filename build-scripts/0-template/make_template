@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:python312-venv/20.28.0
+##DEPENDENCY:app_name/version # comment is not allowed
 #WHATIS:Template for building a module
 
 #########################################################
@@ -11,20 +11,33 @@
 #########################################################
 
 install_app() {
+    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
-    module load python312-venv/20.28.0
-    print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
-    virtualenv "$target_dir"
-    "$target_dir/bin/pip" install --no-cache-dir kb-python==$version
+    mkdir -p "$tmp_dir"          # tmp directory
+    cd "$tmp_dir"
+    # Available functions: 
+    # run_command <command> <args> # exit if command fails
+    # sub_shell <command> <args>   # run command in subshell
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC} source code"
+    ## Add your download link here
+    url=""
+    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.gz" --strip-components=1
+    ./configure --prefix="$target_dir"
+    print_stderr "Building ${YELLOW}${app_name_version}${NC}"
+    run_command make -j "$ncpu"
+    make install
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
     
-    print_stderr "Prepending \$app_root to ${BLUE}PYTHONPATH${NC} environment variable"
-    echo "prepend-path PYTHONPATH \$app_root" >> "${script_path}"
-    echo "prepend_path(\"PYTHONPATH\", app_root)" >> "${script_path}.lua"
+    # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
+    # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
+    # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
     return
 }
 

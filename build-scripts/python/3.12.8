@@ -14,6 +14,10 @@ install_app() {
     cd "$tmp_dir"
 
     install_annaconda_package python 3.12.8
+    if [[ $? -ne 0 ]]; then
+        print_stderr "${RED}ERROR:${NC} Failed to install Python 3.12.8."
+        exit 1
+    fi
     install_annaconda_package bzip2 1.0.8
     install_annaconda_package expat 2.7.1
     install_annaconda_package libffi 3.4.4
@@ -32,9 +36,6 @@ install_app() {
     install_annaconda_package_for_py312 pip 25.0
     install_annaconda_package_for_py312 setuptools 75.8.0
     install_annaconda_package_for_py312 wheel 0.45.1
-
-    # Python packaging
-    install_annaconda_package_for_py312 packaging 24.2
 }
 
 special_modulefiles() {
@@ -46,7 +47,7 @@ special_modulefiles() {
 install_annaconda_package() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url $1 $2)
-    if [ $url == "https:" ]; then return; fi
+    if [[ $url == "https:" ]]; then return 1; fi
     run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
@@ -54,7 +55,7 @@ install_annaconda_package() {
 install_annaconda_package_for_py312() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url_for_py_version $1 312 $2)
-    if [ $url == "https:" ]; then return; fi
+    if [[ $url == "https:" ]]; then return 1; fi
     run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
@@ -84,7 +85,7 @@ get_annaconda_url() {
 
 get_annaconda_url_for_py_version() {
     # $1 is the name
-    # $2 is the python version: 39, 310, 311, 312, 313
+    # $2 is the python version: 27, 39, 310, 311, 312, 313
     # $3 is the version (optional)
     local name=$(echo "$1" | tr '[:upper:]' '[:lower:]')
     local pyversion=py$2

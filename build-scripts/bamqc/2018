@@ -5,7 +5,9 @@
 
 #########################################################
 # BamQC
+# - BAM QC analysis tool
 # - https://github.com/s-andrews/BamQC
+# - https://stab.st-andrews.ac.uk/wiki/index.php/BamQC
 #########################################################
 
 install_app() {
@@ -27,6 +29,7 @@ install_app() {
     
     print_stderr "Building ${YELLOW}${app_name_version}${NC}"
     cd BamQC
+    git checkout 4b3d20f
     run_command ant
     chmod +x bin/bamqc
 

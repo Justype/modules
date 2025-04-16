@@ -1,32 +1,31 @@
 #!/usr/bin/bash
-#DEPENDENCY:python/3.12.8
-#WHATIS:Python virtual environment manager
+#DEPENDENCY:python/2.7.18
+#WHATIS:Template for building a module
 
 #########################################################
-# Virtualenv for Python
-# - https://virtualenv.pypa.io/en/latest/
+# Template for building a module
+# - You can write your own scripts in function install_app() at line 36
+# - Add dependencies in the header with #DEPENDENCY:app_name/version
+#    - version can be specific or with * wildcard
+#    - e.g. jdk/21.0.5 or jdk/21* or jdk/*
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
-    mkdir -p "$target_dir"       # modules/apps/name/version
-    mkdir -p "$tmp_dir"          # tmp directory
-    cd "$tmp_dir"
-
-    module load python/3.12.8
-
-    print_stderr "Installing ${YELLOW}${app_name_version}${NC} with pip"
-    run_command python3 -m pip install --no-cache-dir --target="$target_dir" virtualenv==$version
+    # Available functions: 
+    # run_command <command> <args> # exit if command fails
+    # sub_shell <command> <args>   # run command in subshell
+    module load python/2.7.18
+    print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
+    virtualenv "$target_dir"
+    run_command "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    
     print_stderr "Prepending \$app_root to ${BLUE}PYTHONPATH${NC} environment variable"
-    echo "prepend-path PYTHONPATH \$app_root" >> "${script_path}"
-    echo "prepend_path(\"PYTHONPATH\", app_root)" >> "${script_path}.lua"
-    return
+    echo "prepend-path PYTHONPATH \$app_root/lib/python2.7/site-packages" >> "${script_path}"
+    echo 'prepend_path("PYTHONPATH", pathJoin(app_root, "lib", "python2.7", "site-packages"))' >> "${script_path}.lua"
 }
 
 # Available variables:

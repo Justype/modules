@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import subprocess
 import time
+import re
 
 class Colorize:
     def red(text):
@@ -65,13 +66,37 @@ def get_status()-> dict:
 
     return status
 
+def parse_version_key(version: str):
+    """
+    Parse the version key from the version string
+
+    Args:
+        version (str): The version string
+
+    Returns:
+        tuple: A tuple containing the major, minor, and patch versions
+    """
+    components = re.findall(r'(\d+)|([a-zA-Z]+)', version)
+    # Example breakdown:
+    # "1.10.2b" -> [('1', ''), ('10', ''), ('2', ''), ('', 'b')]
+    # "2025c"   -> [('2025', ''), ('', 'c')]
+    # "3.0"     -> [('3', ''), ('0', '')]
+    parsed_key = []
+    for num_str, alpha_str in components:
+        if num_str:
+            # Append numbers as integers for correct numerical comparison
+            parsed_key.append(int(num_str))
+        elif alpha_str:
+            # Append letter sequences as strings for lexicographical comparison
+            parsed_key.append(alpha_str)
+
+    return tuple(parsed_key)
+
 def version_order(versions: list, descending=True) -> list:
     """
     Order the versions in the list (descending by default)
     """
-    from packaging.version import Version
-
-    return sorted(versions, key=Version, reverse=descending)
+    return sorted(versions, key=parse_version_key, reverse=descending)
 
 def get_dependencies(app: str, version: str) -> list:
     """
