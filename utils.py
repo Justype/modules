@@ -47,7 +47,7 @@ def main():
     elif args.list_upgradable:
         list_upgradable()
     else:
-        list_all(include_whatis=True, include_versions=True, include_dependencies=True)
+        list_all(include_whatis=True, include_versions=True, include_dependencies=False)
 
 def get_status()-> dict:
     """
