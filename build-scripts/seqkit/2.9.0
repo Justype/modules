@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#WHATIS:FASTA_Q file manipulation toolkit
+#WHATIS:FASTA/Q file manipulation toolkit
 
 #########################################################
 # Seqkit

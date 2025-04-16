@@ -24,6 +24,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations')
     parser.add_argument('-l', '--list-all', action='store_true', help='list all the app/versions and their status')
+    parser.add_argument('-lw', '--list-whatis', action='store_true', help='list the whatis of all apps')
     parser.add_argument('-lm', '--list-module', dest='name', help='list all the versions and dependencies from given name')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
     parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
@@ -33,6 +34,8 @@ def main():
 
     if args.list_all:
         list_all()
+    elif args.list_whatis:
+        list_all(include_whatis=True, include_versions=False, include_dependencies=False)
     elif args.name is not None:
         list_dep(args.name)
     elif args.list_newest:
@@ -44,9 +47,7 @@ def main():
     elif args.list_upgradable:
         list_upgradable()
     else:
-        list_all()
-        print("\n")
-        parser.print_help()
+        list_all(include_whatis=True, include_versions=True, include_dependencies=True)
 
 def get_status()-> dict:
     """
@@ -97,6 +98,23 @@ def version_order(versions: list, descending=True) -> list:
     Order the versions in the list (descending by default)
     """
     return sorted(versions, key=parse_version_key, reverse=descending)
+
+def get_whatis(app: str, version: str) -> str:
+    """
+    Get the whatis of the app and version
+
+    Args:
+        app (str): The app name
+        version (str): The version of the app
+
+    Returns:
+        str: The whatis of the app and version
+    """
+    with open(f'build-scripts/{app}/{version}') as f:
+        for line in f:
+            if line.startswith('#WHATIS'):
+                return line.strip().split(":")[1]
+    return None
 
 def get_dependencies(app: str, version: str) -> list:
     """
@@ -184,7 +202,7 @@ def resolve_dependencies(apps: list, dependencies: dict) -> list:
     
     return resolved
 
-def print_status(status: dict):
+def print_status(status: dict, include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True):
     """
     Print the status of the apps and versions
     """
@@ -197,18 +215,28 @@ def print_status(status: dict):
     # each line is an app
     for app in sorted(status.keys()):
         print(f'{Colorize.yellow(app.ljust(max_app_len))}:', end=' ')
-        # order the versions
-        versions = version_order(status[app].keys())
-        # each column is a version
-        for version in versions:
-            print(f'{("("+Colorize.blue("*")+")") if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
-        # print dependencies
-        # dependencies = get_dependencies_name(app, versions[0])
-        dependency_versions = get_dependencies(app, versions[0])
-        dependencies = [f'{Colorize.yellow(dep[0])}/{dep[1]}' for dep in dependency_versions]
-        print()
-        if dependencies:
-            print(' '*max_app_len, f'     └─ {Colorize.blue("D")}', ", ".join(dependencies))
+        if include_whatis:
+            whatis = get_whatis(app, next(iter(status[app].keys())))
+            if whatis:
+                print(whatis)
+            else:
+                print()
+        if include_versions:
+            if include_whatis and whatis:
+                print(' '*max_app_len, end='  ')
+            # order the versions
+            versions = version_order(status[app].keys())
+            # each column is a version
+            for version in versions:
+                print(f'{("("+Colorize.blue("*")+")") if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
+            print()
+            # print dependencies
+            # dependencies = get_dependencies_name(app, versions[0])
+            if include_dependencies:
+                dependency_versions = get_dependencies(app, versions[0])
+                dependencies = [f'{Colorize.yellow(dep[0])}/{dep[1]}' for dep in dependency_versions]
+                if dependencies:
+                    print(' '*max_app_len, f'     └─ {Colorize.blue("D")}', ", ".join(dependencies))
 
 def list_dep(app: str):
     """
@@ -226,16 +254,16 @@ def list_dep(app: str):
             exit(1)
         status = {app: status[app] for app in [app]}
 
-    print_status(status)
+    print_status(status, include_whatis=True, include_versions=True, include_dependencies=True)
 
 #region All
-def list_all():
+def list_all(include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True):
     """
     Check the version diff between build-scripts and installed apps
     """
     status = get_status()
 
-    print_status(status)
+    print_status(status, include_whatis=include_whatis, include_versions=include_versions, include_dependencies=include_dependencies)
 
 def delete_all():
     """

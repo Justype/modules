@@ -19,12 +19,15 @@ options:
 
 Utility script for modules overview and batch operations.
 
+If run with no arguments, it will list all the modules, whatis, and their status.
+
 ```
-usage: utils.py [-h] [-l] [-lm NAME] [-lu] [-ln] [-i] [-d]
+usage: utils.py [-h] [-l] [-lw] [-lm NAME] [-lu] [-ln] [-i] [-d]
 
 optional arguments:
   -h, --help             show this help message and exit
   -l, --list-all         list all the app/versions and their status
+  -lw, --list-whatis     list the whatis of all apps
   -lm NAME, --list-module NAME
                          list all the versions and dependencies from given name
   -lu, --list-upgradable list upgradable apps
