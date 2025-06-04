@@ -5,7 +5,7 @@
 # Cell Ranger build script
 # - https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 # - NOTE: Cell Ranger link only works for one day. 
-# - Please update the link at line 17.
+# - Please update the link at line 17. And Comment out line 19.
 #########################################################
 
 install_app() {
@@ -15,6 +15,8 @@ install_app() {
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     url="https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz"
+    print_stderr "10X links only valid for one day. Please enter the download link: "
+    read -r url
     run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
