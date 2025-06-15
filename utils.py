@@ -28,26 +28,29 @@ def main():
     parser.add_argument('-lm', '--list-module', dest='name', help='list all the versions and dependencies from given name')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
     parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
+    parser.add_argument('-li', '--list-installed', action='store_true', help='list installed apps with versions')
     parser.add_argument('-i', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
     args = parser.parse_args()
 
     if args.list_all:
-        list_all()
+        list_modules()
     elif args.list_whatis:
-        list_all(include_whatis=True, include_versions=False, include_dependencies=False)
+        list_modules(include_whatis=True, include_versions=False, include_dependencies=False)
     elif args.name is not None:
         list_dep(args.name)
+    elif args.list_upgradable:
+        list_upgradable()
     elif args.list_newest:
         list_newest()
+    elif args.list_installed:
+        list_modules(include_whatis=True, include_versions=True, include_dependencies=False, installed_only=True)
     elif args.install_newest:
         install_newest()
     elif args.delete_all:
         delete_all()
-    elif args.list_upgradable:
-        list_upgradable()
     else:
-        list_all(include_whatis=True, include_versions=True, include_dependencies=False)
+        list_modules(include_whatis=True, include_versions=True, include_dependencies=False)
 
 def get_status()-> dict:
     """
@@ -202,7 +205,7 @@ def resolve_dependencies(apps: list, dependencies: dict) -> list:
     
     return resolved
 
-def print_status(status: dict, include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True):
+def print_status(status: dict, include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True, installed_only: bool = False):
     """
     Print the status of the apps and versions
     """
@@ -214,6 +217,9 @@ def print_status(status: dict, include_whatis: bool = False, include_versions: b
     print('App'.ljust(max_app_len), f' ({Colorize.blue("*")}) installed ( ) not installed {Colorize.blue("D")} dependencies')
     # each line is an app
     for app in sorted(status.keys()):
+        if installed_only and not any(status[app].values()): # skip apps with no installed versions
+            continue
+
         print(f'{Colorize.yellow(app.ljust(max_app_len))}:', end=' ')
         if include_whatis:
             whatis = get_whatis(app, next(iter(status[app].keys())))
@@ -225,7 +231,10 @@ def print_status(status: dict, include_whatis: bool = False, include_versions: b
             if include_whatis and whatis:
                 print(' '*max_app_len, end='  ')
             # order the versions
-            versions = version_order(status[app].keys())
+            if installed_only:
+                versions = version_order([version for version in status[app] if status[app][version]])
+            else:
+                versions = version_order(status[app].keys())
             # each column is a version
             for version in versions:
                 print(f'{("("+Colorize.blue("*")+")") if status[app][version] else "( )"} {version.ljust(max_version_len)}', end='  ')
@@ -257,13 +266,13 @@ def list_dep(app: str):
     print_status(status, include_whatis=True, include_versions=True, include_dependencies=True)
 
 #region All
-def list_all(include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True):
+def list_modules(include_whatis: bool = False, include_versions: bool = True, include_dependencies: bool = True, installed_only: bool = False):
     """
     Check the version diff between build-scripts and installed apps
     """
     status = get_status()
 
-    print_status(status, include_whatis=include_whatis, include_versions=include_versions, include_dependencies=include_dependencies)
+    print_status(status, include_whatis, include_versions, include_dependencies, installed_only)
 
 def delete_all():
     """

@@ -3,11 +3,9 @@
 #WHATIS:Template for building a module
 
 #########################################################
-# Template for building a module
-# - You can write your own scripts in function install_app() at line 36
-# - Add dependencies in the header with #DEPENDENCY:app_name/version
-#    - version can be specific or with * wildcard
-#    - e.g. jdk/21.0.5 or jdk/21* or jdk/*
+# Template for building a module (Python 3.12 package)
+# - If you only need the target app/package, you only need to change the WHATIS line.
+#   My script will automatically set the app_name and version variables from file path.
 #########################################################
 
 install_app() {
