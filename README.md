@@ -58,7 +58,7 @@ Most of my scripts are **version independent**. It will automatically download t
 
 For example, `sra-tools` version `3.2.1` comes out. `ln -s build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
 
-#### Do use `sbatch` to install
+#### Do not use `sbatch` to install
 
 - My script use its name and path to find version and installation path.
 - The `sbatch` will save the script into its own directory:
