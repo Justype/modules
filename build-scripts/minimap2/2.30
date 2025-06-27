@@ -1,0 +1,58 @@
+#!/usr/bin/bash
+#WHATIS:Long-read aligner
+
+#########################################################
+# Minimap2
+# - https://github.com/lh3/minimap2
+# - Long-read aligner
+#########################################################
+
+install_app() {
+    mkdir -p "$target_dir/bin"       # modules/apps/name/version/bin
+    mkdir -p "$tmp_dir"          # tmp directory
+    cd "$tmp_dir"
+
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    url="https://github.com/lh3/minimap2/releases/download/v${version}/minimap2-${version}_x64-linux.tar.bz2"
+    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir/bin" --strip-components=1
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
+    
+    # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
+    # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
+    # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
+    return
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         name     of the app
+# - version:          version  of the app
+# - app_name_version: name/version
+
+# - target_base_dir:  modules/apps/name
+# - target_dir:       modules/apps/name/version
+# - script_path:      modules/modulefiles/name/version
+# - tmp_dir:          tmp directory (modules/tmp/name/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@
