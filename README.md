@@ -33,18 +33,29 @@ Utility script for modules overview and batch operations.
 If run with no arguments, it will list all the modules, whatis, and their status.
 
 ```
-usage: utils.py [-h] [-l] [-lw] [-lm NAME] [-lu] [-ln] [-i] [-d]
+usage: utils.py [-h] [-s NAME] [-l] [-lw] [-lu] [-ln] [-li] [-in] [-d] [-c NEW_NAME_VERSION] [-t TEMPLATE]
 
-optional arguments:
-  -h, --help             show this help message and exit
-  -l, --list-all         list all the app/versions and their status
-  -lw, --list-whatis     list the whatis of all apps
-  -lm NAME, --list-module NAME
-                         list all the versions and dependencies from given name
-  -lu, --list-upgradable list upgradable apps
-  -ln, --list-newest     list apps with newer version (even if not installed)
-  -i, --install-newest   install newest version of each app
-  -d, --delete-all       delete all installed apps
+Utility script for modules overview and batch operations
+You can use ./build-scripts/app/version -h for help on individual build scripts
+
+options:
+  -h, --help            show this help message and exit
+  -s NAME, --search NAME
+                        search for an app and whatis by name
+  -l, --list-all        list all the app/versions and their status
+  -lw, --list-whatis    list the whatis of all apps
+  -lu, --list-upgradable
+                        list upgradable apps
+  -ln, --list-newest    list apps with newer version (even if not installed)
+  -li, --list-installed
+                        list installed apps with versions
+  -in, --install-newest
+                        install newest version of each app
+  -d, --delete-all      delete all installed apps
+  -c NEW_NAME_VERSION, --create NEW_NAME_VERSION
+                        create a new build script from existing template
+  -t TEMPLATE, --template TEMPLATE
+                        use template from 0-template (must use with -c)
 ```
 
 ## How to Install/Remove Custom Modules

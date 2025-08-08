@@ -22,15 +22,17 @@ def main():
         exit(1)
 
     import argparse
-    parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations')
+    parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations\nYou can use ./build-scripts/app/version -h for help on individual build scripts', formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-s', '--search', dest='name', help='search for an app and whatis by name')
     parser.add_argument('-l', '--list-all', action='store_true', help='list all the app/versions and their status')
     parser.add_argument('-lw', '--list-whatis', action='store_true', help='list the whatis of all apps')
-    parser.add_argument('-lm', '--list-module', dest='name', help='list all the versions and dependencies from given name')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
     parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
     parser.add_argument('-li', '--list-installed', action='store_true', help='list installed apps with versions')
-    parser.add_argument('-i', '--install-newest', action='store_true', help='install newest version of each app')
+    parser.add_argument('-in', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
+    parser.add_argument('-c', '--create', dest='new_name_version', help='create a new build script from existing template')
+    parser.add_argument('-t', '--template', dest='template', help='use template from 0-template (must use with -c)', default='normal')
     args = parser.parse_args()
 
     if args.list_all:
@@ -38,7 +40,7 @@ def main():
     elif args.list_whatis:
         list_modules(include_whatis=True, include_versions=False, include_dependencies=False)
     elif args.name is not None:
-        list_dep(args.name)
+        search_app(args.name)
     elif args.list_upgradable:
         list_upgradable()
     elif args.list_newest:
@@ -49,6 +51,8 @@ def main():
         install_newest()
     elif args.delete_all:
         delete_all()
+    elif args.new_name_version:
+        create_new_app(args.new_name_version, args.template)
     else:
         list_modules(include_whatis=True, include_versions=True, include_dependencies=False)
 
@@ -247,21 +251,39 @@ def print_status(status: dict, include_whatis: bool = False, include_versions: b
                 if dependencies:
                     print(' '*max_app_len, f'     └─ {Colorize.blue("D")}', ", ".join(dependencies))
 
-def list_dep(app: str):
+def search_app(app: str):
     """
-    List the dependencies of the app
+    Use name or regex to search for an app in the build-scripts directory
     """
     status = get_status()
-    if "*" in app:
-        import re
-        re_app = re.compile("^" + app.replace("*", ".*") + "$")
-        apps = [app for app in status if re_app.match(app)]
-        status = {app: status[app] for app in apps}
-    else:
-        if app not in status:
+    # Skip empty status
+    status = {app: versions for app, versions in status.items() if versions}
+    app_whatis = {app: get_whatis(app, next(iter(status[app].keys()))) for app in status if status[app]}
+
+    if re.search(r'^[a-zA-Z0-9_\-]+$', app):
+        # If the app is a simple name, check if it is a substring of any app
+        # searching both app names and whatis
+        app_selected = [a for a in app_whatis if (app.lower() in a.lower()) or (app.lower() in app_whatis[a].lower())]
+
+        if not app_selected:
             print(f'{Colorize.red("Error")}: {app} not found')
             exit(1)
-        status = {app: status[app] for app in [app]}
+
+    else:
+        # If the app is a regex, use it to filter the apps
+        try:
+            # Compile the regex and search in app names and whatis
+            regex = re.compile(app, re.IGNORECASE)
+            app_selected = [a for a in app_whatis if regex.search(a) or regex.search(app_whatis[a])]
+        except re.error as e:
+            print(f'{Colorize.red("Error")}: Invalid regex {app} - {e}')
+            exit(1)
+
+        if not app_selected:
+            print(f'{Colorize.red("Error")}: No apps found matching {app}')
+            exit(1)
+
+    status = {app: status[app] for app in app_selected}
 
     print_status(status, include_whatis=True, include_versions=True, include_dependencies=True)
 
@@ -271,6 +293,8 @@ def list_modules(include_whatis: bool = False, include_versions: bool = True, in
     Check the version diff between build-scripts and installed apps
     """
     status = get_status()
+    # Skip empty status
+    status = {app: versions for app, versions in status.items() if versions}
 
     print_status(status, include_whatis, include_versions, include_dependencies, installed_only)
 
@@ -436,5 +460,65 @@ def list_upgradable():
     for app in sorted(upgradable_apps.keys()):
         print(f'{app.ljust(len_app)}: {upgradable_apps[app]}')
 
+def create_new_app(new_name_version: str, template: str = 'normal'):
+    """
+    Create a new build script from an existing template
+    """
+
+    if '/' not in new_name_version:
+        print(f'{Colorize.red("Error")}: Invalid new app name/version f{Colorize.yellow(new_name_version)}')
+        print('Please provide a valid app name and version in the format "name/version"')
+        exit(1)
+    new_name, new_version = new_name_version.split('/')
+    if not re.match(r'^[a-zA-Z0-9_\-]+$', new_name):
+        print(f'{Colorize.red("Error")}: Invalid app name {Colorize.yellow(new_name)}')
+        print('App names can only contain alphanumeric characters, underscores, and hyphens.')
+        exit(1)
+    if not re.match(r'^[a-zA-Z0-9_\-\.\+]+$', new_version):
+        print(f'{Colorize.red("Error")}: Invalid version {Colorize.yellow(new_version)}')
+        print('Version names can only contain alphanumeric characters, underscores, hyphens, dots, and plus signs.')
+        exit(1)
+
+    new_app_path = f'build-scripts/{new_name}/{new_version}'
+
+    if os.path.exists(new_app_path):
+        print(f'{Colorize.red("Error")}: {Colorize.yellow(new_app_path)} already exists')
+        print('Please choose a different name or version')
+        exit(1)
+
+    if not os.path.exists('build-scripts/0-template'):
+        print(f'{Colorize.red("Error")}: Template directory not found')
+        exit(1)
+    template_path = f'build-scripts/0-template/{template}_template'
+    if not os.path.exists(template_path):
+        print(f'{Colorize.red("Error")}: Template {template} not found')
+        print('Available templates are:')
+        template_list = os.listdir('build-scripts/0-template')
+        template_list = [t.replace('_template', '') for t in template_list if t.endswith('_template')]
+        for t in template_list:
+            print(f' - {t}')
+        exit(1)
+
+    # Create the new app directory if it doesn't exist
+    os.makedirs(os.path.dirname(new_app_path), exist_ok=True)
+
+    # If having a previous version of the app, use it as a template
+    pre_versions = os.listdir(f'build-scripts/{new_name}')
+    if pre_versions:
+        latest_version = version_order(pre_versions)[0]
+        template_path = f'build-scripts/{new_name}/{latest_version}'
+    
+    with open(template_path, 'r') as template_file, open(new_app_path, 'w') as new_file:
+        new_file.write(template_file.read())
+
+    # chmod +x to the new file
+    os.chmod(new_app_path, 0o775)
+
+    print(f'Created new build script: {Colorize.yellow(new_name_version)} using template {Colorize.blue(template_path)}')
+    print(f'Please edit the file {Colorize.blue(new_app_path)} to customize your app')
+
 if __name__ == '__main__':
     main()
+else:
+    print('This script is not meant to be imported. Please run it directly.')
+    exit(1)
