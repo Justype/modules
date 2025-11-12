@@ -5,18 +5,21 @@
 # Cell Ranger build script
 # - https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
 # - NOTE: Cell Ranger link only works for one day. 
-# - Please update the link at line 17. And Comment out line 19.
+# - Please update the link at line 17. Or you can enter it manually when prompted.
 #########################################################
 
 install_app() {
-    mkdir -p "$target_base_dir"  # modules/apps/name
+    mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    url="https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz"
-    print_stderr "10X links only valid for one day. Please enter the download link: "
-    read -r url
+    url='https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz'
+    # if the url do not contain the 'Expires' parameter, read -r url
+    if [[ "$url" != *"Expires="* ]]; then
+        print_stderr "10X links only valid for one day. Please enter the download link: "
+        read -r url
+    fi
     run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
@@ -60,7 +63,7 @@ run_command() {
     if [ $? -ne 0 ]; then
         print_stderr "${RED}ERROR${NC}: Command failed: $@"
         print_stderr "Link expired! Please get the download link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
-        print_stderr "And change the line 16"
+        print_stderr "And change the line 17"
         clean_up 1
         exit 1
     fi
