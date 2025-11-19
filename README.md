@@ -123,8 +123,9 @@ What does the script do?
 
 - [normal_template](build-scripts/0-template/normal_template)
 - [make_template](build-scripts/0-template/make_template)
-- [python27_template](build-scripts/0-template/python27_template)
-- [python312_template](build-scripts/0-template/python312_template)
+- [python27_template](build-scripts/0-template/py27_template)
+- [python311_template](build-scripts/0-template/py311_template)
+- [python312_template](build-scripts/0-template/py312_template)
 
 ### What you need to do to make your own installation script
 
@@ -196,9 +197,12 @@ In [picard](build-scripts/picard/), I created a custom modulefile `build-scripts
 
 How to set your own custom modulefile? see the next section.
 
-## How does modules work?
+## How does module work?
 
-You can config the environment variables in modulefile.
+You can config the environment variables in modulefile, using `setenv`, `prepend-path`, `append-path`, etc.
+
+- When you run `module load <app>/<version>`, it will set the environment variables defined in the modulefile.
+- When you run `module unload <app>/<version>`, it will unset the environment variables defined in the modulefile.
 
 ### Environment Modules
 
@@ -278,5 +282,5 @@ set name [file tail $abs_path]
 
 Where to store:
 
-- It should be stored in `somewhere/modulefiles/name/x.y.z` (file)
-- Target app is in `somewhere/apps/name/x.y.z/` (directory)
+- Module file should be stored as `somewhere/modulefiles/name/x.y.z` (file)
+- Its target app is under `somewhere/apps/name/x.y.z/` (directory)
