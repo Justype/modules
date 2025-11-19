@@ -45,9 +45,9 @@ if {[file isdirectory "$app_root/bin"]} {
 } elseif { [module-info mode] == "load" && ![info exists ::env(SLURM_JOB_ID)] } {
     puts stderr "WARNING: No bin directory found in $app_full_name"
 }
-if {[file isdirectory "$app_root/lib"]} {
-    prepend-path LD_LIBRARY_PATH $app_root/lib
-}
+# if {[file isdirectory "$app_root/lib"]} {
+#     prepend-path LD_LIBRARY_PATH $app_root/lib
+# }
 if {[file isdirectory "$app_root/share/man"]} {
     prepend-path MANPATH $app_root/share/man
 }

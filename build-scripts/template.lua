@@ -36,9 +36,9 @@ if (isDir(pathJoin(app_root, "bin"))) then
 elseif (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
     io.stderr:write("WARNING: No bin directory found in " .. app_full_name .. "\n")
 end
-if (isDir(pathJoin(app_root, "lib"))) then
-    prepend_path("LD_LIBRARY_PATH", pathJoin(app_root, "lib"))
-end
+-- if (isDir(pathJoin(app_root, "lib"))) then
+--     prepend_path("LD_LIBRARY_PATH", pathJoin(app_root, "lib"))
+-- end
 if (isDir(pathJoin(app_root, "share/man"))) then
     prepend_path("MANPATH", pathJoin(app_root, "share/man"))
 end
