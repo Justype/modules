@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #DEPENDENCY:python/3.12.8
-#WHATIS:Tabular data visualization tool (tsv, csv, sqlite, json, xlsx, hdf5)
+#WHATIS:vd: Tabular data visualization tool (tsv, csv, sqlite, json, xlsx, hdf5)
 
 #########################################################
 # Visidata
@@ -24,9 +24,8 @@ install_app() {
     # xml - lxml
     # yaml - pyyaml
     # hdf5 - h5py
-    run_command "$target_dir/bin/pip" install -q --no-cache-dir openpyxl xlrd lxml pyyaml h5py
-    # pandas and numpy
-    run_command "$target_dir/bin/pip" install -q --no-cache-dir pandas numpy
+    run_command "$target_dir/bin/pip" install -q --no-cache-dir openpyxl xlrd lxml pyyaml h5py \
+                pandas numpy
 }
 
 special_modulefiles() {
@@ -35,6 +34,11 @@ special_modulefiles() {
     print_stderr "Prepending \$app_root to ${BLUE}PYTHONPATH${NC} environment variable"
     echo "prepend-path PYTHONPATH \$app_root/lib/python3.12/site-packages" >> "${script_path}"
     echo 'prepend_path("PYTHONPATH", pathJoin(app_root, "lib", "python3.12", "site-packages"))' >> "${script_path}.lua"
+
+    print_stderr "Make sure system libtinfo is used instead of the one from venv"
+    cpu_arch=$(uname -m)
+    echo "setenv LD_PRELOAD /usr/lib/${cpu_arch}-linux-gnu/libtinfo.so.6" >> "${script_path}"
+    echo "setenv(\"LD_PRELOAD\", \"/usr/lib/${cpu_arch}-linux-gnu/libtinfo.so.6\")" >> "${script_path}.lua"
 }
 
 # Available variables:
