@@ -18,6 +18,10 @@ install_app() {
     flag_install_binary=false
     if [ "$(uname -m)" == "x86_64" ]; then
         distro=$(grep -E '^ID_LIKE=' /etc/os-release | cut -d= -f2 | tr -d '"')
+        # If ID_LIKE is not available, try ID
+        if [ -z "$distro" ]; then
+            distro=$(grep -E '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"')
+        fi
         if [ "$distro" == "fedora" ]; then
             print_stderr "This is a x64 Fedora/RedHat based machine. Install binary directly."
             url="https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/${version}/sratoolkit.${version}-centos_linux64.tar.gz"
