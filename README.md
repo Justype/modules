@@ -33,29 +33,22 @@ Utility script for modules overview and batch operations.
 If run with no arguments, it will list all the modules, whatis, and their status.
 
 ```
-usage: utils.py [-h] [-s NAME] [-l] [-lw] [-lu] [-ln] [-li] [-in] [-d] [-c NEW_NAME_VERSION] [-t TEMPLATE]
+usage: utils.py [-h] [-s NAME] [-la] [-lw] [-lu] [-ln] [-li] [-in] [-d] [-S]
 
 Utility script for modules overview and batch operations
 You can use ./build-scripts/app/version -h for help on individual build scripts
 
 options:
   -h, --help            show this help message and exit
-  -s NAME, --search NAME
-                        search for an app and whatis by name
-  -l, --list-all        list all the app/versions and their status
-  -lw, --list-whatis    list the whatis of all apps
-  -lu, --list-upgradable
-                        list upgradable apps
-  -ln, --list-newest    list apps with newer version (even if not installed)
-  -li, --list-installed
-                        list installed apps with versions
-  -in, --install-newest
-                        install newest version of each app
-  -d, --delete-all      delete all installed apps
-  -c NEW_NAME_VERSION, --create NEW_NAME_VERSION
-                        create a new build script from existing template
-  -t TEMPLATE, --template TEMPLATE
-                        use template from 0-template (must use with -c)
+  -s NAME, --search NAME search for an app and whatis by name
+  -la, --list-all        list all the app/versions and their status
+  -lw, --list-whatis     list apps with whatis only
+  -lu, --list-upgradable list upgradable apps
+  -ln, --list-newer      list apps with newer version (even if not installed)
+  -li, --list-installed  list installed apps with versions
+  -in, --install-newest  install newest version of each app
+  -d, --delete-all       delete all installed apps
+  -S, --set-latest       set the latest version as default for all installed apps
 ```
 
 ## How to Install/Remove Custom Modules
@@ -65,9 +58,11 @@ options:
 1. go into `modules` folder
 2. run build scripts with `-i`, e.g. `./build-scripts/sra-tools/3.1.1 -i`
 
-Most of my scripts are **version independent**. It will automatically download the same version as the file name.  If a new version is available, simply create a symlink to the old one.
+Most of my scripts are **version independent**. It will automatically download the same version as the file name. Just copy the the older version script to a new version and run it.
 
-For example, `sra-tools` version `3.2.1` comes out. `ln -s build-scripts/sra-tools/3.1.1 build-scripts/sra-tools/3.2.1`. Then run that script.
+But when the download link is changed or the installation procedure is changed, you may need to edit the script.
+
+For example, [sra-tools/3.2.1](build-scripts/sra-tools/3.2.1) has different download link for the previous version [3.1.1](build-scripts/sra-tools/3.1.1). They changed the compiling machine from centOS to alma.
 
 #### Do not use `sbatch` to install
 

@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-import time
 import re
 
 class Colorize:
@@ -24,33 +23,36 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description='Utility script for modules overview and batch operations\nYou can use ./build-scripts/app/version -h for help on individual build scripts', formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-s', '--search', dest='name', help='search for an app and whatis by name')
-    parser.add_argument('-l', '--list-all', action='store_true', help='list all the app/versions and their status')
-    parser.add_argument('-lw', '--list-whatis', action='store_true', help='list the whatis of all apps')
+    parser.add_argument('-la', '--list-all', action='store_true', help='list all the app/versions and their status')
+    parser.add_argument('-lw', '--list-whatis', action='store_true', help='list apps with whatis only')
     parser.add_argument('-lu', '--list-upgradable', action='store_true', help='list upgradable apps')
-    parser.add_argument('-ln', '--list-newest', action='store_true', help='list apps with newer version (even if not installed)')
+    parser.add_argument('-ln', '--list-newer', action='store_true', help='list apps with newer version (even if not installed)')
     parser.add_argument('-li', '--list-installed', action='store_true', help='list installed apps with versions')
     parser.add_argument('-in', '--install-newest', action='store_true', help='install newest version of each app')
     parser.add_argument('-d', '--delete-all', action='store_true', help='delete all installed apps')
-    parser.add_argument('-c', '--create', dest='new_name_version', help='create a new build script from existing template')
+    parser.add_argument('-S', '--set-latest', action='store_true', help='set the latest version as default for all installed apps')
+    parser.add_argument('-c', '--create', dest='new_name_version', help='create a new build script from existing template (e.g. -c samtools/1.22)')
     parser.add_argument('-t', '--template', dest='template', help='use template from 0-template (must use with -c)', default='normal')
     args = parser.parse_args()
 
     if args.list_all:
-        list_modules()
+        list_modules(include_whatis=True, include_versions=True, include_dependencies=True)
     elif args.list_whatis:
         list_modules(include_whatis=True, include_versions=False, include_dependencies=False)
     elif args.name is not None:
         search_app(args.name)
     elif args.list_upgradable:
         list_upgradable()
-    elif args.list_newest:
-        list_newest()
+    elif args.list_newer:
+        list_newer()
     elif args.list_installed:
         list_modules(include_whatis=True, include_versions=True, include_dependencies=False, installed_only=True)
     elif args.install_newest:
         install_newest()
     elif args.delete_all:
         delete_all()
+    elif args.set_latest:
+        set_latest()
     elif args.new_name_version:
         create_new_app(args.new_name_version, args.template)
     else:
@@ -66,6 +68,8 @@ def get_status()-> dict:
     status = {}
 
     for app in os.listdir('build-scripts'):
+        if app.startswith('ref-'): # skip genome references
+            continue
         if os.path.isdir(os.path.join('build-scripts', app)) and app != "0-template":
             status[app] = {}
             for version in os.listdir(os.path.join('build-scripts', app)):
@@ -142,7 +146,7 @@ def get_dependencies(app: str, version: str) -> list:
                 dependencies.append(resolve_app_version(name, version))
     return dependencies
 
-def resolve_app_version(app: str, version_match: str) -> (str, str):
+def resolve_app_version(app: str, version_match: str) -> tuple[str, str | None]:
     """
     Resolve the app and version from the app and version_match
 
@@ -151,7 +155,7 @@ def resolve_app_version(app: str, version_match: str) -> (str, str):
         version_match (str): The version match
 
     Returns:
-        (str, str): The app and version
+        tuple[str, str | None]: The app and version (second element may be None if not found)
     """
     if "*" not in version_match:
         return app, version_match
@@ -355,6 +359,37 @@ def delete_all():
         print('Failed to delete:', ", ".join(sorted(failed_apps)))
 #endregion
 
+def set_latest():
+    status = get_status()
+    status = {app: versions for app, versions in status.items() if versions}
+
+    installed_apps = {} # only apps with installed versions
+    for app in status:
+        for version in status[app]:
+            if status[app][version]:
+                if app not in installed_apps:
+                    installed_apps[app] = []
+                installed_apps[app].append(version)
+
+    success_apps = []
+    failed_apps = []
+    for app in installed_apps:
+        versions = version_order(status[app].keys())
+        latest_version = versions[0]
+        result = subprocess.run(
+            [f'./build-scripts/{app}/{latest_version}', '-s'], # -s will set that version as default
+            text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    
+        if result.returncode == 0:
+            success_apps.append(f"{Colorize.yellow(app)}/{latest_version}")
+        else:
+            failed_apps.append(f"{Colorize.yellow(app)}/{latest_version}")
+    
+    if success_apps:
+        print(f'{Colorize.blue("Successfully")} set latest version as default for:', ", ".join(sorted(success_apps)))
+    if failed_apps:
+        print(f'{Colorize.red("Failed")} to set latest version as default for:', ", ".join(sorted(failed_apps)))
+
 def get_newer_versions(status: dict) -> dict:
     """
     Get the apps and versions that have a newer version in build-scripts
@@ -372,7 +407,7 @@ def get_newer_versions(status: dict) -> dict:
             newer_versions[app] = versions[0]
     return newer_versions
 
-def list_newest():
+def list_newer():
     """
     List the apps that have a newer version in build-scripts
     """
