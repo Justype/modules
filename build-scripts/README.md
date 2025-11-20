@@ -14,6 +14,48 @@ There are two similar environment-control softwares: [Environment Modules](https
   - `module unload cellranger/8.0.1`
   - `module purge` unload all modules
 
+## Genome FASTA/GTF and Indexes
+
+The files (FASTA, GTF, indexes, etc.) for genome references are under `ref-<genome_assembly_version>` folders, e.g., `ref-hg19`, `ref-hg38`, `ref-mm10`, `ref-mm39`, etc.
+
+```
+build-scripts/ref-grch38/
+├── cellranger-2024-A
+├── fasta-gencode
+├── gtf-gencode47
+├── star-gencode47-101
+├── template
+└── template.lua
+```
+
+And the modulefiles are under `modulefiles/ref-<genome_assembly_version>` folders. They will be modified to set the env variables to point to the files. e.g. `CELLRANGER_REF_DIR`, `STAR_INDEX_DIR`, `GENOME_FASTA`, etc.
+
+When loading the genome reference modulefile, the alignment or related tools will not be loaded automatically. You need to load them separately.
+
+And when loading the reference modulefile, the env variables will be printed when using the terminal.
+
+```
+$ module load ref-grch38/cellranger-2024-A
+[2025-11-19 15:33:35] Loading module ref-grch38/cellranger-2024-A
+  env CELLRANGER_REF_DIR set to /opt/modules/apps/ref-grch38/cellranger-2024-A
+  env GENOME_FASTA set to /opt/modules/apps/ref-grch38/cellranger-2024-A/fasta/genome.fa
+  env GENOME_FASTA_FAI set to /opt/modules/apps/ref-grch38/cellranger-2024-A/fasta/genome.fa.fai
+  env ANNOTATION_GTF_GZ set to /opt/modules/apps/ref-grch38/cellranger-2024-A/genes/genes.gtf.gz
+  env STAR_INDEX_DIR set to /opt/modules/apps/ref-grch38/cellranger-2024-A/star
+```
+
+Then you can use the env variables in your analysis pipelines.
+
+```bash
+module load cellranger/9.0.1
+module load ref-grch38/cellranger-2024-A
+
+cellranger count \
+  --id=sample1 \ 
+  --transcriptome=$CELLRANGER_REF_DIR \ 
+  ...
+```
+
 ## BCFtools
 
 [BCFtools Howtos](https://samtools.github.io/bcftools/howtos/index.html)
@@ -60,6 +102,6 @@ According to [Illumina instruction](https://help.ora.illumina.com/product-guides
 
 [Picard](https://broadinstitute.github.io/picard/) is a `jar` not a program. Set `PICARD` env to the path of `jar`. And use `alias picard='java -jar $PICARD'` to set `picard` alias.
 
-# Strelka2 Small Variant Caller
+## Strelka2 Small Variant Caller
 
 [Strelka2](https://github.com/Illumina/strelka) use Python2.

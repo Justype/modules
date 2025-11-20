@@ -1,0 +1,95 @@
+#!/usr/bin/bash
+#DEPENDENCY:samtools/*
+#WHATIS:GRCm39 reference genome FASTA
+
+#########################################################
+# GRCm39 reference genome FASTA
+# - https://www.gencodegenes.org/mouse/
+#########################################################
+
+gencode_version="M36"
+
+install_app() {
+    module load samtools
+
+    # mkdir -p "$target_base_dir"  # modules/apps/name
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    cd "$target_dir"
+    url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_${gencode_version}/gencode.v${gencode_version}.transcripts.fa.gz"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    wget -nv -O "gencode.v${gencode_version}.transcripts.fa.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    gunzip "gencode.v${gencode_version}.transcripts.fa.gz"
+
+    print_stderr "Indexing ${YELLOW}${app_name_version}${NC} with samtools faidx"
+    samtools faidx "gencode.v${gencode_version}.transcripts.fa"
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    remove_default_dependencies "samtools"
+    
+    # add custom environment variables and functions to modulefile
+    cat << EOF >> "${script_path}"
+set transcript_fasta \$ref_root/gencode.v${gencode_version}.transcripts.fa
+set transcript_fasta_fai \$ref_root/gencode.v${gencode_version}.transcripts.fa.fai
+setenv TRANSCRIPT_FASTA \$transcript_fasta
+setenv TRANSCRIPT_FASTA_FAI \$transcript_fasta_fai
+
+if { [module-info mode] == "load" } {
+    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
+    # only display message when in terminal
+    if {[info exists env(TERM)] && \$env(TERM) != "dumb"} {
+        puts stderr "Available environment variables:"
+        puts stderr "  TRANSCRIPT_FASTA       (transcript fasta file)"
+        puts stderr "  TRANSCRIPT_FASTA_FAI   (transcript fasta fai index)"
+    }
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local transcript_fasta = pathJoin(ref_root, "gencode.v${gencode_version}.transcripts.fa")
+local transcript_fasta_fai = pathJoin(ref_root, "gencode.v${gencode_version}.transcripts.fa.fai")
+setenv("TRANSCRIPT_FASTA", transcript_fasta)
+setenv("TRANSCRIPT_FASTA_FAI", transcript_fasta_fai)
+
+if (mode() == "load") then
+    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
+    -- only display message when in terminal
+    if os.getenv("TERM") and os.getenv("TERM") ~= "dumb" then
+        io.stderr:write("Available environment variables:\n")
+        io.stderr:write("  TRANSCRIPT_FASTA       (transcript fasta file)\n")
+        io.stderr:write("  TRANSCRIPT_FASTA_FAI   (transcript fasta fai index)\n")
+    end
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         name     of the app
+# - version:          version  of the app
+# - app_name_version: name/version
+
+# - target_base_dir:  modules/apps/name
+# - target_dir:       modules/apps/name/version
+# - script_path:      modules/modulefiles/name/version
+# - tmp_dir:          tmp directory (modules/tmp/name/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@
