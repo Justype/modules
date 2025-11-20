@@ -15,9 +15,9 @@ install_app() {
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     ## Add your download link here
     url="https://github.com/PacificBiosciences/IsoSeq/releases/download/v${version}/isoseq"
-    run_command wget -nv -O "${target_dir}/bin/${app_name}" "$url"
+    wget -nv -O "${target_dir}/bin/${app_name}" "$url"
 
-    run_command chmod +x "${target_dir}/bin/${app_name}"
+    chmod +x "${target_dir}/bin/${app_name}"
 }
 
 special_modulefiles() {
@@ -27,7 +27,7 @@ special_modulefiles() {
     # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
     # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
     # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
-    return
+    return 0
 }
 
 # Available variables:

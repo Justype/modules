@@ -20,7 +20,7 @@ install_app() {
         print_stderr "10X links only valid for one day. Please enter the download link: "
         read -r url
     fi
-    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+    wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
@@ -29,7 +29,7 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 # Available variables:
@@ -57,15 +57,9 @@ if ! [ -d build-scripts ]; then
 fi
 
 source "build-scripts/common.sh"
-# Overwrite the run_command function for better prompt
-run_command() {
-    sub_shell $@
-    if [ $? -ne 0 ]; then
-        print_stderr "${RED}ERROR${NC}: Command failed: $@"
-        print_stderr "Link expired! Please get the download link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
-        print_stderr "And change the line 17"
-        clean_up 1
-        exit 1
-    fi
+print_error_message() {
+    print_stderr "Link expired! Please get the download link from https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
+    print_stderr "And change the line 17"
+    return 0
 }
 main $@

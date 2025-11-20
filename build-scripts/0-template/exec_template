@@ -12,9 +12,9 @@ install_app() {
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     ## Add your download link here
     url="" # e.g. https://github.com/PacificBiosciences/skera/releases/download/v${version}/skera
-    run_command wget -nv -O "${target_dir}/bin/${app_name}" "$url"
+    wget -nv -O "${target_dir}/bin/${app_name}" "$url"
 
-    run_command chmod +x "${target_dir}/bin/${app_name}"
+    chmod +x "${target_dir}/bin/${app_name}"
 }
 
 special_modulefiles() {
@@ -24,7 +24,10 @@ special_modulefiles() {
     # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
     # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
     # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
-    return
+
+    # You can use remove_default_dependencies() function to remove unwanted dependencies
+    # e.g. remove_default_dependencies "samtools"
+    return 0
 }
 
 # Available variables:

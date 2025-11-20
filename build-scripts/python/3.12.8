@@ -21,7 +21,7 @@ install_app() {
     install_annaconda_package bzip2 1.0.8
     install_annaconda_package expat 2.7.1
     install_annaconda_package libffi 3.4.4
-    install_annaconda_package libgcc-ng 12.2.0 # Linux only
+    install_annaconda_package libgcc-ng 11.2.0 # Linux only
     install_annaconda_package libuuid 1.41.5
     install_annaconda_package ncurses 6.4
     install_annaconda_package openssl 3.0.16
@@ -41,14 +41,14 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 install_annaconda_package() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url $1 $2)
     if [[ $url == "https:" ]]; then return 1; fi
-    run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
+    wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
 
@@ -56,7 +56,7 @@ install_annaconda_package_for_py312() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url_for_py_version $1 312 $2)
     if [[ $url == "https:" ]]; then return 1; fi
-    run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
+    wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
 

@@ -12,17 +12,15 @@ install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"          # tmp directory
     cd "$tmp_dir"
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
+
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC} source code"
     ## Add your download link here
     url="https://github.com/deweylab/RSEM/archive/refs/tags/v1.3.3.tar.gz"
-    run_command wget -nv -O "${app_name}_${version}.tar.gz" "$url"
+    wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Building ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.gz" --strip-components=1
-    run_command make -j "$ncpu"
+    make -j "$ncpu"
     make install prefix="$target_dir"
 }
 
@@ -33,7 +31,7 @@ special_modulefiles() {
     # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
     # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
     # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
-    return
+    return 0
 }
 
 # Available variables:

@@ -9,13 +9,10 @@
 #########################################################
 
 install_app() {
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
     module load python/2.7.18
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
     virtualenv "$target_dir"
-    run_command "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
+    "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
 }
 
 special_modulefiles() {
@@ -24,6 +21,7 @@ special_modulefiles() {
     print_stderr "Prepending \$app_root to ${BLUE}PYTHONPATH${NC} environment variable"
     echo "prepend-path PYTHONPATH \$app_root/lib/python2.7/site-packages" >> "${script_path}"
     echo 'prepend_path("PYTHONPATH", pathJoin(app_root, "lib", "python2.7", "site-packages"))' >> "${script_path}.lua"
+    return 0
 }
 
 # Available variables:

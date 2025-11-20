@@ -1,6 +1,6 @@
 #!/usr/bin/bash
-#DEPENDENCY:jdk/1.8*
-#DEPENDENCY:ant/*
+#DEPENDENCY:jdk/1.8.0
+#DEPENDENCY:ant/1.10.15
 #WHATIS:Quality control for sam/bam (alignment) files
 
 #########################################################
@@ -20,7 +20,7 @@ install_app() {
     if [ -d BamQC ]; then
         print_stderr "BamQC directory already exists. Skipping git clone."
     else
-        run_command git clone https://github.com/s-andrews/BamQC
+        git clone https://github.com/s-andrews/BamQC
     fi
 
     print_stderr "Loading ${YELLOW}jdk/1.8${NC} and ${YELLOW}ant${NC} modules"
@@ -30,7 +30,7 @@ install_app() {
     print_stderr "Building ${YELLOW}${app_name_version}${NC}"
     cd BamQC
     git checkout 4b3d20f
-    run_command ant
+    ant
     chmod +x bin/bamqc
 
     print_stderr "Copying ${YELLOW}${app_name_version}${NC} to ${YELLOW}${target_dir}${NC}"

@@ -14,21 +14,21 @@ install_app() {
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC} source code"
     url="https://github.com/samtools/htslib/releases/download/${version}/htslib-${version}.tar.bz2"
-    run_command wget -nv -O ${app_name}_${version}.tar.bz2 "$url"
+    wget -nv -O ${app_name}_${version}.tar.bz2 "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf ${app_name}_${version}.tar.bz2 --strip-components=1
 
     print_stderr "Building ${YELLOW}${app_name_version}${NC}"
     ./configure --prefix="$target_dir"
-    run_command make -j $ncpu
+    make -j $ncpu
     make install
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 # Available variables:

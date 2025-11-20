@@ -16,13 +16,13 @@ install_app() {
     
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${version}.zip"
-    run_command wget -nv -O "${app_name}_${version}.zip" "$url"
+    wget -nv -O "${app_name}_${version}.zip" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    run_command unzip -q "${app_name}_${version}.zip"
+    unzip -q "${app_name}_${version}.zip"
 
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} to ${BLUE}${target_dir}${NC}"
-    run_command ./aws/install -i "$target_dir" -b "$target_dir/bin"
+    ./aws/install -i "$target_dir" -b "$target_dir/bin"
 }
 
 special_modulefiles() {
@@ -32,7 +32,7 @@ special_modulefiles() {
     # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
     # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
     # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
-    return
+    return 0
 }
 
 # Available variables:

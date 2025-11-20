@@ -29,7 +29,7 @@ Since the link from 10X is only valid for **one** day, you will need to change t
 In `cellranger/x.y.z` line 127:
 
 ```bash
-run_command wget -O cellranger-9.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz"
+wget -O cellranger-9.0.0.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.0.tar.gz"
 ```
 
 Go to 10X and get the link: https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions

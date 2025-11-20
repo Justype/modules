@@ -11,13 +11,10 @@
 #########################################################
 
 install_app() {
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
     module load python/3.12.8
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
     python3 -m venv "$target_dir"
-    run_command "$target_dir/bin/pip" install -q --no-cache-dir RSeQC==$version
+    "$target_dir/bin/pip" install -q --no-cache-dir RSeQC==$version
 }
 
 special_modulefiles() {

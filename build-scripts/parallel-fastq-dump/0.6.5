@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 #DEPENDENCY:python/3.12.8
 #DEPENDENCY:sra-tools/*
-#WHATIS: A parallel version of fastq-dump
+#WHATIS:A parallel version of fastq-dump
 
 #########################################################
 # parallel-fastq-dump build script
@@ -13,13 +13,10 @@
 #########################################################
 
 install_app() {
-    # Available functions: 
-    # run_command <command> <args> # exit if command fails
-    # sub_shell <command> <args>   # run command in subshell
     module load python/3.12.8
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
     python3 -m venv "$target_dir"
-    run_command "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
+    "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
 }
 
 special_modulefiles() {

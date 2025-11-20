@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# -E traps ERR in functions and subshells
+# -e exit on error
+# -u exit on undefined variable
+# -o pipefail exit if any command in a pipe fails
+# -o errtrace inherit ERR trap in functions and subshells
+set -Ee
+set -o errtrace
+cleanup_called=0
+
 # This script contains common functions and variables for the build scripts.
 # Must be sourced by other scripts.
 
@@ -37,7 +46,12 @@ help_message() {
 }
 
 install() {
-    # $1 == only to skip the dependencies
+    install_type="${1:-}"
+    # set traps for cleanup when installation ends or errors occur
+    trap 'echo "❌ Command failed: $BASH_COMMAND"; clean_up 1' ERR
+    trap 'echo "🛑 CTRL+C detected. Exiting..."; clean_up 1' INT
+    trap 'clean_up 0' EXIT
+    
     print_stderr "Installing the target module: ${YELLOW}${app_name_version}${NC}"
     print_stderr "Target directory: $target_dir"
     print_stderr "Modulefile path: $script_path"
@@ -47,7 +61,7 @@ install() {
         print_stderr "Exit Installing"
         exit 1
     fi
-    if [ "$1" != only ]; then # skip the dependencies if $1 == only
+    if [ "$install_type" != only ]; then # skip the dependencies if $1 == only
         print_stderr "Checking dependencies."
         dependencies=$(get_dependencies)
         check_dependencies "$dependencies"
@@ -55,14 +69,46 @@ install() {
     fi
     install_app
     copy_modulefile
-    clean_up 0
     print_stderr "Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
+}
+
+remove_target_directory() {
+    print_stderr "Removing target directory: $target_dir"
+    if [[ -d "$target_dir" ]]; then
+        rm -rf "$target_dir"
+        del_dir="$(dirname "$target_dir")"
+        while [[ "$del_dir" != "$modules_root" ]]; do
+            if [[ -z "$(ls -A "$del_dir")" ]]; then
+                print_stderr "Parent directory is empty. Removing $del_dir"
+                rmdir "$del_dir"
+                del_dir="$(dirname "$del_dir")"
+            else
+                break
+            fi
+        done
+    fi
+}
+
+remove_modulefile() {
+    print_stderr "Removing modulefile: $script_path"
+    if [[ -f "$script_path" ]]; then
+        rm -rf "$script_path"
+        rm -rf "${script_path}.lua"
+        del_dir="$(dirname "$script_path")"
+        while [[ "$del_dir" != "$modules_root" ]]; do
+            if [[ -z "$(ls -A "$del_dir")" ]]; then
+                print_stderr "Parent directory is empty. Removing $del_dir"
+                rmdir "$del_dir"
+                del_dir="$(dirname "$del_dir")"
+            else
+                break
+            fi
+        done
+    fi
 }
 
 delete() {
     print_stderr "Deleting the target module: ${YELLOW}${app_name_version}${NC}"
-    print_stderr "Target directory: $target_dir"
-    print_stderr "Modulefile path: $script_path"
     # if target directory does not exist, exit 1
     if [ ! -d "$target_dir" ]; then
         print_stderr "${RED}ERROR${NC}: Target app does not exist!"
@@ -70,22 +116,8 @@ delete() {
         exit 1
     fi
 
-    # modules/apps/name/version
-    rm -rf "$target_dir"
-    # modulefiles/name/version
-    rm -rf "$script_path"
-    rm -rf "${script_path}.lua"
-
-    # If the modules/apps/name directory is empty, remove it
-    if [ -z "$(ls -A $target_base_dir)" ]; then
-        print_stderr "App directory is empty. Removing $target_base_dir"
-        rm -rf "$target_base_dir"
-    fi
-    # If the modulefiles/name directory is empty, remove it
-    if [ -z "$(ls -A $script_base_dir)" ]; then
-        print_stderr "Modulefiles directory is empty. Removing $script_base_dir"
-        rm -rf "$script_base_dir"
-    fi
+    remove_target_directory
+    remove_modulefile
     print_stderr "Deletion completed. ${YELLOW}${app_name_version}${NC} is removed."
     exit
 }
@@ -107,6 +139,10 @@ set_default() {
 
 get_dependencies() {
     # Get the dependencies from the script and put them to stdout
+    if ! grep -q "^#DEPENDENCY:" "$install_script_path"; then
+        return 0
+    fi
+
     for dep in $(grep -oP "^#DEPENDENCY:\K.*" "$install_script_path"); do
         if [[ "$dep" =~ \* ]]; then
             dep_name="${dep%/*}"
@@ -169,7 +205,7 @@ install_dependencies() {
             print_stderr "${BLUE}${dep_name}/${dep_version}${NC} is already installed."
         else
             print_stderr "Installing dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
-            run_command cd "${modules_root}" && bash "build-scripts/${dep_name}/${dep_version}" -i
+            cd "${modules_root}" && bash "build-scripts/${dep_name}/${dep_version}" -i
             if [ $? -ne 0 ]; then
                 print_stderr "${RED}ERROR${NC}: Dependency installation failed: ${BLUE}${dep_name}/${dep_version}${NC}"
                 exit 1
@@ -219,22 +255,47 @@ print_stderr() {
     printf "[`date +"%Y-%m-%d %T"`] $1\n" 1>&2
 }
 
+remove_default_dependencies() {
+    dep_name="$1"
+
+    awk -v dep="$dep_name" '
+        # Remove tcl dependencies
+        $0 ~ "^# Dependency: " dep "($|/)"     { next }
+        $0 ~ "module load " dep "($|/)"        { next }
+        { print }
+    ' "$script_path" > "$script_path.tmp" &&
+    mv "$script_path.tmp" "$script_path"
+
+    awk -v dep="$dep_name" '
+        # Remove Lua dependencies
+        $0 ~ "^-- Dependency: " dep "($|/)"    { next }
+        $0 ~ "depends_on\\(\"" dep "($|/)"     { next }
+        { print }
+    ' "${script_path}.lua" > "${script_path}.lua.tmp" &&
+    mv "${script_path}.lua.tmp" "${script_path}.lua"
+}
+
+
 # Function to clean up the temporary directory
 clean_up () {
+    [[ $cleanup_called -eq 1 ]] && return 0
+    cleanup_called=1
+
+    status="$1"   # 0 = success, 1 = error
+    sleep 1
     cd "$modules_root"
-    sleep 1 # wait for the release of the file handle
-    # if $1 is 1, building failed. Do not remove the temporary directory
-    if [ "$1" == 1 ]; then
-        print_stderr "Removing target directory: $target_dir"
-        rm -rf "$target_dir"
-    # successful building. Remove the temporary directory if it exists
-    elif [ -d "$tmp_dir" ]; then
+
+    if [[ "$status" == "1" ]]; then
+        print_stderr "Removing incomplete installation."
+        print_error_message
+        remove_target_directory
+        remove_modulefile
+    elif [[ -d "$tmp_dir" ]]; then
         print_stderr "Removing temporary directory: $tmp_dir"
-        # keep deleting empty directories until the $module_root dir
         rm -rf "$tmp_dir"
-        del_dir="$(dirname $tmp_dir)"
-        while [ "$del_dir" != "$modules_root" ]; do
-            if [ -z "$(ls -A $del_dir)" ]; then
+        del_dir="$(dirname "$tmp_dir")"
+        while [[ "$del_dir" != "$modules_root" ]]; do
+            if [[ -z "$(ls -A "$del_dir")" ]]; then
                 print_stderr "Parent directory is empty. Removing $del_dir"
                 rmdir "$del_dir"
                 del_dir="$(dirname "$del_dir")"
@@ -245,27 +306,9 @@ clean_up () {
     fi
 }
 
-# run the command in a sub shell to avoid issues when cleaning up
-# cp mv wget or other file operations (it seems rm issue is fixed by adding sleep 1)
-sub_shell() {
-    msg=$($@)
-    result=$?
-    if [ -n "$msg" ]; then
-        print_stderr "$msg"
-    fi
-    return $result
-}
-
-# Function to run a command and exit if it fails
-run_command() {
-    sub_shell $@
-    if [ $? -ne 0 ]; then
-        print_stderr "${RED}ERROR${NC}: Command failed: $@"
-        print_stderr "Possible Reason: Missing dependencies or Expired links"
-        print_stderr "PWD: `pwd`"
-        clean_up 1
-        exit 1
-    fi
+print_error_message() {
+    # Custom error message can be defined in the build script
+    print_stderr "Possible Reason: Missing dependencies or Expired links"
 }
 #endregion
 

@@ -15,17 +15,17 @@ install_app() {
     cd "$tmp_dir"
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -q -N https://gdc.cancer.gov/system/files/public/file/gdc-client_v1.6.1_Ubuntu_x64.zip
+    wget -q -N https://gdc.cancer.gov/system/files/public/file/gdc-client_v1.6.1_Ubuntu_x64.zip
 
     print_stderr "Unzipping gdc-client_v1.6.1_Ubuntu_x64.zip"
-    sub_shell unzip -q gdc-client_v1.6.1_Ubuntu_x64.zip -d "${target_dir}/bin"
+    unzip -q gdc-client_v1.6.1_Ubuntu_x64.zip -d "${target_dir}/bin"
 }
 
 special_modulefiles() {
     # This function will not run if app specific modulefile exists
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 # Available variables:

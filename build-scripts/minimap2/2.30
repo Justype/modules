@@ -14,7 +14,7 @@ install_app() {
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     url="https://github.com/lh3/minimap2/releases/download/v${version}/minimap2-${version}_x64-linux.tar.bz2"
-    run_command wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir/bin" --strip-components=1
@@ -27,7 +27,7 @@ special_modulefiles() {
     # print_stderr "Adding ${BLUE}TEMPLATE_HOME${NC} environment variable"
     # echo "setenv TEMPLATE_HOME \$app_root" >> "${script_path}"
     # echo "setenv(\"TEMPLATE_HOME\", app_root)" >> "${script_path}.lua"
-    return
+    return 0
 }
 
 # Available variables:

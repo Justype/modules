@@ -15,13 +15,13 @@
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
-    run_command wget -nv -O "${target_dir}/picard.jar" https://github.com/broadinstitute/picard/releases/download/${version}/picard.jar 
+    wget -nv -O "${target_dir}/picard.jar" https://github.com/broadinstitute/picard/releases/download/${version}/picard.jar 
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 # Available variables:

@@ -15,14 +15,14 @@ install_app() {
         x86_64)  url="https://github.com/vgteam/vg/releases/download/v${version}/vg" ;;
         aarch64) url="https://github.com/vgteam/vg/releases/download/v${version}/vg-arm64" ;;
     esac
-    run_command wget -nv -O "$target_dir/bin/vg" "$url"
+    wget -nv -O "$target_dir/bin/vg" "$url"
     chmod +x "$target_dir/bin/vg"
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    return
+    return 0
 }
 
 # Available variables:

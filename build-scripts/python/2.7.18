@@ -46,14 +46,13 @@ special_modulefiles() {
     print_stderr "Adding ${YELLOW}virtualenv${NC}"
     module load python/2.7.18
     python2 -m pip install -q --no-cache-dir virtualenv
-    return
 }
 
 install_annaconda_package() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url $1 $2)
     if [[ $url == "https:" ]]; then return 1; fi
-    run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
+    wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
 
@@ -61,7 +60,7 @@ install_annaconda_package_for_py27() {
     print_stderr "Installing ${YELLOW}${1}/${2}${NC} Anaconda Build"
     url=$(get_annaconda_url_for_py_version $1 27 $2)
     if [[ $url == "https:" ]]; then return 1; fi
-    run_command wget -q -O "${app_name}_${version}.tar.bz2" "$url"
+    wget -q -O "${app_name}_${version}.tar.bz2" "$url"
     tar xf "${app_name}_${version}.tar.bz2" -C "$target_dir"
 }
 
