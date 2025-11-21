@@ -18,6 +18,16 @@ install_app() {
         -c conda-forge -c bioconda \
         -p "$target_dir" \
         ${app_name}=${version} -y -q
+    
+    # mkdir -p "${target_dir}/bin"    # modules/apps/name/version/bin
+    # mkdir -p "$tmp_dir"             # tmp directory
+    # cd "$tmp_dir"
+    # print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    # wget -q -N https://gdc.cancer.gov/system/files/public/file/gdc-client_2.3_Ubuntu_x64-py3.8-ubuntu-20.04.zip
+
+    # print_stderr "Unzipping gdc-client_2.3_Ubuntu_x64-py3.8-ubuntu-20.04.zip"
+    # unzip -qn gdc-client_2.3_Ubuntu_x64-py3.8-ubuntu-20.04.zip
+    # unzip -qn gdc-client_2.3_Ubuntu_x64.zip -d "${target_dir}/bin"
 }
 
 special_modulefiles() {

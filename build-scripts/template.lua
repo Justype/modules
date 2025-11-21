@@ -43,8 +43,9 @@ end
 --     prepend_path("MANPATH", pathJoin(app_root, "share/man"))
 -- end
 
+local env_var_name = string.upper(app_name:gsub("-", "_")) .. "_HOME"
+setenv(env_var_name, app_root)
 -- TOCHANGE: Set custom environment variables and aliases
--- setenv("APP_HOME", app_root)
 -- set_alias("app", "command")
 
 -- Handle conflicts with other versions

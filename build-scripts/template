@@ -52,8 +52,9 @@ if {[file isdirectory "$app_root/bin"]} {
 #     prepend-path MANPATH $app_root/share/man
 # }
 
+set env_var_name "[string toupper [string map {- _} $app_name]]_HOME"
+setenv $env_var_name $app_root
 # TOCHANGE: Set custom environment variables and aliases
-# setenv APP_HOME $app_root
 # setalias run_app "$app_root/bin/app"
 
 # Handle conflicts with other versions
