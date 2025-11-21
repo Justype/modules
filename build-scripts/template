@@ -48,9 +48,9 @@ if {[file isdirectory "$app_root/bin"]} {
 # if {[file isdirectory "$app_root/lib"]} {
 #     prepend-path LD_LIBRARY_PATH $app_root/lib
 # }
-if {[file isdirectory "$app_root/share/man"]} {
-    prepend-path MANPATH $app_root/share/man
-}
+# if {[file isdirectory "$app_root/share/man"]} {
+#     prepend-path MANPATH $app_root/share/man
+# }
 
 # TOCHANGE: Set custom environment variables and aliases
 # setenv APP_HOME $app_root

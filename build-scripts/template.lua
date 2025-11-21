@@ -39,9 +39,9 @@ end
 -- if (isDir(pathJoin(app_root, "lib"))) then
 --     prepend_path("LD_LIBRARY_PATH", pathJoin(app_root, "lib"))
 -- end
-if (isDir(pathJoin(app_root, "share/man"))) then
-    prepend_path("MANPATH", pathJoin(app_root, "share/man"))
-end
+-- if (isDir(pathJoin(app_root, "share/man"))) then
+--     prepend_path("MANPATH", pathJoin(app_root, "share/man"))
+-- end
 
 -- TOCHANGE: Set custom environment variables and aliases
 -- setenv("APP_HOME", app_root)

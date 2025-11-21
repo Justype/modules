@@ -5,6 +5,10 @@
 # BCFTOOLS build script
 # - https://www.htslib.org/download/
 # - setenv BCFTOOLS_PLUGINS $app_root/libexec/bcftools
+# Debian dependency:
+#  build-essential autoconf automake make libz-dev libbz2-dev liblzma-dev libcurl4-openssl-dev libhts-dev pkg-config
+# Optional:
+#  libgsl-dev libperl-dev libdeflate-dev libpthread-stubs0-dev libssh-dev libssl-dev libjson-c-dev
 #########################################################
 
 install_app() {
