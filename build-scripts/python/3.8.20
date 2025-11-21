@@ -1,50 +1,26 @@
 #!/usr/bin/bash
-#DEPENDENCY:jdk/1.8.0
-#DEPENDENCY:ant/1.10.15
-#WHATIS:Quality control for sam/bam (alignment) files
+#WHATIS:Python 3 with pip (conda-forge Build)
 
 #########################################################
-# BamQC
-# - BAM QC analysis tool
-# - https://github.com/s-andrews/BamQC
-# - https://stab.st-andrews.ac.uk/wiki/index.php/BamQC
+# Python 3 with pip (conda-forge Build)
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
-    mkdir -p "$target_dir"       # modules/apps/name/version
-    mkdir -p "$tmp_dir"          # tmp directory
-    cd "$tmp_dir"
+    module load micromamba
+    print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
 
-    print_stderr "Cloning ${YELLOW}${app_name_version}${NC}"
-    if [ -d BamQC ]; then
-        print_stderr "BamQC directory already exists. Skipping git clone."
-    else
-        git clone https://github.com/s-andrews/BamQC
-    fi
-
-    print_stderr "Loading ${YELLOW}jdk/1.8${NC} and ${YELLOW}ant${NC} modules"
-    module purge
-    module load jdk/1.8.0 ant/1.10.15
-    
-    print_stderr "Building ${YELLOW}${app_name_version}${NC}"
-    cd BamQC
-    git checkout 4b3d20f
-    ant
-    chmod +x bin/bamqc
-
-    print_stderr "Copying ${YELLOW}${app_name_version}${NC} to ${YELLOW}${target_dir}${NC}"
-    cp -r bin "$target_dir"
+    micromamba create \
+        -r $MICROMAMBA_HOME/mamba \
+        -c conda-forge -c bioconda \
+        -p "$target_dir" \
+        ${app_name}=${version} pip virtualenv -y -q
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    # remove module load ant from modulefile
-    print_stderr "Removing ${BLUE}ant${NC} dependency load from ${YELLOW}modulefile[.lua]${NC}"
-    sed -i '/ant/d' "${script_path}"
-    sed -i '/ant/d' "${script_path}.lua"
-    return
+    remove_default_dependencies "micromamba"
+    return 0
 }
 
 # Available variables:

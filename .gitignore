@@ -7,3 +7,5 @@
 !build-scripts/
 !build-scripts/**
 !utils.py
+!backup/
+!backup/**

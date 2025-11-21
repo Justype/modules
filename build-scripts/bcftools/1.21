@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#DEPENDENCY:micromamba/*
 #WHATIS:Utilities for VCF/BCF (Variant Call Format/Binary Call Format)
 
 #########################################################
@@ -12,27 +13,36 @@
 #########################################################
 
 install_app() {
-    mkdir -p "$target_base_dir"  # modules/apps/name
-    mkdir -p "$tmp_dir"          # tmp directory
-    cd "$tmp_dir"
+    module load micromamba
+    print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
+
+    micromamba create \
+        -r $MICROMAMBA_HOME/mamba \
+        -c conda-forge -c bioconda \
+        -p "$target_dir" \
+        ${app_name}=${version} -y -q
 
     # Build the bcftools from source
-    print_stderr "Downloading ${YELLOW}${app_name_version}${NC} source code"
-    url="https://github.com/samtools/bcftools/releases/download/${version}/bcftools-${version}.tar.bz2"
-    wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
+    # mkdir -p "$target_base_dir"  # modules/apps/name
+    # mkdir -p "$tmp_dir"          # tmp directory
+    # cd "$tmp_dir"
 
-    print_stderr "Extracting ${YELLOW}${app_name_version}${NC} source code"
-    tar xf "${app_name}_${version}.tar.bz2" --strip-components=1
+    # print_stderr "Downloading ${YELLOW}${app_name_version}${NC} source code"
+    # url="https://github.com/samtools/bcftools/releases/download/${version}/bcftools-${version}.tar.bz2"
+    # wget -nv -O "${app_name}_${version}.tar.bz2" "$url"
 
-    print_stderr "Building ${YELLOW}${app_name_version}${NC}"
-    autoheader && autoconf && ./configure --enable-libgsl --enable-perl-filters --prefix="$target_dir" # recommanded options
-    make -j $ncpu
-    if [ $? -ne 0 ]; then
-        print_stderr "${RED}WARNING${NC}: Recommended options failed. Trying default options."
-        ./configure --prefix="$target_dir"
-        make -j $ncpu
-    fi
-    make install
+    # print_stderr "Extracting ${YELLOW}${app_name_version}${NC} source code"
+    # tar xf "${app_name}_${version}.tar.bz2" --strip-components=1
+
+    # print_stderr "Building ${YELLOW}${app_name_version}${NC}"
+    # autoheader && autoconf && ./configure --enable-libgsl --enable-perl-filters --prefix="$target_dir" # recommanded options
+    # make -j $ncpu
+    # if [ $? -ne 0 ]; then
+    #     print_stderr "${RED}WARNING${NC}: Recommended options failed. Trying default options."
+    #     ./configure --prefix="$target_dir"
+    #     make -j $ncpu
+    # fi
+    # make install
 }
 
 special_modulefiles() {
@@ -41,6 +51,8 @@ special_modulefiles() {
     print_stderr "Adding ${BLUE}BCFTOOLS_PLUGINS${NC} environment variable"
     echo "setenv BCFTOOLS_PLUGINS \"\$app_root/libexec/bcftools\"" >> "$script_path"
     echo "setenv(\"BCFTOOLS_PLUGINS\", pathJoin(app_root, \"libexec\", \"bcftools\"))" >> "${script_path}.lua"
+
+    remove_default_dependencies "micromamba"
 }
 
 # Available variables:

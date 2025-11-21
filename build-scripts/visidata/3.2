@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:python/3.12.8
+#DEPENDENCY:python/3.12.12
 #WHATIS:vd - Tabular data visualization tool (tsv, csv, sqlite, json, xlsx, hdf5)
 
 #########################################################
@@ -11,7 +11,7 @@
 #########################################################
 
 install_app() {
-    module load python/3.12.8
+    module load python/3.12.12
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
     python3 -m venv "$target_dir"
     "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version
@@ -31,11 +31,6 @@ special_modulefiles() {
     print_stderr "Prepending \$app_root to ${BLUE}PYTHONPATH${NC} environment variable"
     echo "prepend-path PYTHONPATH \$app_root/lib/python3.12/site-packages" >> "${script_path}"
     echo 'prepend_path("PYTHONPATH", pathJoin(app_root, "lib", "python3.12", "site-packages"))' >> "${script_path}.lua"
-
-    print_stderr "Make sure system libtinfo is used instead of the one from venv"
-    cpu_arch=$(uname -m)
-    echo "setenv LD_PRELOAD /usr/lib/${cpu_arch}-linux-gnu/libtinfo.so.6" >> "${script_path}"
-    echo "setenv(\"LD_PRELOAD\", \"/usr/lib/${cpu_arch}-linux-gnu/libtinfo.so.6\")" >> "${script_path}.lua"
 }
 
 # Available variables:
