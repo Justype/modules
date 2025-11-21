@@ -1,0 +1,112 @@
+#!/usr/bin/bash
+#DEPENDENCY:data-vcf/grch38-hprc-v1.1-decomposed
+#DEPENDENCY:bcftools/*
+#DEPENDENCY:htslib/*
+#WHATIS:HPRC v1.1 GRCh38 Decomposed VCF with chromosome names matching GENCODE
+
+#########################################################
+# Human Pangenome Reference Consortium (HPRC) GRCh38 VCF
+# - https://github.com/human-pangenomics/hpp_pangenome_resources
+# - VCF file with decomposed by variant Bub (bubble)
+# - We need the UCSC-style chromosome names to match GENCODE annotation
+# - https://github.com/dpryan79/ChromosomeMappings
+#########################################################
+
+install_app() {
+    # mkdir -p "$target_base_dir"  # modules/apps/name
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$tmp_dir"
+    cd "$tmp_dir"
+
+    print_stderr "Downloading mapping file for chromosome names conversion from UCSC to GENCODE style"
+    wget -Nnv 'https://raw.githubusercontent.com/dpryan79/ChromosomeMappings/refs/heads/master/GRCh38_UCSC2gencode.txt'
+
+    module load bcftools
+    module load htslib
+    module load data-vcf/grch38-hprc-v1.1-decomposed
+    print_stderr "Converting HPRC v1.1 GRCh38 VCF to GENCODE-style chromosome names"
+    header=$(bcftools annotate --rename-chrs GRCh38_UCSC2gencode.txt $HPRC_VCF_GZ | head -n 1000 | grep "^#")
+    print_stderr "Sorting and compressing HPRC v1.1 GRCh38 GENCODE-style VCF"
+    bcftools annotate --rename-chrs GRCh38_UCSC2gencode.txt $HPRC_VCF_GZ | \
+        grep -v "^#" | \
+        LC_ALL=C sort -k1,1 -k2,2n | \
+        cat <(echo "$header") - | \
+        bgzip -c > hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
+    
+    print_stderr "Indexing HPRC v1.1 GRCh38 GENCODE-style VCF"
+    tabix -p vcf hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
+
+    print_stderr "Moving files to target directory"
+    mv hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz "$target_dir/"
+    mv hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz.tbi "$target_dir/"
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    remove_default_dependencies "bcftools"
+    remove_default_dependencies "htslib"
+    remove_default_dependencies "data"
+    
+    # add custom environment variables and functions to modulefile
+    cat << EOF >> "${script_path}"
+set hprc_gencode_vcf_gz \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
+set hprc_gencode_vcf_gz_tbi \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz.tbi
+setenv HPRC_GENCODE_VCF_GZ \$hprc_gencode_vcf_gz
+setenv HPRC_GENCODE_VCF_GZ_TBI \$hprc_gencode_vcf_gz_tbi
+
+if { [module-info mode] == "load" } {
+    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
+    # only display message when in terminal
+    if {[info exists env(TERM)] && \$env(TERM) != "dumb"} {
+        puts stderr "Available environment variables:"
+        puts stderr "  HPRC_GENCODE_VCF_GZ     (HPRC v1.1 decomposed VCF with GENCODE-style chrom names)"
+        puts stderr "  HPRC_GENCODE_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)"
+    }
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local hprc_gencode_vcf_gz = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz")
+local hprc_gencode_vcf_gz_tbi = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz.tbi")
+setenv("HPRC_GENCODE_VCF_GZ", hprc_gencode_vcf_gz)
+setenv("HPRC_GENCODE_VCF_GZ_TBI", hprc_gencode_vcf_gz_tbi)
+
+if (mode() == "load") then
+    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
+    -- only display message when in terminal
+    if os.getenv("TERM") and os.getenv("TERM") ~= "dumb" then
+        io.stderr:write("Available environment variables:\n")
+        io.stderr:write("  HPRC_GENCODE_VCF_GZ     (HPRC v1.1 decomposed VCF with GENCODE-style chrom names)\n")
+        io.stderr:write("  HPRC_GENCODE_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)\n")
+    end
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         name     of the app
+# - version:          version  of the app
+# - app_name_version: name/version
+
+# - target_base_dir:  modules/apps/name
+# - target_dir:       modules/apps/name/version
+# - script_path:      modules/modulefiles/name/version
+# - tmp_dir:          tmp directory (modules/tmp/name/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@

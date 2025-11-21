@@ -1,6 +1,6 @@
 #!/usr/bin/bash
-#DEPENDENCY:ref-grch38/fasta-genome-gencode
-#DEPENDENCY:ref-grch38/gtf-gencode47
+#DEPENDENCY:data-fasta/grch38-genome-gencode
+#DEPENDENCY:data-gtf/grch38-gencode47
 #DEPENDENCY:star/*
 #WHATIS:STAR GRCh38 GENCODE47 index for read length 151
 
@@ -15,8 +15,8 @@ install_app() {
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    module load ref-grch38/fasta-genome-gencode
-    module load ref-grch38/gtf-gencode47
+    module load data-fasta/grch38-genome-gencode
+    module load data-gtf/grch38-gencode47
     module load star
 
     print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
@@ -31,8 +31,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-
-    # remove star dependency added by default (because you may not want the version used to build the index)
     remove_default_dependencies "star"
 
     # add custom environment variables and functions to modulefile

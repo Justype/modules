@@ -68,7 +68,7 @@ def get_status()-> dict:
     status = {}
 
     for app in os.listdir('build-scripts'):
-        if app.startswith('ref-'): # skip genome references
+        if app.startswith('data-'): # skip genome data
             continue
         if os.path.isdir(os.path.join('build-scripts', app)) and app != "0-template":
             status[app] = {}

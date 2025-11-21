@@ -53,8 +53,8 @@ install() {
     trap 'clean_up 0' EXIT
     
     print_stderr "Installing the target module: ${YELLOW}${app_name_version}${NC}"
-    print_stderr "Target directory: $target_dir"
-    print_stderr "Modulefile path: $script_path"
+    print_stderr "🎯 Target directory: $target_dir"
+    print_stderr "📜 Modulefile path: $script_path"
     # if target directory exists, exit 1
     if [ -d "$target_dir" ]; then
         print_stderr "${RED}ERROR${NC}: Target app exists!"
@@ -62,14 +62,14 @@ install() {
         exit 1
     fi
     if [ "$install_type" != only ]; then # skip the dependencies if $1 == only
-        print_stderr "Checking dependencies."
+        print_stderr "🤔 Checking dependencies..."
         dependencies=$(get_dependencies)
         check_dependencies "$dependencies"
         install_dependencies "$dependencies"
     fi
     install_app
     copy_modulefile
-    print_stderr "Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
+    print_stderr "✅ Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
 }
 
 remove_target_directory() {
@@ -219,12 +219,12 @@ copy_modulefile() {
     mkdir -p "$script_base_dir"
     if [ -f "${modules_root}/build-scripts/${app_name}/template" ]; then
         print_stderr "${YELLOW}${app_name}${NC} specific template exists. Use it."
-        cp "${modules_root}/build-scripts/${app_name}/template" "$script_path"
-        cp "${modules_root}/build-scripts/${app_name}/template.lua" "${script_path}.lua"
+        cat "${modules_root}/build-scripts/${app_name}/template" > "$script_path"
+        cat "${modules_root}/build-scripts/${app_name}/template.lua" > "${script_path}.lua"
     else
         print_stderr "${YELLOW}${app_name}${NC} specific template does not exist. Use default template."
-        cp "${modules_root}/build-scripts/template" "$script_path"
-        cp "${modules_root}/build-scripts/template.lua" "${script_path}.lua"
+        cat "${modules_root}/build-scripts/template" > "$script_path"
+        cat "${modules_root}/build-scripts/template.lua" > "${script_path}.lua"
     fi
 
     print_stderr "Editing the modulefile to include the dependencies"
@@ -260,16 +260,16 @@ remove_default_dependencies() {
 
     awk -v dep="$dep_name" '
         # Remove tcl dependencies
-        $0 ~ "^# Dependency: " dep "($|/)"     { next }
-        $0 ~ "module load " dep "($|/)"        { next }
+        $0 ~ "^# Dependency: " dep   { next }
+        $0 ~ "module load " dep      { next }
         { print }
     ' "$script_path" > "$script_path.tmp" &&
     mv "$script_path.tmp" "$script_path"
 
     awk -v dep="$dep_name" '
         # Remove Lua dependencies
-        $0 ~ "^-- Dependency: " dep "($|/)"    { next }
-        $0 ~ "depends_on\\(\"" dep "($|/)"     { next }
+        $0 ~ "^-- Dependency: " dep  { next }
+        $0 ~ "depends_on\\(\"" dep   { next }
         { print }
     ' "${script_path}.lua" > "${script_path}.lua.tmp" &&
     mv "${script_path}.lua.tmp" "${script_path}.lua"

@@ -16,39 +16,44 @@ There are two similar environment-control softwares: [Environment Modules](https
 
 ## Genome FASTA/GTF and Indexes
 
-The files (FASTA, GTF, indexes, etc.) for genome references are under `ref-<genome_assembly_version>` folders, e.g., `ref-hg19`, `ref-hg38`, `ref-mm10`, `ref-mm39`, etc.
+~~The files (FASTA, GTF, indexes, etc.) for genome references are under `ref-<genome_assembly_version>` folders, e.g., `ref-hg19`, `ref-hg38`, `ref-mm10`, `ref-mm39`, etc.~~
+
+The previous structure works fine on environment modules but not on lmod. When loading `ref-grch/gtf` and `ref-grch/fasta`, the latter one will make the former one unload. So I separate modules by data types like: `data-fasta`, `data-gtf`, `data-index` ...
+
+The scripts/modulefiles will be modified to set the env variables to point to the files. e.g. `CELLRANGER_REF_DIR`, `STAR_INDEX_DIR`, `GENOME_FASTA`, etc.
 
 ```
-build-scripts/ref-grch38/
-├── cellranger-2024-A
-├── fasta-gencode
-├── gtf-gencode47
-├── star-gencode47-101
-├── template
-└── template.lua
+build-scripts/data-fasta
+├── grch38-genome-gencode
+└── grch38-transcript-gencode47
+build-scripts/data-gtf
+└── grch38-gencode47
+build-scripts/data-index
+├── cellranger-grch38-2024-A
+├── star-grch38-gencode47-101
+└── star-grch38-gencode47-151
 ```
-
-And the modulefiles are under `modulefiles/ref-<genome_assembly_version>` folders. They will be modified to set the env variables to point to the files. e.g. `CELLRANGER_REF_DIR`, `STAR_INDEX_DIR`, `GENOME_FASTA`, etc.
 
 When loading the genome reference modulefile, the alignment or related tools will not be loaded automatically. You need to load them separately.
 
 And when loading the reference modulefile, the env variables will be printed when using the terminal.
 
 ```
-$ module load ref-grch38/cellranger-2024-A
-[2025-11-19 15:33:35] Loading module ref-grch38/cellranger-2024-A
-  env CELLRANGER_REF_DIR set to /opt/modules/apps/ref-grch38/cellranger-2024-A
-  env GENOME_FASTA set to /opt/modules/apps/ref-grch38/cellranger-2024-A/fasta/genome.fa
-  env GENOME_FASTA_FAI set to /opt/modules/apps/ref-grch38/cellranger-2024-A/fasta/genome.fa.fai
-  env ANNOTATION_GTF_GZ set to /opt/modules/apps/ref-grch38/cellranger-2024-A/genes/genes.gtf.gz
-  env STAR_INDEX_DIR set to /opt/modules/apps/ref-grch38/cellranger-2024-A/star
+$ module load data-index/cellranger-grch38-2024-A
+[2025-11-19 15:33:35] Loading module data-index/cellranger-grch38-2024-A
+Available environment variables:
+  CELLRANGER_REF_DIR (reference directory: cellranger)
+  GENOME_FASTA       (fasta file)
+  GENOME_FASTA_FAI   (fasta fai index)
+  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)
+  STAR_INDEX_DIR     (star index: star alignment)
 ```
 
 Then you can use the env variables in your analysis pipelines.
 
 ```bash
 module load cellranger/9.0.1
-module load ref-grch38/cellranger-2024-A
+module load data-index/cellranger-grch38-2024-A
 
 cellranger count \
   --id=sample1 \ 
