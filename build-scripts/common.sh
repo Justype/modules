@@ -9,6 +9,14 @@ set -Ee
 set -o errtrace
 cleanup_called=0
 
+# Detect if this file is being sourced or executed.
+# When sourced, we should not call `exit` (would exit the caller shell);
+# when executed, calling `exit` is desired to terminate the script after cleanup.
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+    __COMMON_SOURCED=1
+else
+    __COMMON_SOURCED=0
+fi
 # This script contains common functions and variables for the build scripts.
 # Must be sourced by other scripts.
 
@@ -48,8 +56,11 @@ help_message() {
 install() {
     install_type="${1:-}"
     # set traps for cleanup when installation ends or errors occur
-    trap 'echo "❌ Command failed: $BASH_COMMAND"; clean_up 1' ERR
-    trap 'echo "🛑 CTRL+C detected. Exiting..."; clean_up 1' INT
+    # For ERR and INT, run clean_up then either `exit` (if this script is executed)
+    # or `return` (if this file was sourced) so we don't remain in any blocking `read`.
+    trap 'echo "❌ Command failed: $BASH_COMMAND"; clean_up 1; if [[ $__COMMON_SOURCED -eq 0 ]]; then exit 1; else return 1; fi' ERR
+    trap 'echo "🛑 CTRL+C detected. Exiting..."; clean_up 1; if [[ $__COMMON_SOURCED -eq 0 ]]; then exit 130; else return 130; fi' INT
+    # EXIT trap should only perform cleanup; don't call exit/return here (it would re-trigger EXIT)
     trap 'clean_up 0' EXIT
     
     print_stderr "Installing the target module: ${YELLOW}${app_name_version}${NC}"
@@ -87,6 +98,9 @@ remove_target_directory() {
             fi
         done
     fi
+
+    # restore terminal settings in case interrupted during a `read` or similar
+    stty sane 2>/dev/null || true
 }
 
 remove_modulefile() {

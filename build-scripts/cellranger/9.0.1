@@ -17,7 +17,9 @@ install_app() {
     url='https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz'
     # if the url do not contain the 'Expires' parameter, read -r url
     if [[ "$url" != *"Expires="* ]]; then
-        print_stderr "10X links only valid for one day. Please enter the download link: "
+        print_stderr "⚠️ 10X links only valid for one day. Please go to"
+        print_stderr "https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
+        print_stderr "And enter the download link: "
         read -r url
     fi
     wget -nv -O "${app_name}_${version}.tar.gz" "$url"
