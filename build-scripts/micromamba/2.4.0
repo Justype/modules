@@ -46,9 +46,9 @@ special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
     
-    print_stderr "Adding ${BLUE}MICROMAMBA_HOME${NC} environment variable"
-    echo "setenv MICROMAMBA_HOME \$app_root" >> "${script_path}"
-    echo "setenv(\"MICROMAMBA_HOME\", app_root)" >> "${script_path}.lua"
+    # print_stderr "Adding ${BLUE}MICROMAMBA_HOME${NC} environment variable"
+    # echo "setenv MICROMAMBA_HOME \$app_root" >> "${script_path}"
+    # echo "setenv(\"MICROMAMBA_HOME\", app_root)" >> "${script_path}.lua"
 
     # You can use remove_default_dependencies() function to remove unwanted dependencies
     # e.g. remove_default_dependencies "samtools"

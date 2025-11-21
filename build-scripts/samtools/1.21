@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#DEPENDENCY:micromamba/*
 #WHATIS:Utilities for SAM/BAM (Sequence Alignment Map)
 
 #########################################################
@@ -38,6 +39,7 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
+    remove_default_dependencies "micromamba"
     return 0
 }
 

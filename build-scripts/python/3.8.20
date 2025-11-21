@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+#DEPENDENCY:micromamba/*
 #WHATIS:Python 3 with pip (conda-forge Build)
 
 #########################################################

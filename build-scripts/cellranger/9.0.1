@@ -18,7 +18,7 @@ install_app() {
     # if the url do not contain the 'Expires' parameter, read -r url
     if [[ "$url" != *"Expires="* ]]; then
         print_stderr "⚠️ 10X links only valid for one day. Please go to"
-        print_stderr "https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions"
+        printf "https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions \n" 1>&2
         print_stderr "And enter the download link: "
         read -r url
     fi
