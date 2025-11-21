@@ -38,15 +38,12 @@ setenv STAR_INDEX_DIR \$star_index_dir
 
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
-    # Hide help messages in the SLURM environment
-    if {![info exists ::env(SLURM_JOB_ID)]} {
-        puts stderr "Available environment variables:"
-        puts stderr "  CELLRANGER_REF_DIR (reference directory: cellranger)"
-        puts stderr "  GENOME_FASTA       (fasta file)"
-        puts stderr "  GENOME_FASTA_FAI   (fasta fai index)"
-        puts stderr "  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)"
-        puts stderr "  STAR_INDEX_DIR     (star index: star alignment)"
-    }
+    puts stderr "Available environment variables:"
+    puts stderr "  CELLRANGER_REF_DIR (reference directory: cellranger)"
+    puts stderr "  GENOME_FASTA       (fasta file)"
+    puts stderr "  GENOME_FASTA_FAI   (fasta fai index)"
+    puts stderr "  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)"
+    puts stderr "  STAR_INDEX_DIR     (star index: star alignment)"
 }
 EOF
 
@@ -63,15 +60,12 @@ local star_index_dir = pathJoin(cellranger_ref_dir, "star")
 setenv("STAR_INDEX_DIR", star_index_dir)
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
-    -- Hide help messages in the SLURM environment
-    if os.getenv("SLURM_JOB_ID") == nil then
-        io.stderr:write("Available environment variables:\n")
-        io.stderr:write(string.format("  CELLRANGER_REF_DIR (reference directory: cellranger)\n", cellranger_ref_dir))
-        io.stderr:write(string.format("  GENOME_FASTA       (fasta file)\n", genome_fasta))
-        io.stderr:write(string.format("  GENOME_FASTA_FAI   (fasta fai index)\n", genome_fasta_fai))
-        io.stderr:write(string.format("  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)\n", annotation_gtf_gz))
-        io.stderr:write(string.format("  STAR_INDEX_DIR     (star index: star alignment)\n", star_index_dir))
-    end
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write(string.format("  CELLRANGER_REF_DIR (reference directory: cellranger)\n", cellranger_ref_dir))
+    io.stderr:write(string.format("  GENOME_FASTA       (fasta file)\n", genome_fasta))
+    io.stderr:write(string.format("  GENOME_FASTA_FAI   (fasta fai index)\n", genome_fasta_fai))
+    io.stderr:write(string.format("  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)\n", annotation_gtf_gz))
+    io.stderr:write(string.format("  STAR_INDEX_DIR     (star index: star alignment)\n", star_index_dir))
 end
 EOF
 }

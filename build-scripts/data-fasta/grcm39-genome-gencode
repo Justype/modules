@@ -38,12 +38,9 @@ setenv GENOME_FASTA_FAI \$genome_fasta_fai
 
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
-    # Hide help messages in the SLURM environment
-    if {![info exists ::env(SLURM_JOB_ID)]} {
-        puts stderr "Available environment variables:"
-        puts stderr "  GENOME_FASTA       (fasta file)"
-        puts stderr "  GENOME_FASTA_FAI   (fasta fai index)"
-    }
+    puts stderr "Available environment variables:"
+    puts stderr "  GENOME_FASTA       (fasta file)"
+    puts stderr "  GENOME_FASTA_FAI   (fasta fai index)"
 }
 EOF
 
@@ -55,12 +52,9 @@ setenv("GENOME_FASTA_FAI", genome_fasta_fai)
 
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
-    -- Hide help messages in the SLURM environment
-    if os.getenv("SLURM_JOB_ID") == nil then
-        io.stderr:write("Available environment variables:\n")
-        io.stderr:write("  GENOME_FASTA       (fasta file)\n")
-        io.stderr:write("  GENOME_FASTA_FAI   (fasta fai index)\n")
-    end
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  GENOME_FASTA       (fasta file)\n")
+    io.stderr:write("  GENOME_FASTA_FAI   (fasta fai index)\n")
 end
 EOF
 }

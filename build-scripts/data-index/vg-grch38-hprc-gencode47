@@ -70,17 +70,14 @@ setenv VG_TXORIGIN_TSV \$vg_txorigin_tsv
 
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
-    # Hide help messages in the SLURM environment
-    if {![info exists ::env(SLURM_JOB_ID)]} {
-        puts stderr "Available environment variables:"
-        puts stderr "  VG_XG       (xg index file: mpmap, rpvg)"
-        puts stderr "  VG_DIST     (dist index file: mpmap)"
-        puts stderr "  VG_GCSA     (gcsa2 index file: mpmap, rpvg)"
-        puts stderr "  VG_GCSA_LCP (gcsa lcp index)"
-        puts stderr "  VG_GBWT     (gbwt haplotype paths: rpvg)"
-        puts stderr "  VG_GBWT_RI  (gbwt index)"
-        puts stderr "  VG_TXORIGIN_TSV (transcript origin: rpvg)"
-    }
+    puts stderr "Available environment variables:"
+    puts stderr "  VG_XG       (xg index file: mpmap, rpvg)"
+    puts stderr "  VG_DIST     (dist index file: mpmap)"
+    puts stderr "  VG_GCSA     (gcsa2 index file: mpmap, rpvg)"
+    puts stderr "  VG_GCSA_LCP (gcsa lcp index)"
+    puts stderr "  VG_GBWT     (gbwt haplotype paths: rpvg)"
+    puts stderr "  VG_GBWT_RI  (gbwt index)"
+    puts stderr "  VG_TXORIGIN_TSV (transcript origin: rpvg)"
 }
 EOF
 
@@ -89,17 +86,14 @@ local star_index_dir = ref_root
 setenv("STAR_INDEX_DIR", star_index_dir)
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
-    -- Hide help messages in the SLURM environment
-    if os.getenv("SLURM_JOB_ID") == nil then
-        io.stderr:write("Available environment variables:\n")
-        io.stderr:write("  VG_XG       (xg index file: mpmap, rpvg)\n")
-        io.stderr:write("  VG_DIST     (dist index file: mpmap)\n")
-        io.stderr:write("  VG_GCSA     (gcsa2 index file: mpmap, rpvg)\n")
-        io.stderr:write("  VG_GCSA_LCP (gcsa lcp index)\n")
-        io.stderr:write("  VG_GBWT     (gbwt haplotype paths: rpvg)\n")
-        io.stderr:write("  VG_GBWT_RI  (gbwt index)\n")
-        io.stderr:write("  VG_TXORIGIN_TSV (transcript origin: rpvg)\n")
-    end
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  VG_XG       (xg index file: mpmap, rpvg)\n")
+    io.stderr:write("  VG_DIST     (dist index file: mpmap)\n")
+    io.stderr:write("  VG_GCSA     (gcsa2 index file: mpmap, rpvg)\n")
+    io.stderr:write("  VG_GCSA_LCP (gcsa lcp index)\n")
+    io.stderr:write("  VG_GBWT     (gbwt haplotype paths: rpvg)\n")
+    io.stderr:write("  VG_GBWT_RI  (gbwt index)\n")
+    io.stderr:write("  VG_TXORIGIN_TSV (transcript origin: rpvg)\n")
 end
 EOF
 }

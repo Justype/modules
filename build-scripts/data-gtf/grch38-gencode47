@@ -35,11 +35,8 @@ setenv ANNOTATION_GTF \$annotation_gtf
 
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
-    # Hide help messages in the SLURM environment
-    if {![info exists ::env(SLURM_JOB_ID)]} {
-        puts stderr "Available environment variables:"
-        puts stderr "  ANNOTATION_GTF  (annotation gtf)"
-    }
+    puts stderr "Available environment variables:"
+    puts stderr "  ANNOTATION_GTF  (annotation gtf)"
 }
 EOF
 
@@ -49,11 +46,8 @@ setenv("ANNOTATION_GTF", annotation_gtf)
 
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
-    -- Hide help messages in the SLURM environment
-    if os.getenv("SLURM_JOB_ID") == nil then
-        io.stderr:write("Available environment variables:\n")
-        io.stderr:write("  ANNOTATION_GTF  (annotation gtf)\n")
-    end
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  ANNOTATION_GTF  (annotation gtf)\n")
 end
 EOF
 }
