@@ -19,7 +19,7 @@ install_app() {
 
     mkdir -p "$target_dir/bin"
     print_stderr "Creating picard wrapper script"
-    echo -e "#!/usr/bin/bash\njava -jar \$PICARD \"\$@\"" > "${target_dir}/bin/picard"
+    echo -e "#!/usr/bin/bash\njava -jar \$PICARD \$@" > "${target_dir}/bin/picard"
     chmod +x "${target_dir}/bin/picard"
 }
 
