@@ -45,11 +45,7 @@ install_app() {
         print_stderr "This is not a x64 Fedora or Debian based machine."
         module load micromamba
         print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
-        micromamba create \
-            -r $MICROMAMBA_HOME/mamba \
-            -c conda-forge -c bioconda \
-            -p "$target_dir" \
-            ${app_name}=${version} -y -q
+        mm-create -yq --prefix "$target_dir" ${app_name}=${version}
 
         # #region ncbi-vdb
         # print_stderr "Building ncbi/ncbi-vdb $version"

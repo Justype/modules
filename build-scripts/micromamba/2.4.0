@@ -40,6 +40,25 @@ install_app() {
 
     print_stderr "Setting executable permission for ${YELLOW}${app_name_version}${NC}"
     chmod +x "${target_dir}/bin/micromamba"
+
+    print_stderr "Setting up helping scripts for handling micromamba environments"
+    cat << EOF > "${target_dir}/bin/mm"
+#!/usr/bin/bash
+\${MICROMAMBA_HOME}/bin/micromamba --root-prefix \${MICROMAMBA_HOME}/mamba \$@
+EOF
+    chmod +x "${target_dir}/bin/mm"
+
+    cat << EOF > "${target_dir}/bin/mm-create"
+#!/usr/bin/bash
+\${MICROMAMBA_HOME}/bin/micromamba --root-prefix \${MICROMAMBA_HOME}/mamba create --channel conda-forge --channel bioconda --override-channels \$@
+EOF
+    chmod +x "${target_dir}/bin/mm-create"
+
+#     cat << EOF > "${target_dir}/bin/mm-clean"
+# #!/usr/bin/bash
+# \${MICROMAMBA_HOME}/bin/micromamba --root-prefix \${MICROMAMBA_HOME}/mamba clean --packages --tarballs \$@
+# EOF
+#     chmod +x "${target_dir}/bin/mm-clean"
 }
 
 special_modulefiles() {

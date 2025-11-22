@@ -188,7 +188,9 @@ These will edit `modules/modulefiles/bcftools/1.21` and `modules/modulefiles/bcf
 
 #### Example of custom modulefile
 
-In [picard](build-scripts/picard/), I created a custom modulefile `build-scripts/cellranger/template(.lua)` to set the environment variables.
+In [micromamba](build-scripts/micromamba/), I created a custom modulefile `build-scripts/micromamba/template(.lua)` to have better prompt.
+
+In [orad](build-scripts/orad/), I added custom environment variables in [orad/2.7.0](build-scripts/orad/2.7.0).
 
 How to set your own custom modulefile? see the next section.
 
@@ -272,8 +274,8 @@ set name [file tail $abs_path]
 
 ## Template script
 
-- [modulefile template](build-scripts/template)
-- [Lmod template.lua](build-scripts/template.lua)
+- [modulefile template](build-scripts/template) (Tcl script for Environment Modules)
+- [Lmod template.lua](build-scripts/template.lua) (Lua script for Lmod)
 
 Where to store:
 

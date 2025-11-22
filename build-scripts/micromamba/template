@@ -1,0 +1,60 @@
+#%Module1.0
+# Author: Ziyue Cheng
+# Almost all of them are automated, you can modify whatis, ModulesHelp, and APP_HOME as needed.
+# Search TOCHANGE to find the targets.
+# You can also load other modules in this modulefile.
+#   module load java/17.0.12
+
+# abs path of this file, like /somewhere/modules/modulefiles/app/x.x.x
+set abs_path [file normalize [info script]]
+# full name of this module, like app/x.x.x
+set app_full_name [module-info name]
+# name of this module, like app
+set app_name [file dirname $app_full_name]
+# version of this app, like x.x.x
+set app_version [file tail $app_full_name]
+# abs path of modules, like /somewhere/modules
+set module_root [file dirname [file dirname [file dirname $abs_path]]]
+# abs path of the apps/app/x.x.x , like /somewhere/modules/apps/app/x.x.x
+set app_root [file join $module_root apps $app_full_name]
+# record current date time
+set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %T"]
+
+# TOCHANGE: A brief description using module-whatis
+module-whatis "Loads $app_name version $app_version"
+
+# TOCHANGE: Detailed Help Section
+proc ModulesHelp { } {
+    # cannot use variables here
+    puts stderr "Placeholder for the usage of this module."
+}
+
+# Display a help message when loading this module
+if { [module-info mode] == "load" } {
+    puts stderr "\[$current_datetime\] Loading module $app_full_name"
+    puts stderr "Available scripts:"
+    puts stderr "  mm         : micromamba but set root prefix to MICROMAMBA_HOME/mamba"
+    puts stderr "  mm-create  : create environment with conda-forge and bioconda channels"
+    puts stderr ""
+    puts stderr "WARNING: You should not use mm for managing personal environments."
+    puts stderr "    Only use mm-create in build-scripts to create environments for modules."
+    puts stderr "    You can use mm clean to clean up micromamba cache, tarballs, and unused packages. Be careful when cleaning packages!"
+} elseif { [module-info mode] == "unload" } {
+    # puts stderr "\[$current_datetime\] Unloading module $app_full_name"
+}
+
+# Modify environment variables if the folders exist
+if {[file isdirectory "$app_root/bin"]} {
+    prepend-path PATH $app_root/bin
+} elseif { [module-info mode] == "load" && ![info exists ::env(SLURM_JOB_ID)] } {
+    puts stderr "WARNING: No bin directory found in $app_full_name"
+}
+
+set env_var_name "[string toupper [string map {- _} $app_name]]_HOME"
+setenv $env_var_name $app_root
+# TOCHANGE: Set custom environment variables and aliases
+# setalias run_app "$app_root/bin/app"
+
+# Handle conflicts with other versions
+conflict $app_name
+
