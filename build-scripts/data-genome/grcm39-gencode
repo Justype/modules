@@ -10,7 +10,6 @@
 install_app() {
     module load samtools
 
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
     cd "$target_dir"
     url='https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_M38/GRCm39.primary_assembly.genome.fa.gz'
@@ -18,7 +17,7 @@ install_app() {
     wget -nv -O "GRCm39.primary_assembly.genome.fa.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    gunzip "GRCm39.primary_assembly.genome.fa.gz"
+    pigz_or_gunzip "GRCm39.primary_assembly.genome.fa.gz"
 
     print_stderr "Indexing ${YELLOW}${app_name_version}${NC} with samtools faidx"
     samtools faidx "GRCm39.primary_assembly.genome.fa"

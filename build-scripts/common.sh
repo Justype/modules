@@ -269,6 +269,14 @@ print_stderr() {
     printf "[`date +"%Y-%m-%d %T"`] $1\n" 1>&2
 }
 
+pigz_or_gunzip() {
+    if command -v pigz &> /dev/null; then
+        pigz -d -p $ncpu "$1"
+    else
+        gunzip "$1"
+    fi
+}
+
 remove_default_dependencies() {
     dep_name="$1"
 

@@ -9,7 +9,6 @@
 gencode_version="47"
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
@@ -18,7 +17,7 @@ install_app() {
     wget -nv -O "gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    gunzip "gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz"
+    pigz_or_gunzip "gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz"
 
     print_stderr "Moving files to target directory"
     mv "gencode.v${gencode_version}.primary_assembly.annotation.gtf" "$target_dir/"

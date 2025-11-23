@@ -7,7 +7,6 @@
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir/bin"   # modules/apps/name/version/bin
 
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"

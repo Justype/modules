@@ -18,7 +18,7 @@ install_app() {
     wget -nv -O "GRCh38.primary_assembly.genome.fa.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    gunzip "GRCh38.primary_assembly.genome.fa.gz"
+    pigz_or_gunzip "GRCh38.primary_assembly.genome.fa.gz"
 
     print_stderr "Indexing ${YELLOW}${app_name_version}${NC} with samtools faidx"
     samtools faidx "GRCh38.primary_assembly.genome.fa"

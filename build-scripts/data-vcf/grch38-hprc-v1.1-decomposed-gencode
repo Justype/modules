@@ -13,7 +13,6 @@
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"

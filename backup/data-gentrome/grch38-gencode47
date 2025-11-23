@@ -10,6 +10,8 @@
 #########################################################
 # GRCh38 GENCODE 47 gentrome FASTA for pseudoalignment
 # - https://salmon.readthedocs.io/en/latest/salmon.html#preparing-transcriptome-indices-mapping-based-mode
+# NOTE: mapmap will consume a lot of memory when indexing large genomes
+# over 400GB RAM may be required for human genome
 #########################################################
 
 install_app() {

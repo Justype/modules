@@ -10,7 +10,6 @@
 #########################################################
 
 install_app() {
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
@@ -20,7 +19,7 @@ install_app() {
     module load star
 
     print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
-    STAR --runThreadN "${ncpu}" \
+    STAR --runThreadN $ncpu \
         --runMode genomeGenerate \
         --genomeDir "$target_dir" \
         --genomeFastaFiles "$GENOME_FASTA" \

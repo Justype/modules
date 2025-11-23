@@ -12,7 +12,6 @@ gencode_version="M36"
 install_app() {
     module load samtools
 
-    # mkdir -p "$target_base_dir"  # modules/apps/name
     mkdir -p "$target_dir"       # modules/apps/name/version
     cd "$target_dir"
     url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_${gencode_version}/gencode.v${gencode_version}.transcripts.fa.gz"
@@ -20,7 +19,7 @@ install_app() {
     wget -nv -O "gencode.v${gencode_version}.transcripts.fa.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    gunzip "gencode.v${gencode_version}.transcripts.fa.gz"
+    pigz_or_gunzip "gencode.v${gencode_version}.transcripts.fa.gz"
 
     print_stderr "Indexing ${YELLOW}${app_name_version}${NC} with samtools faidx"
     samtools faidx "gencode.v${gencode_version}.transcripts.fa"

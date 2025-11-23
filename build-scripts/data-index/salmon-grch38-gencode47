@@ -1,5 +1,6 @@
 #!/usr/bin/bash
-#DEPENDENCY:data-gentrome/grch38-gencode47
+#DEPENDENCY:data-genome/grch38-gencode
+#DEPENDENCY:data-transcriptome/grch38-gencode47
 #DEPENDENCY:salmon/*
 #WHATIS:Salmon GRCh38 GENCODE 47 index for transcript quantification
 
@@ -10,19 +11,31 @@
 #########################################################
 
 install_app() {
-
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    module load data-gentrome/grch38-gencode47
+    module load data-genome/grch38-gencode
+    module load data-transcriptome/grch38-gencode47
     module load salmon
+
+    print_stderr "Concatenating genome to transcriptome and generate decoys..."
+    cat \
+        "$TRANSCRIPT_FASTA" \
+        "$GENOME_FASTA" \
+        > gentrome.fa
+    
+    cat "$GENOME_FASTA" | \
+        grep "^>" | \
+        cut -d " " -f 1 | \
+        sed 's/^>//' \
+        > decoys.txt
 
     print_stderr "Building Salmon index for ${YELLOW}${app_name_version}${NC}"
     salmon index \
         -p $ncpu \
-        -t "$GENTROME_FASTA" \
-        -d "$DECOYS_TXT" \
+        -t gentrome.fa \
+        -d decoys.txt \
         -i "$target_dir" \
         --gencode
 }
