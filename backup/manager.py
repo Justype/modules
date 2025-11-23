@@ -11,19 +11,16 @@ import shutil
 import argparse
 from typing import Dict, List, Optional
 
-# External libraries
-import requests
-from bs4 import BeautifulSoup
-
 class Config:
     # TSV fields: package | tags | whatis | url | conda | versions
-    metadata_root = "./metadata"          # Default metadata root
+    # metadata_root = "./metadata"          # Default metadata root
+    metadata_root = "./backup"
     build_scripts_path = "./build-scripts"  # Default build scripts path
     apps_path = "./apps"                    # Default installation path
     modulefiles_path = "./modulefiles"      # Default modulefiles path
-    micromamba_root = "./conda"             # Default micromamba root
+    micromamba_root = "./mamba"             # Default micromamba root
     tsv_path = os.path.join(metadata_root, "packages.tsv")  # Default TSV path
-    
+
 def main():
     parser = argparse.ArgumentParser(description="Package Manager")
     parser.add_argument("-i", "--install", type=str, help="<package>/<version> to install")
@@ -165,6 +162,13 @@ class Package:
         """Fetch whatis and url from Anaconda.org if conda!=NA."""
         if self.conda == "NA":
             return True  # nothing to do
+        
+        try:
+            import requests
+            from bs4 import BeautifulSoup
+        except ImportError:
+            print("Required libraries 'requests' and 'beautifulsoup4' not installed.")
+            return False
 
         url_page = f"https://anaconda.org/{self.conda}/{self.package}"
         resp = requests.get(url_page)
