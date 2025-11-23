@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:data-fasta/grcm39-genome-gencode
+#DEPENDENCY:data-genome/grcm39-gencode
 #DEPENDENCY:data-gtf/grcm39-gencodeM36
 #DEPENDENCY:star/*
 #WHATIS:STAR GRCm39 GENCODE M36 index for read length 151
@@ -15,7 +15,7 @@ install_app() {
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    module load data-fasta/grcm39-genome-gencode
+    module load data-genome/grcm39-gencode
     module load data-gtf/grcm39-gencodeM36
     module load star
 
@@ -32,6 +32,7 @@ special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
     remove_default_dependencies "star"
+    remove_default_dependencies "data"
 
     # add custom environment variables and functions to modulefile
     # ref_root is a special variable that points to the app directory in modulefile[.lua]

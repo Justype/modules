@@ -44,7 +44,6 @@ $ module load data-index/cellranger-grch38-2024-A
 Available environment variables:
   CELLRANGER_REF_DIR (reference directory: cellranger)
   GENOME_FASTA       (fasta file)
-  GENOME_FASTA_FAI   (fasta fai index)
   ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)
   STAR_INDEX_DIR     (star index: star alignment)
 ```

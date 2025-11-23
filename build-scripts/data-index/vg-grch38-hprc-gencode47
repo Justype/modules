@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:data-fasta/grch38-genome-gencode
+#DEPENDENCY:data-genome/grch38-gencode
 #DEPENDENCY:data-gtf/grch38-gencode47
 #DEPENDENCY:data-vcf/grch38-hprc-v1.1-decomposed-gencode
 #DEPENDENCY:vg/*
@@ -19,7 +19,7 @@ install_app() {
     cd "$tmp_dir"
     mkdir -p vg-tmp
     
-    module load data-fasta/grch38-genome-gencode
+    module load data-genome/grch38-gencode
     module load data-gtf/grch38-gencode47
     module load data-vcf/grch38-hprc-v1.1-decomposed-gencode
     module load vg
