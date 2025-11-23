@@ -25,10 +25,9 @@ if (mode() == "load") then
     io.stderr:write("Available scripts:\n")
     io.stderr:write("  mm         : micromamba but set root prefix to MICROMAMBA_HOME/mamba\n")
     io.stderr:write("  mm-create  : create environment with conda-forge and bioconda channels\n")
-    io.stderr:write("\n")
-    io.stderr:write("WARNING: You should not use mm for managing personal environments.\n")
-    io.stderr:write("    Only use mm-create in build-scripts to create environments for modules.\n")
-    io.stderr:write("    You can use mm clean to clean up micromamba cache, tarballs, and unused packages. Be careful when cleaning packages!\n")
+    io.stderr:write("NOTE: You should not use mm for managing personal environments.\n")
+    io.stderr:write("  Only use mm-create in build-scripts to create environments for modules.\n")
+    io.stderr:write("  You can use mm clean to clean up micromamba cache, tarballs, and unused packages. Be careful when cleaning packages!\n")
     -- # only display message if not in SLURM
     -- if os.getenv("SLURM_JOB_ID") == nil then
     -- end

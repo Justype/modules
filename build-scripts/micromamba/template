@@ -35,10 +35,9 @@ if { [module-info mode] == "load" } {
     puts stderr "Available scripts:"
     puts stderr "  mm         : micromamba but set root prefix to MICROMAMBA_HOME/mamba"
     puts stderr "  mm-create  : create environment with conda-forge and bioconda channels"
-    puts stderr ""
-    puts stderr "WARNING: You should not use mm for managing personal environments."
-    puts stderr "    Only use mm-create in build-scripts to create environments for modules."
-    puts stderr "    You can use mm clean to clean up micromamba cache, tarballs, and unused packages. Be careful when cleaning packages!"
+    puts stderr "NOTE: You should not use mm for managing personal environments."
+    puts stderr "  Only use mm-create in build-scripts to create environments for modules."
+    puts stderr "  You can use mm clean to clean up micromamba cache, tarballs, and unused packages. Be careful when cleaning packages!"
 } elseif { [module-info mode] == "unload" } {
     # puts stderr "\[$current_datetime\] Unloading module $app_full_name"
 }
