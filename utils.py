@@ -78,30 +78,19 @@ def get_status()-> dict:
 
     return status
 
-def parse_version_key(version: str):
+def parse_version_key(version: str) -> tuple:
     """
-    Parse the version key from the version string
-
-    Args:
-        version (str): The version string
-
-    Returns:
-        tuple: A tuple containing the major, minor, and patch versions
+    Parse a version string into a tuple suitable for sorting.
+    Numbers are converted to (num, '') and letters to (0, str)
+    This allows comparing tuples like (1,22,'a') and (1,23,1)
     """
     components = re.findall(r'(\d+)|([a-zA-Z]+)', version)
-    # Example breakdown:
-    # "1.10.2b" -> [('1', ''), ('10', ''), ('2', ''), ('', 'b')]
-    # "2025c"   -> [('2025', ''), ('', 'c')]
-    # "3.0"     -> [('3', ''), ('0', '')]
     parsed_key = []
     for num_str, alpha_str in components:
         if num_str:
-            # Append numbers as integers for correct numerical comparison
-            parsed_key.append(int(num_str))
+            parsed_key.append( (int(num_str), '') )   # numeric -> (num, '')
         elif alpha_str:
-            # Append letter sequences as strings for lexicographical comparison
-            parsed_key.append(alpha_str)
-
+            parsed_key.append( (0, alpha_str) )      # letters -> (0, 'letters')
     return tuple(parsed_key)
 
 def version_order(versions: list, descending=True) -> list:

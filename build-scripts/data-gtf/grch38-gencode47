@@ -6,7 +6,9 @@
 # - https://www.gencodegenes.org/human/
 #########################################################
 
-gencode_version="47"
+# Get the gencode version from the script name
+script_name=$(basename "$0")
+gencode_version="${script_name##*-gencode}"
 
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version

@@ -46,7 +46,6 @@ help_message() {
     echo "Usage: bash $0 [options]" 1>&2
     echo "Options:" 1>&2
     echo "  -i  Install the target module with dependencies." 1>&2
-    echo "  -o  Only install the target module without dependencies." 1>&2
     echo "  -l  List the dependencies of the target module." 1>&2
     echo "  -d  Delete the target module." 1>&2
     echo "  -s  Set this version as the default version." 1>&2
@@ -54,7 +53,6 @@ help_message() {
 }
 
 install() {
-    install_type="${1:-}"
     # set traps for cleanup when installation ends or errors occur
     # For ERR and INT, run clean_up then either `exit` (if this script is executed)
     # or `return` (if this file was sourced) so we don't remain in any blocking `read`.
@@ -72,12 +70,11 @@ install() {
         print_stderr "Exit Installing"
         exit 1
     fi
-    if [ "$install_type" != only ]; then # skip the dependencies if $1 == only
-        print_stderr "🤔 Checking dependencies..."
-        dependencies=$(get_dependencies)
-        check_dependencies "$dependencies"
-        install_dependencies "$dependencies"
-    fi
+    print_stderr "🤔 Checking dependencies..."
+    dependencies=$(get_dependencies)
+    check_dependencies "$dependencies"
+    install_dependencies "$dependencies"
+    load_dependencies "$dependencies"
     install_app
     copy_modulefile
     print_stderr "✅ Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
@@ -228,6 +225,23 @@ install_dependencies() {
     done
 }
 
+load_dependencies() {
+    # Load the dependencies in the current shell
+    autoload=$(grep -oP "^#AUTOLOAD_DEPENDENCY:\K.*" "$install_script_path" | cut -d' ' -f1)
+    if [ -n "$autoload" ]; then
+        if [[ "$autoload" =~ ^(FALSE|False|false)$ ]]; then
+            return 0
+        fi
+    fi
+
+    for dep in $1; do
+        dep_name="${dep%/*}"
+        dep_version="${dep#*/}"
+        print_stderr "Loading dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
+        module load "${dep_name}/${dep_version}"
+    done
+}
+
 copy_modulefile() {
     print_stderr "Copying modulefile to $script_path"
     mkdir -p "$script_base_dir"
@@ -347,7 +361,6 @@ main() {
         case ${opt} in
             h ) help_message ; exit;;
             i ) install ;;
-            o ) install only ;;
             l ) print_dependencies ;;
             s ) set_default ;;
             d ) delete ;;

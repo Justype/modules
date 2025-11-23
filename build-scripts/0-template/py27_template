@@ -1,5 +1,5 @@
 #!/usr/bin/bash
-#DEPENDENCY:python/2.7.15
+#DEPENDENCY:python/2.7*
 #WHATIS:Template for building a module
 
 #########################################################
@@ -9,7 +9,6 @@
 #########################################################
 
 install_app() {
-    module load python/2.7.15
     print_stderr "Installing ${YELLOW}${app_name_version}${NC} using pip"
     virtualenv "$target_dir"
     "$target_dir/bin/pip" install -q --no-cache-dir $app_name==$version

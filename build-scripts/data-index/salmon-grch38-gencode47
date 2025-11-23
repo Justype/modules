@@ -5,7 +5,6 @@
 #WHATIS:Salmon GRCh38 GENCODE 47 index for transcript quantification
 
 #########################################################
-# Salmon GRCh38 GENCODE 47 index for transcript quantification
 # - https://combine-lab.github.io/salmon/
 # - https://salmon.readthedocs.io/en/latest/salmon.html#preparing-transcriptome-indices-mapping-based-mode
 #########################################################
@@ -15,11 +14,7 @@ install_app() {
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    module load data-genome/grch38-gencode
-    module load data-transcriptome/grch38-gencode47
-    module load salmon
-
-    print_stderr "Concatenating genome to transcriptome and generate decoys..."
+    print_stderr "Appending genome to transcriptome and generating decoys..."
     cat \
         "$TRANSCRIPT_FASTA" \
         "$GENOME_FASTA" \

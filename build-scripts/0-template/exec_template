@@ -3,7 +3,7 @@
 
 #########################################################
 # Template for building a module (single executable)
-# - You ccan change the url to the actual download link (with $version)
+# - You can change the url to the actual download link (with $version)
 #########################################################
 
 install_app() {

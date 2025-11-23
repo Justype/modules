@@ -20,9 +20,6 @@ install_app() {
     print_stderr "Downloading mapping file for chromosome names conversion from UCSC to GENCODE style"
     wget -Nnv 'https://raw.githubusercontent.com/dpryan79/ChromosomeMappings/refs/heads/master/GRCh38_UCSC2gencode.txt'
 
-    module load bcftools
-    module load htslib
-    module load data-vcf/grch38-hprc-v1.1-decomposed
     print_stderr "Converting HPRC v1.1 GRCh38 VCF to GENCODE-style chromosome names"
     header=$(bcftools annotate --rename-chrs GRCh38_UCSC2gencode.txt $HPRC_VCF_GZ | head -n 1000 | grep "^#")
     print_stderr "Sorting and compressing HPRC v1.1 GRCh38 GENCODE-style VCF"

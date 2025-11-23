@@ -26,6 +26,12 @@ options:
 - `-l`  List dependencies of target module.
 - `-h`  Help message.
 
+If you want to increase the number of threads, you can set env `SLURM_CPUS_PER_TASK`. If you are using slurm, it will automatically use the number of cpus allocated.
+
+```bash
+SLURM_CPUS_PER_TASK=16 ./build-scripts/<app>/<version> -i
+```
+
 ## `utils.py`
 
 Utility script for modules overview and batch operations.

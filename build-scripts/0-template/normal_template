@@ -9,6 +9,9 @@
 # - Add dependencies in the header with #DEPENDENCY:app_name/version
 #    - version can be specific or with * wildcard
 #    - e.g. jdk/21.0.5 or jdk/21* or jdk/*
+#
+# - NOTE: By default, all dependencies will be auto loaded before installation.
+#         If you don't want that, add the line #AUTOLOAD_DEPENDENCY:FALSE in the header.
 #########################################################
 
 install_app() {

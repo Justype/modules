@@ -5,26 +5,26 @@
 #WHATIS:STAR GRCm39 GENCODE M36 index for read length 151
 
 #########################################################
-# STAR GRCm39 GENCODE M36 index for read length 151
-# --sjdbOverhang 150 # read length -1
+# - https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 #########################################################
+
+# Get the sequence length from the script name
+script_name=$(basename "$0")
+seq_len=${script_name##*-} # extract everything after the last hyphen
+build_len=$((seq_len - 1))
 
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    module load data-genome/grcm39-gencode
-    module load data-gtf/grcm39-gencodeM36
-    module load star
-
     print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
     STAR --runThreadN $ncpu \
         --runMode genomeGenerate \
         --genomeDir "$target_dir" \
         --genomeFastaFiles "$GENOME_FASTA" \
         --sjdbGTFfile "$ANNOTATION_GTF" \
-        --sjdbOverhang 150
+        --sjdbOverhang $build_len
 }
 
 special_modulefiles() {

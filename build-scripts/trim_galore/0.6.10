@@ -2,6 +2,7 @@
 #DEPENDENCY:cutadapt/*
 #DEPENDENCY:fastqc/*
 #WHATIS:Wrapper tool around Cutadapt and FastQC for fastq QC and trimming
+#AUTOLOAD_DEPENDENCY:FALSE
 
 #########################################################
 # Trim Galore

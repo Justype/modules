@@ -42,7 +42,6 @@ install_app() {
         tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
     else
         print_stderr "This is not a x64 Fedora or Debian based machine."
-        module load micromamba
         print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
         mm-create -yq --prefix "$target_dir" ${app_name}=${version}
 

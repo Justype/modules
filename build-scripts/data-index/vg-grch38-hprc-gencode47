@@ -18,11 +18,6 @@ install_app() {
     cd "$tmp_dir"
     mkdir -p vg-tmp
     
-    module load data-genome/grch38-gencode
-    module load data-gtf/grch38-gencode47
-    module load data-vcf/grch38-hprc-v1.1-decomposed-gencode
-    module load vg
-
     print_stderr "Building VG graph index for ${YELLOW}${app_name_version}${NC}"
     vg autoindex --workflow mpmap --workflow rpvg \
         --prefix hprc-v1.1-mc-grch38-gencode47 \
