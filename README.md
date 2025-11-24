@@ -4,57 +4,65 @@ Make sure you run `module use /somewhere/modules/modulefiles` to use these modul
 
 Personally, I recommend you to use `conda` or `mamba` for most of the bioinfo tools. But if you want to use environment modules/lmod, this is a good place to start.
 
+If a package in available in bioconda/conda-forge, you can use `./manager.py -i <app>/<version>` to install it automatically.
+
+If you want to install a package that is not available in bioconda/conda-forge, you can create your own installation script under `build-scripts/<app>/<version>`. e.g. [cellranger/9.0.1](build-scripts/cellranger/9.0.1).
+
+You can search for available packages on [anaconda.org](https://anaconda.org).
+
 ## TOC
 
 - [How to Install/Remove Custom Modules](#how-to-installremove-custom-modules)
-- [Version Dependent Packages](#version-dependent-packages)
 - [Setup Environment Modules](#setup-environment-modules)
 - [How to create your own module](#how-to-create-your-own-module)
-- [How does modules work?](#how-does-modules-work)
+- [How does modules work?](#how-does-module-work)
 - [Template script](#template-script)
 
-## `build-scripts/<app>/<version>`
+## Manager Script: [manager.py](manager.py)
+
+The manager script utilizes the conda-forge and bioconda databases to download all pre-compiled binaries and create modulefiles for them.
+
+Usage: `./manager.py [options] <app>/<version>`
+
+Quick example:
+
+```bash
+# Try to get package info for sra-tools and add it to the local database
+./manager.py -a sra-tools
+# Install the latest version of sra-tools
+./manager.py -i sra-tools
+# Install sra-tools with version 3.*
+./manager.py -i sra-tools/3*
+
+# Remove sra-tools version 3.1.1
+./manager.py -d sra-tools/3.1.1
+# Search for packages related to "aligner"
+./manager.py -s aligner
+# Show detailed info for package "fastqc"
+./manager.py -I fastqc
+# Update the local database
+./manager.py -u
+```
+
+## Custom Packages `build-scripts/<app>/<version>`
 
 Usage: `./build-scripts/<app>/<version> [options]`
 
 options:
 
 - `-i`  Install the target module with its dependencies.
-- `-o`  Only install the target module.
 - `-d`  Delete the target module.
-- `-s`  Set this version as the default version. (Not working if `tclsh` is missing)
-- `-l`  List dependencies of target module.
 - `-h`  Help message.
 
 If you want to increase the number of threads, you can set env `SLURM_CPUS_PER_TASK`. If you are using slurm, it will automatically use the number of cpus allocated.
 
 ```bash
 SLURM_CPUS_PER_TASK=16 ./build-scripts/<app>/<version> -i
-```
 
-## `utils.py`
-
-Utility script for modules overview and batch operations.
-
-If run with no arguments, it will list all the modules, whatis, and their status.
-
-```
-usage: utils.py [-h] [-s NAME] [-la] [-lw] [-lu] [-ln] [-li] [-in] [-d] [-S]
-
-Utility script for modules overview and batch operations
-You can use ./build-scripts/app/version -h for help on individual build scripts
-
-options:
-  -h, --help            show this help message and exit
-  -s NAME, --search NAME search for an app and whatis by name
-  -la, --list-all        list all the app/versions and their status
-  -lw, --list-whatis     list apps with whatis only
-  -lu, --list-upgradable list upgradable apps
-  -ln, --list-newer      list apps with newer version (even if not installed)
-  -li, --list-installed  list installed apps with versions
-  -in, --install-newest  install newest version of each app
-  -d, --delete-all       delete all installed apps
-  -S, --set-latest       set the latest version as default for all installed apps
+# e.g. Build salmon index with 16 threads
+SLURM_CPUS_PER_TASK=16 ./build-scripts/data-index/salmon-grch38-gencode47 -i
+# or
+SLURM_CPUS_PER_TASK=16 ./manager.py -i data-index/salmon-grch38-gencode47
 ```
 
 ## How to Install/Remove Custom Modules
@@ -62,43 +70,29 @@ options:
 ### Install
 
 1. go into `modules` folder
-2. run build scripts with `-i`, e.g. `./build-scripts/sra-tools/3.1.1 -i`
-
-Most of my scripts are **version independent**. It will automatically download the same version as the file name. Just copy the the older version script to a new version and run it.
-
-But when the download link is changed or the installation procedure is changed, you may need to edit the script.
-
-For example, [sra-tools/3.2.1](build-scripts/sra-tools/3.2.1) has different download link for the previous version [3.1.1](build-scripts/sra-tools/3.1.1). They changed the compiling machine from centOS to alma.
-
-#### Do not use `sbatch` to install
-
-- My script use its name and path to find version and installation path.
-- The `sbatch` will save the script into its own directory:
-  - like `/opt/slurm/data/slurmd/job53753702/slurm_script`
-- Use a script to wrap it or use `srun`
+2. `./manager.py -i <app>/<version>`
 
 ### Remove
 
 Currently can only remove one version at a time. Cannot remove the dependency automatically.
 
 1. go into `modules` folder
-2. run build scripts with `-d`, e.g. `./build-scripts/sra-tools/3.1.1 -d`
-
-## Version Dependent Packages
-
-goto [build-scripts README](build-scripts/README.md) for detailed
-
-- [Cell Ranger](build-scripts/README.md#cell-ranger)
-  - You need key-pair to download the it. If it fails, change the link.
-  - https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions
+2. `./manager.py -d <app>/<version>`
 
 ## Setup Environment Modules
 
-It is installed by default on Redhat. In Ubuntu, you need to install and init it.
+You can either use Environment Modules or Lmod.
 
 ```bash
+# install Environment Modules
 sudo apt update -y
 sudo apt install -y environment-modules
+```
+
+```bash
+# install Lmod
+sudo apt update -y
+sudo apt install -y lmod
 ```
 
 If you have custom modulefiles, You can add `module use <path>/modules/modulefiles` to your `$HOME/.bashrc`.
@@ -123,10 +117,8 @@ What does the script do?
 ### Available Installation Templates
 
 - [normal_template](build-scripts/0-template/normal_template)
-- [make_template](build-scripts/0-template/make_template)
 - [python27_template](build-scripts/0-template/py27_template)
 - [python311_template](build-scripts/0-template/py311_template)
-- [python312_template](build-scripts/0-template/py312_template)
 
 ### What you need to do to make your own installation script
 
@@ -142,7 +134,7 @@ What does the script do?
 
 You need to set `#DEPENDENCY:<name>/<version>` at the top of your installation script.
 
-This is an example of [picard/3.3.0](build-scripts/picard/3.3.0). Here I set `picard` depends on `java` 21.
+This is an example of [picard/3.3.0](backup/build-scripts/picard/3.3.0). Here I set `picard` depends on `java` 21.
 
 ```bash
 #!/usr/bin/bash

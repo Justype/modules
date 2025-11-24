@@ -39,6 +39,8 @@ script_base_dir="${modules_root}/modulefiles/${app_name}"      # modules/modulef
 script_path="${modules_root}/modulefiles/${app_name_version}"  # modules/modulefiles/name/version
 
 tmp_dir="${modules_root}/tmp/${app_name_version}" # tmp directory
+manager_script="${modules_root}/manager.py" # manager script path
+dependencies=$("$manager_script" --print-dependencies "${app_name}/${version}")
 #endregion
 
 #region OPTION_FUNCTIONS
@@ -70,11 +72,14 @@ install() {
         print_stderr "Exit Installing"
         exit 1
     fi
-    print_stderr "🤔 Checking dependencies..."
-    dependencies=$(get_dependencies)
-    check_dependencies "$dependencies"
-    install_dependencies "$dependencies"
-    load_dependencies "$dependencies"
+
+    print_stderr "Checking dependencies for ${YELLOW}${app_name_version}${NC}"
+    install_dependencies
+
+    for dep in $dependencies; do
+        print_stderr "Loading dependency: ${BLUE}${dep}${NC}"
+        module load "${dep}" &> /dev/null # suppress output
+    done
     install_app
     copy_modulefile
     print_stderr "✅ Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
@@ -148,28 +153,6 @@ set_default() {
     exit
 }
 
-get_dependencies() {
-    # Get the dependencies from the script and put them to stdout
-    if ! grep -q "^#DEPENDENCY:" "$install_script_path"; then
-        return 0
-    fi
-
-    for dep in $(grep -oP "^#DEPENDENCY:\K.*" "$install_script_path"); do
-        if [[ "$dep" =~ \* ]]; then
-            dep_name="${dep%/*}"
-            version_pattern="${dep#*/}"
-            versions="$(ls ${modules_root}/build-scripts/${dep_name}/$version_pattern | xargs -n 1 basename | grep -v "^template")"
-            if [ $? -ne 0 ] || [ -z "$versions" ]; then
-                print_stderr "${RED}ERROR${NC}: Dependency not found: ${BLUE}${dep_name}${NC}"
-                exit 1
-            fi
-            echo "${dep_name}/$(echo "$versions" | sort -V | tail -n 1)"
-        else
-            echo "$dep"
-        fi
-    done
-}
-
 is_installed() {
     # $1: app_name $2: version
     if [ -d "${modules_root}/apps/${1}/${2}" ]; then
@@ -179,21 +162,9 @@ is_installed() {
     fi
 }
 
-check_dependencies() {
-    # Exit 1 if any dependency is not found
-    for dep in $1; do
-        dep_name="${dep%/*}"
-        dep_version="${dep#*/}"
-        if [ ! -x "${modules_root}/build-scripts/${dep_name}/${dep_version}" ]; then
-            print_stderr "${RED}ERROR${NC}: Dependency not found: ${BLUE}${dep_name}/${dep_version}${NC}"
-            exit 1
-        fi
-    done
-}
 
 print_dependencies() {
     printf "${YELLOW}$app_name_version${NC} dependencies:\n" 1>&2
-    dependencies=$(get_dependencies)
     # Print the dependencies
     if [ -n "$dependencies" ]; then
         for dep in $dependencies; do
@@ -209,19 +180,12 @@ print_dependencies() {
 
 install_dependencies() {
     # Install the dependencies
-    for dep in $1; do
-        dep_name="${dep%/*}"
-        dep_version="${dep#*/}"
-        if [ $(is_installed "$dep_name" "$dep_version") -eq 0 ]; then
-            print_stderr "${BLUE}${dep_name}/${dep_version}${NC} is already installed."
-        else
-            print_stderr "Installing dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
-            cd "${modules_root}" && bash "build-scripts/${dep_name}/${dep_version}" -i
-            if [ $? -ne 0 ]; then
-                print_stderr "${RED}ERROR${NC}: Dependency installation failed: ${BLUE}${dep_name}/${dep_version}${NC}"
-                exit 1
-            fi
+    for dep in $dependencies; do
+        if [ $(is_installed "${dep%/*}" "${dep#*/}") -eq 0 ]; then
+            continue
         fi
+        print_stderr "Installing dependency: ${BLUE}${dep}${NC} for ${YELLOW}${app_name_version}${NC}"
+        "$manager_script" -i "$dep"
     done
 }
 
@@ -238,7 +202,7 @@ load_dependencies() {
         dep_name="${dep%/*}"
         dep_version="${dep#*/}"
         print_stderr "Loading dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
-        module load "${dep_name}/${dep_version}"
+        module load "${dep_name}/${dep_version}" &> /dev/null # suppress output
     done
 }
 
@@ -256,7 +220,7 @@ copy_modulefile() {
     fi
 
     print_stderr "Editing the modulefile to include the dependencies"
-    for dep in $(get_dependencies); do
+    for dep in $dependencies; do
         dep_name="${dep%/*}"
         dep_version="${dep#*/}"
         print_stderr "Adding dependency: ${BLUE}${dep_name}/${dep_version}${NC}"

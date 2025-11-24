@@ -23,15 +23,16 @@ The previous structure works fine on environment modules but not on lmod. When l
 The scripts/modulefiles will be modified to set the env variables to point to the files. e.g. `CELLRANGER_REF_DIR`, `STAR_INDEX_DIR`, `GENOME_FASTA`, etc.
 
 ```
-build-scripts/data-fasta
-├── grch38-genome-gencode
-└── grch38-transcript-gencode47
+build-scripts/data-genome
+└── grch38-gencode
 build-scripts/data-gtf
 └── grch38-gencode47
 build-scripts/data-index
 ├── cellranger-grch38-2024-A
-├── star-grch38-gencode47-101
+├── salmon-grch38-gencode47
 └── star-grch38-gencode47-151
+build-scripts/data-transcriptome
+└── grch38-gencode47
 ```
 
 When loading the genome reference modulefile, the alignment or related tools will not be loaded automatically. You need to load them separately.
@@ -60,14 +61,6 @@ cellranger count \
   ...
 ```
 
-## BCFtools
-
-[BCFtools Howtos](https://samtools.github.io/bcftools/howtos/index.html)
-
-BCFtools's plugins are under `bcftools/version/libexec/bcftools`. You need to set `$BCFTOOLS_PLUGINS` to that directory so that BCFtools can find the plugins.
-
-e.g. `setenv BCFTOOLS_PLUGINS "$app_root/libexec/bcftools"` in `modulefiles/bcftools/version`
-
 ## Cell Ranger
 
 Since the link from 10X is only valid for **one** day, you will need to change the link to make it work.
@@ -86,18 +79,6 @@ GATK requires Java Environment to run. So In the building script, the latest jdk
 
 e.g. `load jdk/latest_version` in `modulefiles/gatk/version`
 
-## GDC-Client
-
-[GDC client](https://gdc.cancer.gov/access-data/gdc-data-transfer-tool) is used to transfer data from/to Genomic Data Commons.
-
-Version `2.x.x` requires `glibc 2.29` to run. If the `glibc` on your machine is below `2.29`, install version `1.6.1`.
-
-Use `ldd --version` to get `glibc` version.
-
-## KMC (K mer Counter)
-
-[KMC](https://github.com/refresh-bio/KMC) is a disk-based program for counting k-mers from (possibly gzipped) FASTQ/FASTA files.
-
 ## ORAD (ORA Decompress Tool)
 
 According to [Illumina instruction](https://help.ora.illumina.com/product-guides/dragen-ora-decompression/software-installation), `orad` needs `$ORA_REF_PATH/refbin` to decompress. So My script edit the `ORA_REF_PATH` env variable.
@@ -105,7 +86,3 @@ According to [Illumina instruction](https://help.ora.illumina.com/product-guides
 ## Picard
 
 [Picard](https://broadinstitute.github.io/picard/) is a `jar` not a program. Set `PICARD` env to the path of `jar`. And use `alias picard='java -jar $PICARD'` to set `picard` alias.
-
-## Strelka2 Small Variant Caller
-
-[Strelka2](https://github.com/Illumina/strelka) use Python2.

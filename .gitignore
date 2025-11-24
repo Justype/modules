@@ -6,6 +6,6 @@
 !README.md
 !build-scripts/
 !build-scripts/**
-!utils.py
+!manager.py
 !backup/
 !backup/**

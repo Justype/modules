@@ -1,5 +1,4 @@
 #!/usr/bin/bash
-#DEPENDENCY:micromamba/*
 #WHATIS:Python 3 with pip (conda-forge Build)
 
 #########################################################
@@ -8,13 +7,12 @@
 
 install_app() {
     print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
-    mm-create -yq --prefix "$target_dir" ${app_name}=${version} pip virtualenv
+    bin/mm-create -yq --prefix "$target_dir" ${app_name}=${version} pip virtualenv
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    remove_default_dependencies "micromamba"
     return 0
 }
 
