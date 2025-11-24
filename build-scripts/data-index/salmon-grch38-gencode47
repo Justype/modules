@@ -5,6 +5,11 @@
 #WHATIS:Salmon GRCh38 GENCODE 47 index for transcript quantification
 
 #########################################################
+# If you want to build index for another annotation version,
+#   1. copy the script to a new name, e.g., salmon-grch38-gencode49
+#   2. change the dependencies to the new genome and transcriptome data
+#   3. change the WHATIS line accordingly
+#
 # - https://combine-lab.github.io/salmon/
 # - https://salmon.readthedocs.io/en/latest/salmon.html#preparing-transcriptome-indices-mapping-based-mode
 #########################################################

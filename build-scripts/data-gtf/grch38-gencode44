@@ -1,62 +1,53 @@
 #!/usr/bin/bash
-#DEPENDENCY:data-genome/grcm39-gencode
-#DEPENDENCY:data-gtf/grcm39-gencodeM36
-#DEPENDENCY:star/*
-#WHATIS:STAR GRCm39 GENCODE M36 index for read length 101
+#WHATIS:GRCh38 reference genome GTF for GENCODE 44
 
 #########################################################
-# If you want to build index for another annotation version,
-#   1. copy the script to a new name, e.g., star-grcm39-gencodeM38-101
-#   2. change the dependencies to the new genome and transcriptome data (my script will autodetect the read length from the script name)
-#   3. change the WHATIS line accordingly
-#
-# - https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+# - https://www.gencodegenes.org/human/
 #########################################################
 
-# Get the sequence length from the script name
+# Get the gencode version from the script name
 script_name=$(basename "$0")
-seq_len=${script_name##*-} # extract everything after the last hyphen
-build_len=$((seq_len - 1))
+gencode_version="${script_name##*-gencode}"
 
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
-    
-    print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
-    STAR --runThreadN $ncpu \
-        --runMode genomeGenerate \
-        --genomeDir "$target_dir" \
-        --genomeFastaFiles "$GENOME_FASTA" \
-        --sjdbGTFfile "$ANNOTATION_GTF" \
-        --sjdbOverhang $build_len
+    url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_${gencode_version}/gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    wget -nv -O "gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    pigz_or_gunzip "gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz"
+
+    print_stderr "Moving files to target directory"
+    mv "gencode.v${gencode_version}.primary_assembly.annotation.gtf" "$target_dir/"
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
-    # app_root is a special variable that points to the app directory in modulefile[.lua]
-    remove_default_dependencies "star"
-    remove_default_dependencies "data"
-
-    # add custom environment variables and functions to modulefile
     # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    
+    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
-set star_index_dir \$ref_root
-setenv STAR_INDEX_DIR \$star_index_dir
+set annotation_gtf \$ref_root/gencode.v${gencode_version}.primary_assembly.annotation.gtf
+setenv ANNOTATION_GTF \$annotation_gtf
+
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
-    puts stderr "  STAR_INDEX_DIR       (STAR index directory)"
+    puts stderr "  ANNOTATION_GTF  (annotation gtf)"
 }
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local star_index_dir = ref_root
-setenv("STAR_INDEX_DIR", star_index_dir)
+local annotation_gtf = pathJoin(ref_root, "gencode.v${gencode_version}.primary_assembly.annotation.gtf")
+setenv("ANNOTATION_GTF", annotation_gtf)
+
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
-    io.stderr:write("  STAR_INDEX_DIR       (STAR index directory)\n")
+    io.stderr:write("  ANNOTATION_GTF  (annotation gtf)\n")
 end
 EOF
 }

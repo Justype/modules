@@ -1,8 +1,7 @@
 #!/usr/bin/bash
-#WHATIS:GRCm39 RMSK GTF
+#WHATIS:GRCm39 RepeatMasker GTF
 
 #########################################################
-# GRCm39 RMSK GTF
 # - https://genome.ucsc.edu/cgi-bin/hgTables
 # - https://genome.ucsc.edu/cgi-bin/hgTables?clade=mammal&org=Mouse&db=mm39&hgta_group=allTracks&hgta_track=rmsk&hgta_table=rmsk&hgta_regionType=genome&position=&hgta_outputType=gff&hgta_outFileName=mm39_rmsk.gtf&hgta_doTopSubmit=get+output
 # Currently UCSC table browser requires a verification step (captcha) to download RMSK GTF for hg38

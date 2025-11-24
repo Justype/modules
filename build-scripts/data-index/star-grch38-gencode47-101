@@ -5,6 +5,11 @@
 #WHATIS:STAR GRCh38 GENCODE47 index for read length 101
 
 #########################################################
+# If you want to build index for another annotation version,
+#   1. copy the script to a new name, e.g., star-grch38-gencode49-101
+#   2. change the dependencies to the new genome and transcriptome data (my script will autodetect the read length from the script name)
+#   3. change the WHATIS line accordingly
+#
 # - https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
 #########################################################
 

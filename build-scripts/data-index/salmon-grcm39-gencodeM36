@@ -1,62 +1,70 @@
 #!/usr/bin/bash
 #DEPENDENCY:data-genome/grcm39-gencode
-#DEPENDENCY:data-gtf/grcm39-gencodeM36
-#DEPENDENCY:star/*
-#WHATIS:STAR GRCm39 GENCODE M36 index for read length 101
+#DEPENDENCY:data-transcriptome/grcm39-gencodeM36
+#DEPENDENCY:salmon/*
+#WHATIS:Salmon GRCm39 GENCODE M36 index for transcript quantification
 
 #########################################################
 # If you want to build index for another annotation version,
-#   1. copy the script to a new name, e.g., star-grcm39-gencodeM38-101
-#   2. change the dependencies to the new genome and transcriptome data (my script will autodetect the read length from the script name)
+#   1. copy the script to a new name, e.g., salmon-grcm39-gencodeM38
+#   2. change the dependencies to the new genome and transcriptome data
 #   3. change the WHATIS line accordingly
 #
-# - https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf
+# - https://combine-lab.github.io/salmon/
+# - https://salmon.readthedocs.io/en/latest/salmon.html#preparing-transcriptome-indices-mapping-based-mode
 #########################################################
-
-# Get the sequence length from the script name
-script_name=$(basename "$0")
-seq_len=${script_name##*-} # extract everything after the last hyphen
-build_len=$((seq_len - 1))
 
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
     
-    print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
-    STAR --runThreadN $ncpu \
-        --runMode genomeGenerate \
-        --genomeDir "$target_dir" \
-        --genomeFastaFiles "$GENOME_FASTA" \
-        --sjdbGTFfile "$ANNOTATION_GTF" \
-        --sjdbOverhang $build_len
+    print_stderr "Appending genome to transcriptome and generating decoys..."
+    cat \
+        "$TRANSCRIPT_FASTA" \
+        "$GENOME_FASTA" \
+        > gentrome.fa
+    
+    cat "$GENOME_FASTA" | \
+        grep "^>" | \
+        cut -d " " -f 1 | \
+        sed 's/^>//' \
+        > decoys.txt
+
+    print_stderr "Building Salmon index for ${YELLOW}${app_name_version}${NC}"
+    salmon index \
+        -p $ncpu \
+        -t gentrome.fa \
+        -d decoys.txt \
+        -i "$target_dir" \
+        --gencode
 }
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # app_root is a special variable that points to the app directory in modulefile[.lua]
-    remove_default_dependencies "star"
+    remove_default_dependencies "salmon"
     remove_default_dependencies "data"
 
     # add custom environment variables and functions to modulefile
     # ref_root is a special variable that points to the app directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
-set star_index_dir \$ref_root
-setenv STAR_INDEX_DIR \$star_index_dir
+set salmon_index_dir \$ref_root
+setenv SALMON_INDEX_DIR \$salmon_index_dir
 if { [module-info mode] == "load" } {
     puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
-    puts stderr "  STAR_INDEX_DIR       (STAR index directory)"
+    puts stderr "  SALMON_INDEX_DIR       (Salmon index directory)"
 }
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local star_index_dir = ref_root
-setenv("STAR_INDEX_DIR", star_index_dir)
+local salmon_index_dir = ref_root
+setenv("SALMON_INDEX_DIR", salmon_index_dir)
 if (mode() == "load") then
     io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
-    io.stderr:write("  STAR_INDEX_DIR       (STAR index directory)\n")
+    io.stderr:write("  SALMON_INDEX_DIR       (Salmon index directory)\n")
 end
 EOF
 }
