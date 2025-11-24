@@ -47,9 +47,9 @@ special_modulefiles() {
     remove_default_dependencies "data"
 
     # add custom environment variables and functions to modulefile
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
-set salmon_index_dir \$ref_root
+set salmon_index_dir \$app_root
 setenv SALMON_INDEX_DIR \$salmon_index_dir
 if { [module-info mode] == "load" } {
     puts stderr "Available environment variables:"
@@ -58,7 +58,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local salmon_index_dir = ref_root
+local salmon_index_dir = app_root
 setenv("SALMON_INDEX_DIR", salmon_index_dir)
 if (mode() == "load") then
     io.stderr:write("Available environment variables:\n")

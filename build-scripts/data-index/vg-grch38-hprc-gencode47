@@ -44,15 +44,15 @@ special_modulefiles() {
     remove_default_dependencies "data"
 
     # add custom environment variables and functions to modulefile
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
-set vg_xg \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.xg
-set vg_dist \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.dist
-set vg_gcsa \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.gcsa
-set vg_gcsa_lcp \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.gcsa.lcp
-set vg_gbwt \$ref_root/hprc-v1.1-mc-grch38-gencode47.haplotx.gbwt
-set vg_gbwt_ri \$ref_root/hprc-v1.1-mc-grch38-gencode47.haplotx.gbwt.ri
-set vg_txorigin_tsv \$ref_root/hprc-v1.1-mc-grch38-gencode47.txorigin.tsv
+set vg_xg \$app_root/hprc-v1.1-mc-grch38-gencode47.spliced.xg
+set vg_dist \$app_root/hprc-v1.1-mc-grch38-gencode47.spliced.dist
+set vg_gcsa \$app_root/hprc-v1.1-mc-grch38-gencode47.spliced.gcsa
+set vg_gcsa_lcp \$app_root/hprc-v1.1-mc-grch38-gencode47.spliced.gcsa.lcp
+set vg_gbwt \$app_root/hprc-v1.1-mc-grch38-gencode47.haplotx.gbwt
+set vg_gbwt_ri \$app_root/hprc-v1.1-mc-grch38-gencode47.haplotx.gbwt.ri
+set vg_txorigin_tsv \$app_root/hprc-v1.1-mc-grch38-gencode47.txorigin.tsv
 
 setenv VG_XG \$vg_xg
 setenv VG_DIST \$vg_dist
@@ -75,7 +75,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local star_index_dir = ref_root
+local star_index_dir = app_root
 setenv("STAR_INDEX_DIR", star_index_dir)
 if (mode() == "load") then
     io.stderr:write("Available environment variables:\n")

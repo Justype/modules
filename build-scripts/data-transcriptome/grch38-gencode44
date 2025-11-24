@@ -26,12 +26,12 @@ install_app() {
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     remove_default_dependencies "samtools"
     
     # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
-set transcript_fasta \$ref_root/gencode.v${gencode_version}.transcripts.fa
+set transcript_fasta \$app_root/gencode.v${gencode_version}.transcripts.fa
 setenv TRANSCRIPT_FASTA \$transcript_fasta
 
 if { [module-info mode] == "load" } {
@@ -41,7 +41,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local transcript_fasta = pathJoin(ref_root, "gencode.v${gencode_version}.transcripts.fa")
+local transcript_fasta = pathJoin(app_root, "gencode.v${gencode_version}.transcripts.fa")
 setenv("TRANSCRIPT_FASTA", transcript_fasta)
 
 if (mode() == "load") then

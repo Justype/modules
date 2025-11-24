@@ -26,11 +26,11 @@ install_app() {
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     
     # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
-set RMSK_gtf \$ref_root/grch38_rmsk.gtf
+set RMSK_gtf \$app_root/grch38_rmsk.gtf
 setenv RMSK_GTF \$RMSK_gtf
 
 if { [module-info mode] == "load" } {
@@ -40,7 +40,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local rmsk_gtf = pathJoin(ref_root, "grch38_rmsk.gtf")
+local rmsk_gtf = pathJoin(app_root, "grch38_rmsk.gtf")
 setenv("RMSK_GTF", rmsk_gtf)
 
 if (mode() == "load") then

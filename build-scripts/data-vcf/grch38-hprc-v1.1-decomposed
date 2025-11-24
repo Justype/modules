@@ -27,12 +27,12 @@ install_app() {
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     
     # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
-set hprc_vcf_gz \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz
-set hprc_vcf_gz_tbi \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi
+set hprc_vcf_gz \$app_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz
+set hprc_vcf_gz_tbi \$app_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi
 setenv HPRC_VCF_GZ \$hprc_vcf_gz
 setenv HPRC_VCF_GZ_TBI \$hprc_vcf_gz_tbi
 
@@ -44,8 +44,8 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local hprc_vcf_gz = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz")
-local hprc_vcf_gz_tbi = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi")
+local hprc_vcf_gz = pathJoin(app_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz")
+local hprc_vcf_gz_tbi = pathJoin(app_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi")
 setenv("HPRC_VCF_GZ", hprc_vcf_gz)
 setenv("HPRC_VCF_GZ_TBI", hprc_vcf_gz_tbi)
 

@@ -22,9 +22,9 @@ install_app() {
 
 special_modulefiles() {
     # add custom environment variables and functions to modulefile
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
-set cellranger_ref_dir \$ref_root
+set cellranger_ref_dir \$app_root
 setenv CELLRANGER_REF_DIR \$cellranger_ref_dir
 set genome_fasta \$cellranger_ref_dir/fasta/genome.fa
 setenv GENOME_FASTA \$genome_fasta
@@ -43,7 +43,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local cellranger_ref_dir = ref_root
+local cellranger_ref_dir = app_root
 setenv("CELLRANGER_REF_DIR", cellranger_ref_dir)
 local genome_fasta = pathJoin(cellranger_ref_dir, "fasta/genome.fa")
 setenv("GENOME_FASTA", genome_fasta)

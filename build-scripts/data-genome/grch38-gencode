@@ -24,12 +24,12 @@ install_app() {
 
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # app_root is a special variable that points to the app directory in modulefile[.lua]
     remove_default_dependencies "samtools"
     
     # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
-set genome_fasta \$ref_root/GRCh38.primary_assembly.genome.fa
+set genome_fasta \$app_root/GRCh38.primary_assembly.genome.fa
 setenv GENOME_FASTA \$genome_fasta
 
 if { [module-info mode] == "load" } {
@@ -39,7 +39,7 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local genome_fasta = pathJoin(ref_root, "GRCh38.primary_assembly.genome.fa")
+local genome_fasta = pathJoin(app_root, "GRCh38.primary_assembly.genome.fa")
 setenv("GENOME_FASTA", genome_fasta)
 
 if (mode() == "load") then
