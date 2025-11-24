@@ -1,0 +1,118 @@
+#!/usr/bin/bash
+##DEPENDENCY:cellranger/9.0.1
+#WHATIS:Cell Ranger 9.0.1 Barcodes list
+
+#########################################################
+# - https://kb.10xgenomics.com/s/article/115004506263-What-is-a-barcode-inclusion-list-formerly-barcode-whitelist
+# - Can be copied from the cellranger
+# - under lib/python/cellranger/barcodes/
+#########################################################
+
+install_app() {
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$tmp_dir"          # tmp directory
+    cd "$tmp_dir"
+
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    wget -nv https://github.com/Justype/modules/releases/download/cellranger/cellranger_9.0.1_barcodes.tar.xz
+    
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar xf cellranger_9.0.1_barcodes.tar.xz -C "$target_dir" --strip-components=1
+
+    # # Or copy from cellranger installation
+    # print_stderr "Copying barcodes from cellranger installation"
+    # cp -r "$CELLRANGER_HOME/"lib/python/cellranger/barcodes/* "$target_dir/"
+    # # Remove python files
+    # rm -r "$target_dir/"__*
+    # rm "$target_dir/"*.py
+    # cp "$CELLRANGER_HOME/"lib/python/cellranger/chemistry_defs.json "$target_dir/"
+
+    # print_stderr "Unzipping gz files in ${YELLOW}${app_name_version}${NC}"
+    # gunzip "$target_dir/"*.gz
+    # gunzip "$target_dir/"*/*.gz
+}
+
+special_modulefiles() {
+    # add custom environment variables and functions to modulefile
+    # ref_root is a special variable that points to the app directory in modulefile[.lua]
+    # remove_default_dependencies "cellranger/9.0.1"
+
+    cat << EOF >> "${script_path}"
+set barcode_3pv1 \$ref_root/737K-april-2014_rc.txt
+set barcode_3pv2 \$ref_root/737K-august-2016.txt
+set barcode_3pv3 \$ref_root/3M-february-2018_TRU.txt
+set barcode_3pv4 \$ref_root/3M-3pgex-may-2023_TRU.txt
+set barcode_5pv3 \$ref_root/3M-5pgex-jan-2023.txt
+set barcode_arcv1 \$ref_root/737K-arc-v1.txt
+
+setenv BARCODE_3PV1 \$barcode_3pv1
+setenv BARCODE_3PV2 \$barcode_3pv2
+setenv BARCODE_3PV3 \$barcode_3pv3
+setenv BARCODE_3PV4 \$barcode_3pv4
+setenv BARCODE_5PV3 \$barcode_5pv3
+setenv BARCODE_ARCV1 \$barcode_arcv1
+
+if { [module-info mode] == "load" } {
+    puts stderr "Available environment variables:"
+    puts stderr "  BARCODE_3PV1 (3'   : 737K-april-2014_rc.txt)"
+    puts stderr "  BARCODE_3PV2 (3' v2: 737K-august-2016.txt)"
+    puts stderr "  BARCODE_3PV3 (3' v3: 3M-february-2018_TRU.txt)"
+    puts stderr "  BARCODE_3PV4 (3' v4: 3M-3pgex-may-2023_TRU.txt)"
+    puts stderr "  BARCODE_5PV3 (5' v3: 3M-5pgex-jan-2023.txt)"
+    puts stderr "  BARCODE_ARCV1 (ATAC v1: 737K-arc-v1.txt)"
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local barcode_3pv1 = pathJoin(ref_root, "737K-april-2014_rc.txt")
+local barcode_3pv2 = pathJoin(ref_root, "737K-august-2016.txt")
+local barcode_3pv3 = pathJoin(ref_root, "3M-february-2018_TRU.txt")
+local barcode_3pv4 = pathJoin(ref_root, "3M-3pgex-may-2023_TRU.txt")
+local barcode_5pv3 = pathJoin(ref_root, "3M-5pgex-jan-2023.txt")
+local barcode_arcv1 = pathJoin(ref_root, "737K-arc-v1.txt")
+
+setenv("BARCODE_3PV1", barcode_3pv1)
+setenv("BARCODE_3PV2", barcode_3pv2)
+setenv("BARCODE_3PV3", barcode_3pv3)
+setenv("BARCODE_3PV4", barcode_3pv4)
+setenv("BARCODE_5PV3", barcode_5pv3)
+setenv("BARCODE_ARCV1", barcode_arcv1)
+
+if (mode() == "load") then
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  BARCODE_3PV1 (3'   : 737K-april-2014_rc.txt)\n")
+    io.stderr:write("  BARCODE_3PV2 (3' v2: 737K-august-2016.txt)\n")
+    io.stderr:write("  BARCODE_3PV3 (3' v3: 3M-february-2018_TRU.txt)\n")
+    io.stderr:write("  BARCODE_3PV4 (3' v4: 3M-3pgex-may-2023_TRU.txt)\n")
+    io.stderr:write("  BARCODE_5PV3 (5' v3: 3M-5pgex-jan-2023.txt)\n")
+    io.stderr:write("  BARCODE_ARCV1 (ATAC v1: 737K-arc-v1.txt)\n")
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         name     of the app
+# - version:          version  of the app
+# - app_name_version: name/version
+
+# - target_base_dir:  modules/apps/name
+# - target_dir:       modules/apps/name/version
+# - script_path:      modules/modulefiles/name/version
+# - tmp_dir:          tmp directory (modules/tmp/name/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@

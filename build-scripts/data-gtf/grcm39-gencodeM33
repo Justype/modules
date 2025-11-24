@@ -30,7 +30,6 @@ set annotation_gtf \$ref_root/gencode.v${gencode_version}.primary_assembly.annot
 setenv ANNOTATION_GTF \$annotation_gtf
 
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  ANNOTATION_GTF       (annotation gtf file)"
 }
@@ -41,7 +40,6 @@ local annotation_gtf = pathJoin(ref_root, "gencode.v${gencode_version}.primary_a
 setenv("ANNOTATION_GTF", annotation_gtf)
 
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write("  ANNOTATION_GTF       (annotation gtf file)\n")
 end

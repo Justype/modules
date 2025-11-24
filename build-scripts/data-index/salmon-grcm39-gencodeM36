@@ -52,7 +52,6 @@ special_modulefiles() {
 set salmon_index_dir \$ref_root
 setenv SALMON_INDEX_DIR \$salmon_index_dir
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  SALMON_INDEX_DIR       (Salmon index directory)"
 }
@@ -62,7 +61,6 @@ EOF
 local salmon_index_dir = ref_root
 setenv("SALMON_INDEX_DIR", salmon_index_dir)
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write("  SALMON_INDEX_DIR       (Salmon index directory)\n")
 end

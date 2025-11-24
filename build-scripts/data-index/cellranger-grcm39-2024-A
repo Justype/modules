@@ -34,7 +34,6 @@ set star_index_dir \$cellranger_ref_dir/star
 setenv STAR_INDEX_DIR \$star_index_dir
 
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  CELLRANGER_REF_DIR (reference directory: cellranger)"
     puts stderr "  GENOME_FASTA       (fasta file)"
@@ -53,7 +52,6 @@ setenv("ANNOTATION_GTF_GZ", annotation_gtf_gz)
 local star_index_dir = pathJoin(cellranger_ref_dir, "star")
 setenv("STAR_INDEX_DIR", star_index_dir)
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write(string.format("  CELLRANGER_REF_DIR (reference directory: cellranger)\n", cellranger_ref_dir))
     io.stderr:write(string.format("  GENOME_FASTA       (fasta file)\n", genome_fasta))

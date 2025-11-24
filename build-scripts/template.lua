@@ -1,9 +1,9 @@
 -- Lmod modulefile.lua
 -- Author: Ziyue Cheng
--- Almost all of them are automated, you can modify whatis, ModulesHelp, and APP_HOME as needed.
+-- Almost all of them are automated, you can modify whatis, ModulesHelp as needed.
 -- Search TOCHANGE to find the targets.
 -- You can also load other dependency modules by depends_on().
---     depends_on("java/17.0.12")
+--     depends_on("openjdk/17.0.12")
 
 local abs_path = myFileName()                   -- absolute path of module, /somewhere/modules/modulefiles/app/x.y.z
 local app_full_name = myModuleFullName()        -- full name of module, app/x.y.z
@@ -33,8 +33,8 @@ end
 -- Modify environment variables if the directories exist
 if (isDir(pathJoin(app_root, "bin"))) then
     prepend_path("PATH", pathJoin(app_root, "bin"))
-elseif (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
-    io.stderr:write("WARNING: No bin directory found in " .. app_full_name .. "\n")
+-- elseif (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
+--     io.stderr:write("WARNING: No bin directory found in " .. app_full_name .. "\n")
 end
 -- if (isDir(pathJoin(app_root, "lib"))) then
 --     prepend_path("LD_LIBRARY_PATH", pathJoin(app_root, "lib"))

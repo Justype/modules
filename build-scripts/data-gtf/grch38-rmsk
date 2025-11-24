@@ -34,7 +34,6 @@ set RMSK_gtf \$ref_root/grch38_rmsk.gtf
 setenv RMSK_GTF \$RMSK_gtf
 
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  RMSK_GTF  (rmsk gtf)"
 }
@@ -45,7 +44,6 @@ local rmsk_gtf = pathJoin(ref_root, "grch38_rmsk.gtf")
 setenv("RMSK_GTF", rmsk_gtf)
 
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write("  RMSK_GTF  (rmsk gtf)\n")
 end

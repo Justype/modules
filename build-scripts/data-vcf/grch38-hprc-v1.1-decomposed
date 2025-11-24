@@ -37,7 +37,6 @@ setenv HPRC_VCF_GZ \$hprc_vcf_gz
 setenv HPRC_VCF_GZ_TBI \$hprc_vcf_gz_tbi
 
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  HPRC_VCF_GZ     (HPRC v1.1 decomposed VCF)"
     puts stderr "  HPRC_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)"
@@ -51,7 +50,6 @@ setenv("HPRC_VCF_GZ", hprc_vcf_gz)
 setenv("HPRC_VCF_GZ_TBI", hprc_vcf_gz_tbi)
 
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write("  HPRC_VCF_GZ     (HPRC v1.1 decomposed VCF)\n")
     io.stderr:write("  HPRC_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)\n")

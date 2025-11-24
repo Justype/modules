@@ -1,9 +1,9 @@
 #%Module1.0
 # Author: Ziyue Cheng
-# Almost all of them are automated, you can modify whatis, ModulesHelp, and APP_HOME as needed.
+# Almost all of them are automated, you can modify whatis, ModulesHelp as needed.
 # Search TOCHANGE to find the targets.
 # You can also load other modules in this modulefile.
-#   module load java/17.0.12
+#   module load openjdk/17.0.12
 
 # abs path of this file, like /somewhere/modules/modulefiles/app/x.x.x
 set abs_path [file normalize [info script]]
@@ -42,8 +42,8 @@ if { [module-info mode] == "load" } {
 # Modify environment variables if the folders exist
 if {[file isdirectory "$app_root/bin"]} {
     prepend-path PATH $app_root/bin
-} elseif { [module-info mode] == "load" && ![info exists ::env(SLURM_JOB_ID)] } {
-    puts stderr "WARNING: No bin directory found in $app_full_name"
+# } elseif { [module-info mode] == "load" && ![info exists ::env(SLURM_JOB_ID)] } {
+#     puts stderr "WARNING: No bin directory found in $app_full_name"
 }
 # if {[file isdirectory "$app_root/lib"]} {
 #     prepend-path LD_LIBRARY_PATH $app_root/lib

@@ -33,7 +33,6 @@ set genome_fasta \$ref_root/GRCh38.primary_assembly.genome.fa
 setenv GENOME_FASTA \$genome_fasta
 
 if { [module-info mode] == "load" } {
-    puts stderr "\[\$current_datetime\] Loading module \$ref_full_name"
     puts stderr "Available environment variables:"
     puts stderr "  GENOME_FASTA       (fasta file)"
 }
@@ -44,7 +43,6 @@ local genome_fasta = pathJoin(ref_root, "GRCh38.primary_assembly.genome.fa")
 setenv("GENOME_FASTA", genome_fasta)
 
 if (mode() == "load") then
-    io.stderr:write(string.format("[%s] Loading module %s\n", current_datetime, ref_full_name))
     io.stderr:write("Available environment variables:\n")
     io.stderr:write("  GENOME_FASTA       (fasta file)\n")
 end
