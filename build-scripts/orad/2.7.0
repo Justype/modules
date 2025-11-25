@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 #WHATIS:Illumina ORA Decompressor
+#URL:https://support.illumina.com/sequencing/sequencing_software/DRAGENORA/software-downloads.html
 
 #########################################################
 # Illumina ORA Decompress Build Script
-# - https://support.illumina.com/sequencing/sequencing_software/DRAGENORA/software-downloads.html
 # - setenv ORA_REF_PATH $app_root/oradata
 #########################################################
 

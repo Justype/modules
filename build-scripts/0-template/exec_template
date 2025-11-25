@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 #WHATIS:Template for building a module
+#URL:
 
 #########################################################
 # Template for building a module (single executable)

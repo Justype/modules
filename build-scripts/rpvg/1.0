@@ -1,10 +1,6 @@
 #!/usr/bin/bash
 #WHATIS:Inferring the expression VG mpmap results for RNA-seq
-
-#########################################################
-# RPVG build script
-# - https://github.com/jonassibbesen/rpvg/
-#########################################################
+#URL:https://github.com/jonassibbesen/rpvg
 
 install_app() {
     mkdir -p "$target_dir"       # modules/apps/name/version

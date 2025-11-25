@@ -1,0 +1,84 @@
+#!/usr/bin/bash
+#WHATIS:Cell Ranger GRCh38 2024-A index
+#URL:https://www.10xgenomics.com/support/software/cell-ranger/downloads#reference-downloads
+
+install_app() {
+    mkdir -p "$target_dir"       # modules/ref/assembly/data-type/version
+    mkdir -p "$tmp_dir"
+    cd "$tmp_dir"
+
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    url="https://cf.10xgenomics.com/supp/cell-exp/refdata-gex-GRCh38-2024-A.tar.gz"
+    wget -nv -O "refdata-gex.tar.gz" "$url"
+
+    print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    tar -xzf "refdata-gex.tar.gz" -C "$target_dir" --strip-components=1
+}
+
+special_modulefiles() {
+    # add custom environment variables and functions to modulefile
+    # ref_root is a special variable that points to the ref directory in modulefile[.lua]
+    cat << EOF >> "${script_path}"
+set cellranger_ref_dir \$ref_root
+setenv CELLRANGER_REF_DIR \$cellranger_ref_dir
+set genome_fasta \$cellranger_ref_dir/fasta/genome.fa
+setenv GENOME_FASTA \$genome_fasta
+set annotation_gtf_gz \$cellranger_ref_dir/genes/genes.gtf.gz
+setenv ANNOTATION_GTF_GZ \$annotation_gtf_gz
+set star_index_dir \$cellranger_ref_dir/star
+setenv STAR_INDEX_DIR \$star_index_dir
+
+if { [module-info mode] == "load" && ![info exists env(SLURM_JOB_ID)] } {
+    puts stderr "Available environment variables:"
+    puts stderr "  CELLRANGER_REF_DIR (reference directory: cellranger)"
+    puts stderr "  GENOME_FASTA       (fasta file)"
+    puts stderr "  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)"
+    puts stderr "  STAR_INDEX_DIR     (star index: star alignment)"
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local cellranger_ref_dir = ref_root
+setenv("CELLRANGER_REF_DIR", cellranger_ref_dir)
+local genome_fasta = pathJoin(cellranger_ref_dir, "fasta/genome.fa")
+setenv("GENOME_FASTA", genome_fasta)
+local annotation_gtf_gz = pathJoin(cellranger_ref_dir, "genes/genes.gtf.gz")
+setenv("ANNOTATION_GTF_GZ", annotation_gtf_gz)
+local star_index_dir = pathJoin(cellranger_ref_dir, "star")
+setenv("STAR_INDEX_DIR", star_index_dir)
+if (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  CELLRANGER_REF_DIR (reference directory: cellranger)\n")
+    io.stderr:write("  GENOME_FASTA       (fasta file)\n")
+    io.stderr:write("  ANNOTATION_GTF_GZ  (annotation gtf.gz: gene counting)\n")
+    io.stderr:write("  STAR_INDEX_DIR     (star index: star alignment)\n")
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         assembly/data-type (e.g. grch38/gencode-gtf)
+# - version:          version (e.g. 41)
+# - app_name_version: assembly/data-type/version (e.g. grch38/gencode-gtf/41)
+
+# - target_base_dir:  modules/ref/assembly/data-type
+# - target_dir:       modules/ref/assembly/data-type/version
+# - script_path:      modules/modulefiles/ref/assembly/data-type/version
+# - tmp_dir:          tmp directory (modules/tmp/assembly/data-type/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@

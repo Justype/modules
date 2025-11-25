@@ -1,0 +1,85 @@
+#!/usr/bin/bash
+#WHATIS:HPRC v1.1 GRCh38 Decomposed VCF
+#URL:https://github.com/human-pangenomics/hpp_pangenome_resources
+
+#########################################################
+# Human Pangenome Reference Consortium (HPRC) GRCh38 VCF
+# - VCF file with decomposed by variant Bub (bubble)
+#########################################################
+
+install_app() {
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    mkdir -p "$tmp_dir"
+    cd "$tmp_dir"
+
+    url="https://s3-us-west-2.amazonaws.com/human-pangenomics/pangenomes/freeze/freeze1/minigraph-cactus/hprc-v1.1-mc-grch38/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    wget -nv -O "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz" "$url"
+
+    url="https://s3-us-west-2.amazonaws.com/human-pangenomics/pangenomes/freeze/freeze1/minigraph-cactus/hprc-v1.1-mc-grch38/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi"
+    print_stderr "Downloading index for ${YELLOW}${app_name_version}${NC}"
+    wget -nv -O "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi" "$url"
+
+    print_stderr "Moving files to target directory"
+    mv hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz "$target_dir/"
+    mv hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi "$target_dir/"
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # ref_root is a special variable that points to the ref directory in modulefile[.lua]
+    
+    # add custom environment variables and functions to modulefile
+    cat << EOF >> "${script_path}"
+set hprc_vcf_gz \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz
+set hprc_vcf_gz_tbi \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi
+setenv HPRC_VCF_GZ \$hprc_vcf_gz
+setenv HPRC_VCF_GZ_TBI \$hprc_vcf_gz_tbi
+
+if { [module-info mode] == "load" && ![info exists env(SLURM_JOB_ID)] } {
+    puts stderr "Available environment variables:"
+    puts stderr "  HPRC_VCF_GZ     (HPRC v1.1 decomposed VCF)"
+    puts stderr "  HPRC_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)"
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local hprc_vcf_gz = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz")
+local hprc_vcf_gz_tbi = pathJoin(ref_root, "hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi")
+setenv("HPRC_VCF_GZ", hprc_vcf_gz)
+setenv("HPRC_VCF_GZ_TBI", hprc_vcf_gz_tbi)
+
+if (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  HPRC_VCF_GZ     (HPRC v1.1 decomposed VCF)\n")
+    io.stderr:write("  HPRC_VCF_GZ_TBI (HPRC v1.1 decomposed VCF index)\n")
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         assembly/data-type (e.g. grch38/gencode-gtf)
+# - version:          version (e.g. 41)
+# - app_name_version: assembly/data-type/version (e.g. grch38/gencode-gtf/41)
+
+# - target_base_dir:  modules/ref/assembly/data-type
+# - target_dir:       modules/ref/assembly/data-type/version
+# - script_path:      modules/modulefiles/ref/assembly/data-type/version
+# - tmp_dir:          tmp directory (modules/tmp/assembly/data-type/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@

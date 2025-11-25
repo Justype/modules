@@ -1,9 +1,6 @@
 #!/usr/bin/bash
 #WHATIS:Python 3 with pip (conda-forge Build)
-
-#########################################################
-# Python 3 with pip (conda-forge Build)
-#########################################################
+#URL:https://anaconda.org/conda-forge/python
 
 install_app() {
     print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"

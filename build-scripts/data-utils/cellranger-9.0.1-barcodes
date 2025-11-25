@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 ##DEPENDENCY:cellranger/9.0.1
 #WHATIS:Cell Ranger 9.0.1 Barcodes list
+#URL:https://kb.10xgenomics.com/s/article/115004506263-What-is-a-barcode-inclusion-list-formerly-barcode-whitelist
 
 #########################################################
-# - https://kb.10xgenomics.com/s/article/115004506263-What-is-a-barcode-inclusion-list-formerly-barcode-whitelist
 # - Can be copied from the cellranger
 # - under lib/python/cellranger/barcodes/
 #########################################################

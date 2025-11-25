@@ -29,18 +29,25 @@ NC='\033[0m'        # No Color
 
 modules_root="$PWD"
 install_script_path="$(realpath --no-symlinks "$0")"
-app_name_version="${install_script_path#*/build-scripts/}" # name/version
-app_name="${app_name_version%/*}"  # name
-version="${app_name_version##*/}"  # version
+script_relative_path="${install_script_path#*/build-scripts/}" # build-scripts/name/version
+# count number of slashed
+slash_count=$(grep -o "/" <<< "$script_relative_path" | wc -l)
+target=apps
+if [ "$slash_count" = "2" ]; then
+    target=ref
+fi
 
-target_base_dir="${modules_root}/apps/${app_name}"      # modules/apps/name
-target_dir="${modules_root}/apps/${app_name_version}"   # modules/apps/name/version
-script_base_dir="${modules_root}/modulefiles/${app_name}"      # modules/modulefiles/name
-script_path="${modules_root}/modulefiles/${app_name_version}"  # modules/modulefiles/name/version
+app_name_version="${install_script_path#*/build-scripts/}" # name/version or ref/assembly/data-type/version
+app_name="${app_name_version%/*}"  # name   or ref/assembly/data-type
+version="${app_name_version##*/}"  # version
+target_base_dir="${modules_root}/${target}/${app_name}"      # apps/name or ref/assembly/data-type
+target_dir="${modules_root}/${target}/${app_name_version}"   # apps/name/version or ref/assembly/data-type/version
+script_base_dir="${modules_root}/${target}_modulefiles/${app_name}"      # modulefiles/name or modulefiles/ref/assembly
+script_path="${modules_root}/${target}_modulefiles/${app_name_version}"  # modulefiles/name/version or modulefiles/ref/assembly/data-type/version
 
 tmp_dir="${modules_root}/tmp/${app_name_version}" # tmp directory
 manager_script="${modules_root}/manager.py" # manager script path
-dependencies=$("$manager_script" --print-dependencies "${app_name}/${version}")
+dependencies=$("$manager_script" --print-dependencies "${app_name_version}")
 #endregion
 
 #region OPTION_FUNCTIONS
@@ -50,7 +57,6 @@ help_message() {
     echo "  -i  Install the target module with dependencies." 1>&2
     echo "  -l  List the dependencies of the target module." 1>&2
     echo "  -d  Delete the target module." 1>&2
-    echo "  -s  Set this version as the default version." 1>&2
     echo "  -h  Help message." 1>&2
 }
 
@@ -75,11 +81,8 @@ install() {
 
     print_stderr "Checking dependencies for ${YELLOW}${app_name_version}${NC}"
     install_dependencies
+    load_dependencies
 
-    for dep in $dependencies; do
-        print_stderr "Loading dependency: ${BLUE}${dep}${NC}"
-        module load "${dep}" &> /dev/null # suppress output
-    done
     install_app
     copy_modulefile
     print_stderr "✅ Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."
@@ -138,38 +141,21 @@ delete() {
     exit
 }
 
-set_default() {
-    print_stderr "Setting this version as the default version: $target_dir"
-    # if target directory does not exist, exit 1
-    if [ ! -d "$target_dir" ]; then
-        print_stderr "${RED}ERROR${NC}: Target app does not exist!"
-        print_stderr "Exit Setting Default"
-        exit 1
-    fi
-
-    # Create .version file under modulefiles/name
-    echo "#%Module" > "${script_base_dir}/.version"
-    echo "set ModulesVersion $version" >> "${script_base_dir}/.version"
-    exit
-}
-
 is_installed() {
-    # $1: app_name $2: version
-    if [ -d "${modules_root}/apps/${1}/${2}" ]; then
+    if [ -d "${modules_root}/${target}/${1}" ]; then
         echo 0
     else
         echo 1
     fi
 }
 
-
 print_dependencies() {
     printf "${YELLOW}$app_name_version${NC} dependencies:\n" 1>&2
     # Print the dependencies
     if [ -n "$dependencies" ]; then
         for dep in $dependencies; do
-            printf "  ${BLUE}${dep%/*}${NC}/${dep#*/}" 1>&2
-            if [ $(is_installed "${dep%/*}" "${dep#*/}") -eq 0 ]; then
+            printf "  ${BLUE}${dep}${NC}" 1>&2
+            if [ $(is_installed "${dep}") -eq 0 ]; then
                 printf " (installed)\n" 1>&2
             else
                 printf "\n" 1>&2
@@ -181,7 +167,7 @@ print_dependencies() {
 install_dependencies() {
     # Install the dependencies
     for dep in $dependencies; do
-        if [ $(is_installed "${dep%/*}" "${dep#*/}") -eq 0 ]; then
+        if [ $(is_installed "${dep}") -eq 0 ]; then
             continue
         fi
         print_stderr "Installing dependency: ${BLUE}${dep}${NC} for ${YELLOW}${app_name_version}${NC}"
@@ -198,11 +184,9 @@ load_dependencies() {
         fi
     fi
 
-    for dep in $1; do
-        dep_name="${dep%/*}"
-        dep_version="${dep#*/}"
-        print_stderr "Loading dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
-        module load "${dep_name}/${dep_version}" &> /dev/null # suppress output
+    for dep in $dependencies; do
+        print_stderr "Loading dependency: ${BLUE}${dep}${NC}"
+        module load $dep &> /dev/null # suppress output
     done
 }
 
@@ -215,8 +199,8 @@ copy_modulefile() {
         cat "${modules_root}/build-scripts/${app_name}/template.lua" > "${script_path}.lua"
     else
         print_stderr "${YELLOW}${app_name}${NC} specific template does not exist. Use default template."
-        cat "${modules_root}/build-scripts/template" > "$script_path"
-        cat "${modules_root}/build-scripts/template.lua" > "${script_path}.lua"
+        cat "${modules_root}/build-scripts/${target}-template" > "$script_path"
+        cat "${modules_root}/build-scripts/${target}-template.lua" > "${script_path}.lua"
     fi
 
     print_stderr "Editing the modulefile to include the dependencies"
@@ -231,13 +215,19 @@ copy_modulefile() {
     done
 
     # edit whatis if #WHATIS: is found in the script
-    whatis=$(grep -oP "^#WHATIS:\K.*" "$install_script_path")
-    if [ -n "$whatis" ]; then
-        print_stderr "Editing ${BLUE}whatis${NC} in modulefile"
-        sed -i "s|^module-whatis.*|module-whatis \"${whatis}\"|" "${script_path}"
-        sed -i "s|^whatis.*|whatis(\"${whatis}\")|" "${script_path}.lua"
-    fi
+    whatis=$(grep -oP "^#WHATIS:\K.*" "$install_script_path" || true)
+    whatis=${whatis:-"Loads ${app_name_version}"}
+    print_stderr "Editing ${BLUE}whatis${NC} in modulefile"
+    # Replace the place holder ${WHATIS} in the modulefile
+    sed -i "s|\${WHATIS}|${whatis}|" "${script_path}"
+    sed -i "s|\${WHATIS}|${whatis}|" "${script_path}.lua"
 
+    url=$(grep -oP "^#URL:\K.*" "$install_script_path" || true)
+    url=${url:-"No additional information available."}
+    print_stderr "Editing ${BLUE}help${NC} in modulefile"
+    # Replace the place holder ${URL} in the modulefile
+    sed -i "s|\${HELP}|WEBSITE: ${url}|" "${script_path}"
+    sed -i "s|\${HELP}|WEBSITE: ${url}|" "${script_path}.lua"
     special_modulefiles
 }
 #endregion
@@ -321,12 +311,11 @@ main() {
     fi
 
     # Parse the parameters
-    while getopts ":hdiols" opt; do
+    while getopts ":hdil" opt; do
         case ${opt} in
             h ) help_message ; exit;;
             i ) install ;;
             l ) print_dependencies ;;
-            s ) set_default ;;
             d ) delete ;;
             \? )
                 print_stderr "${RED}ERROR${NC}: Invalid option: $OPTARG"

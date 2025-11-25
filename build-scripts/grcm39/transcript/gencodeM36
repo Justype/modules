@@ -1,0 +1,76 @@
+#!/usr/bin/bash
+##DEPENDENCY:samtools/*
+#WHATIS:GRCm39 GENCODE M36 transcript FASTA
+#URL:https://www.gencodegenes.org/mouse/
+
+# Get the gencode version from the script name
+script_name=$(basename "$0")
+gencode_version="${script_name##*gencode}"
+
+install_app() {
+    mkdir -p "$target_dir"       # modules/apps/name/version
+    cd "$target_dir"
+    url="https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_mouse/release_${gencode_version}/gencode.v${gencode_version}.transcripts.fa.gz"
+    print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
+    wget -nv -O "gencode.v${gencode_version}.transcripts.fa.gz" "$url"
+
+    # print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
+    # pigz_or_gunzip "gencode.v${gencode_version}.transcripts.fa.gz"
+
+    # print_stderr "Indexing ${YELLOW}${app_name_version}${NC} with samtools faidx"
+    # samtools faidx "gencode.v${gencode_version}.transcripts.fa"
+}
+
+special_modulefiles() {
+    # Any additional modulefile operations: add environment variables, aliases, etc.
+    # ref_root is a special variable that points to the ref directory in modulefile[.lua]
+    # remove_default_dependencies "samtools"
+    
+    # add custom environment variables and functions to modulefile
+    cat << EOF >> "${script_path}"
+set transcript_fasta_gz \$ref_root/gencode.v${gencode_version}.transcripts.fa.gz
+setenv TRANSCRIPT_FASTA_GZ \$transcript_fasta_gz
+
+if { [module-info mode] == "load" && ![info exists env(SLURM_JOB_ID)] } {
+    puts stderr "Available environment variables:"
+    puts stderr "  TRANSCRIPT_FASTA_GZ       (transcript fasta gz file)"
+}
+EOF
+
+    cat << EOF >> "${script_path}.lua"
+local transcript_fasta_gz = pathJoin(ref_root, "gencode.v${gencode_version}.transcripts.fa.gz")
+setenv("TRANSCRIPT_FASTA_GZ", transcript_fasta_gz)
+
+if (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
+    io.stderr:write("Available environment variables:\n")
+    io.stderr:write("  TRANSCRIPT_FASTA_GZ       (transcript fasta gz file)\n")
+end
+EOF
+}
+
+# Available variables:
+# - ncpu: number of cores to use (default: 4) will be overwritten by SLURM_CPUS_PER_TASK
+
+# - app_name:         assembly/data-type (e.g. grch38/gencode-gtf)
+# - version:          version (e.g. 41)
+# - app_name_version: assembly/data-type/version (e.g. grch38/gencode-gtf/41)
+
+# - target_base_dir:  modules/ref/assembly/data-type
+# - target_dir:       modules/ref/assembly/data-type/version
+# - script_path:      modules/modulefiles/ref/assembly/data-type/version
+# - tmp_dir:          tmp directory (modules/tmp/assembly/data-type/version)
+
+RED='\033[0;91m'    # Red      WARNING or ERROR
+BLUE='\033[0;94m'   # Blue     Dependency or Modulefile Changes
+YELLOW='\033[0;93m' # Yellow   App Name and/or Version
+NC='\033[0m'        # No Color
+
+if ! [ -d build-scripts ]; then
+    printf "Please run this script under ${RED}modules${NC} directory.\n" 1>&2
+    printf "And make sure you have your scripts in build-scripts folder.\n" 1>&2
+    printf "    e.g. bash build-scripts/sra-tools/3.1.1\n" 1>&2
+    exit 1
+fi
+
+source "build-scripts/common.sh"
+main $@

@@ -2,6 +2,7 @@
 ##DEPENDENCY:app_name/version # comment is not allowed
 ##DEPENDENCY:jdk/*
 #WHATIS:Template for building a module
+#URL:
 
 #########################################################
 # Template for building a module

@@ -1,11 +1,6 @@
 #!/usr/bin/bash
 #WHATIS:Genome Variation Graph tools for pan-genome analysis
-
-#########################################################
-# vg build script
-# - https://github.com/vgteam/vg/
-# - no dependency
-#########################################################
+#URL:https://github.com/vgteam/vg
 
 install_app() {
     mkdir -p "$target_dir/bin"   # modules/apps/name/version/bin

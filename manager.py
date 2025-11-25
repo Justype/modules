@@ -16,7 +16,8 @@ from typing import Dict, List, Optional
 def main():
     parser = argparse.ArgumentParser(description="Package Manager")
     parser.add_argument("-i", "--install", type=str, help="<package>/<version> to install")
-    parser.add_argument("-u", "--update", action="store_true", help="Update package versions in the database")
+    parser.add_argument("-u", "--update-local", action="store_true", help="Update local packages from build-scripts")
+    parser.add_argument("-U", "--update", action="store_true", help="Update package versions in the database")
     parser.add_argument("-a", "--add", type=str, help="Add a new <package> to the database")
     parser.add_argument("-s", "--search", type=str, help="Search for <term> in package names and descriptions")
     parser.add_argument("-l", "--list", action="store_true", help="List all packages (not implemented)")
@@ -32,8 +33,14 @@ def main():
     if args.update:
         pm.update_local_packages()
         pm.fetch_all_online_versions()
+        pm.sort_packages()
         pm.save_to_tsv()
-        print_stderr("Package versions updated.")
+        Utils.print_stderr("Package versions updated.")
+    elif args.update_local:
+        pm.update_local_packages()
+        pm.sort_packages()
+        pm.save_to_tsv()
+        Utils.print_stderr("Local packages updated from build-scripts.")
     elif args.add:
         success = pm.add_entry_from_name(args.add)
         if success:
@@ -43,30 +50,30 @@ def main():
             package_name, version = pm.get_package_version(args.install)
             success = pm.install_package(package_name, version)
             if success:
-                print_stderr(f"Successfully installed {Colorize.blue(args.install)}.")
+                Utils.print_stderr(f"Successfully installed {Colorize.blue(args.install)}.")
             else:
-                print_stderr(f"Failed to install {Colorize.red(args.install)}.")
+                Utils.print_stderr(f"Failed to install {Colorize.red(args.install)}.")
         except KeyboardInterrupt:
-            print_stderr(f"Installation of {Colorize.red(args.install)} interrupted by user.")
+            Utils.print_stderr(f"Installation of {Colorize.red(args.install)} interrupted by user.")
             pm.delete(package_name, version)
         except Exception as e:
-            print_stderr(f"Error installing {Colorize.red(args.install)}: {e}")
+            Utils.print_stderr(f"Error installing {Colorize.red(args.install)}: {e}")
             pm.delete(package_name, version)
-            print_stderr("For local packages, run -u to refresh the database.")
+            Utils.print_stderr("For local packages, run -u to refresh the database.")
     elif args.delete:
         try:
             package_name, version = pm.get_package_version(args.delete)
             ready = input(f"Are you sure you want to delete {Colorize.yellow(package_name)}/{Colorize.yellow(version)}? [y/N]: ")
             if ready.lower() != 'y':
-                print_stderr("Deletion cancelled by user.")
+                Utils.print_stderr("Deletion cancelled by user.")
                 sys.exit(0)
             success = pm.delete(package_name, version)
             if success:
-                print_stderr(f"Successfully deleted {Colorize.blue(args.delete)}.")
+                Utils.print_stderr(f"Successfully deleted {Colorize.blue(args.delete)}.")
             else:
-                print_stderr(f"Failed to delete {Colorize.red(args.delete)}.")
+                Utils.print_stderr(f"Failed to delete {Colorize.red(args.delete)}.")
         except Exception as e:
-            print_stderr(f"Error deleting {Colorize.red(args.delete)}: {e}")
+            Utils.print_stderr(f"Error deleting {Colorize.red(args.delete)}: {e}")
     elif args.search:
         matches = pm.search_term(args.search)
         if matches:
@@ -74,7 +81,7 @@ def main():
             for pkg in matches:
                 print(f"{Colorize.yellow(pkg.package.ljust(max_len))}: {pkg.whatis}")
         else:
-            print_stderr(f"No packages found matching {Colorize.yellow(args.search)}.")
+            Utils.print_stderr(f"No packages found matching {Colorize.yellow(args.search)}.")
     elif args.info:
         pm.print_info(args.info)
     elif args.print_package_version:
@@ -90,8 +97,10 @@ class Config:
     executable_root    = os.path.join(script_dir, "bin")           # Default executable root
     build_scripts_root = os.path.join(script_dir, "build-scripts") # Default build scripts path
     apps_root          = os.path.join(script_dir, "apps")          # Default installation path
-    modulefiles_root   = os.path.join(script_dir, "modulefiles")   # Default modulefiles path
-    micromamba_root    = os.path.join(script_dir, "mamba")         # Default micromamba root
+    ref_root           = os.path.join(script_dir, "ref")           # Default reference data path
+    apps_modulefiles_root   = os.path.join(script_dir, "apps_modulefiles")   # Default modulefiles path
+    ref_modulefiles_root = os.path.join(script_dir, "ref_modulefiles")  # Default ref modulefiles path
+    micromamba_root    = os.path.join(script_dir, "conda")         # Default micromamba root
     
     @classmethod
     def get_tsv_path(cls) -> str:
@@ -137,13 +146,13 @@ class Config:
         else:
             release_url = f"https://github.com/mamba-org/micromamba-releases/releases/download/{version}/micromamba-{combo}"
 
-        print_stderr(f"Downloading micromamba from {release_url} ...")
+        Utils.print_stderr(f"Downloading micromamba from {release_url} ...")
         urllib.request.urlretrieve(release_url, micromamba_path)
 
         # Make executable
         st = os.stat(micromamba_path)
         os.chmod(micromamba_path, st.st_mode | stat.S_IEXEC)
-        print_stderr(f"Micromamba downloaded and made executable at {Colorize.blue(micromamba_path)}")
+        Utils.print_stderr(f"Micromamba downloaded and made executable at {Colorize.blue(micromamba_path)}")
 
         # Create a help script
         mm_path = os.path.join(os.path.abspath(cls.executable_root), "mm")
@@ -166,7 +175,7 @@ class Config:
             f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" install -c conda-forge -c bioconda $@\n')
         st = os.stat(mm_install_path)
         os.chmod(mm_install_path, st.st_mode | stat.S_IEXEC)
-        print_stderr(f"Micromamba helper script created at {Colorize.blue(cls.executable_root)}/mm mm-create mm-install ...")
+        Utils.print_stderr(f"Micromamba helper script created at {Colorize.blue(cls.executable_root)}/mm mm-create mm-install ...")
 
         return micromamba_path
 
@@ -189,6 +198,26 @@ class Config:
             f"{package}={version}", "-q", "-y"
         ]
 
+class Utils:
+    @staticmethod
+    def print_stderr(message: str):
+        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {message}", file=sys.stderr)
+
+    @staticmethod
+    def rmdir_until_not_empty(path: str):
+        """Remove directories up to the first non-empty one."""
+        current_path = path
+        while True:
+            try:
+                os.rmdir(current_path)
+            except OSError:
+                break  # Directory not empty or other error
+            parent_path = os.path.dirname(current_path)
+            if parent_path == current_path:
+                break  # Reached root
+            current_path = parent_path
+    
+
 class Colorize:
     @staticmethod
     def red(text: str) -> str:
@@ -202,10 +231,6 @@ class Colorize:
     @staticmethod
     def green(text: str) -> str:
         return f'\033[92m{text}\033[0m'
-    
-def print_stderr(message: str):
-    """Print message to stderr."""
-    print(message, file=sys.stderr)
 
 class Package:
     def __init__(self, package: str, tags: List[str], whatis: str, url: str, source: str):
@@ -262,7 +287,11 @@ class Package:
 
     def is_local(self) -> bool:
         """Return True if package is local"""
-        return self.source == "NA" or self.source.lower() == "local"
+        return self.source == "NA" or self.source.lower() == "local" or self.source == "ref"
+    
+    def is_ref(self) -> bool:
+        """Return True if package is reference data"""
+        return self.source == "ref"
 
     def is_conda(self) -> bool:
         """Return True if package is from conda"""
@@ -272,7 +301,7 @@ class Package:
         """Return True if package is from pypi"""
         return self.source.lower() == "pypi"
 
-    def update_whatis_url(self, n_try: int = 3, delay: int = 3) -> bool:
+    def update_whatis_url(self, n_try: int = 3, delay: int = 2) -> bool:
         """Fetch whatis and url from Anaconda.org if conda!=NA."""
         if not self.is_conda():
             return True  # nothing to do
@@ -281,29 +310,29 @@ class Package:
             import requests
             from bs4 import BeautifulSoup
         except ImportError:
-            print_stderr("Required libraries 'requests' and 'beautifulsoup4' not installed.")
-            print_stderr("Please install them via pip: pip install --user requests beautifulsoup4")
-            print_stderr(f"If you want to update the whatis/url later, please rerun with {Colorize.yellow('-a')} {Colorize.yellow(self.package)}")
+            Utils.print_stderr("Required libraries 'requests' and 'beautifulsoup4' not installed.")
+            Utils.print_stderr("Please install them via pip: pip install --user requests beautifulsoup4")
+            Utils.print_stderr(f"If you want to update the whatis/url later, please rerun with {Colorize.yellow('-a')} {Colorize.yellow(self.package)}")
             return False
 
-        url_page = f"https://anaconda.org/{self.source}/{self.package}"
+        url_page = f"https://anaconda.org/channels/{self.source}/packages/{self.package}/overview"
 
         for attempt in range(n_try):
             if attempt > 0:
-                print_stderr(f"Retrying in {delay} seconds...")
+                Utils.print_stderr(f"Retrying in {delay} seconds...")
                 time.sleep(delay)
             try:
                 resp = requests.get(url_page)
                 if resp.status_code != 200:
-                    print_stderr(f"Attempt {attempt+1}: Failed to fetch package page for {Colorize.yellow(self.package)} from Anaconda.org (status code {resp.status_code})")
+                    Utils.print_stderr(f"Attempt {attempt+1}: Failed to fetch package page for {Colorize.yellow(self.package)} from Anaconda.org (status code {resp.status_code})")
                     continue
             except requests.RequestException as e:
-                print_stderr(f"Attempt {attempt+1}: Error fetching package page for {Colorize.yellow(self.package)} from Anaconda.org: {e}")
+                Utils.print_stderr(f"Attempt {attempt+1}: Error fetching package page for {Colorize.yellow(self.package)} from Anaconda.org: {e}")
                 continue
 
             soup = BeautifulSoup(resp.text, 'html.parser')
 
-            p = soup.select_one("body > div.container > div:nth-child(2) > div > div:nth-child(2) > div > p")
+            p = soup.select_one("body > prex-root > prex-package-details > div > div > div > prex-package-overview > div > div.overview-content-cards > div.right-column > kendo-card > kendo-card-body > div:nth-child(1) > p:nth-child(2)")
             if p:
                 text = p.get_text()
                 # take first line and 150 max
@@ -312,24 +341,26 @@ class Package:
                 if len(text) == 150:
                     text = text + "..."
                 self.whatis = text
-                a = soup.select_one("body > div.container > div:nth-child(2) > div > div:nth-child(4) > div > div:nth-child(1) > ul > li:nth-child(2) > a")
+                a = soup.select_one("body > prex-root > prex-package-details > div > div > div > prex-package-overview > div > div.overview-content-cards > div.right-column > kendo-card > kendo-card-body > div:nth-child(6) > a")
                 if a:
                     self.url = a['href'].strip()
                 else:
                     self.url = url_page  # fallback to Anaconda page
                 return True
             else:
-                print_stderr(f"Attempt {attempt+1}: Failed to parse whatis for {Colorize.yellow(self.package)} from Anaconda.org")
-                continue
+                Utils.print_stderr(f"Failed to parse whatis for {Colorize.yellow(self.package)} from Anaconda.org")
+                Utils.print_stderr(f"⚠️ The website layout may have changed. Please check the URL manually and update the {Colorize.yellow('soup.select_one')} selectors accordingly.")
+                Utils.print_stderr(f"URL: {url_page}")
+                Utils.print_stderr(f"Then rerun with {Colorize.yellow('-a')} {Colorize.yellow(self.package)}")
+                return False
         
-        print_stderr(f"⚠️ All attempts failed to fetch whatis/url for {Colorize.yellow(self.package)} from Anaconda.org")
-        print_stderr(f"If you want to update the whatis/url later, please rerun with {Colorize.yellow('-a')} {Colorize.yellow(self.package)}")
+        Utils.print_stderr(f"⚠️ All attempts failed to fetch whatis/url for {Colorize.yellow(self.package)} from Anaconda.org")
+        Utils.print_stderr(f"If you want to update the whatis/url later, please rerun with {Colorize.yellow('-a')} {Colorize.yellow(self.package)}")
         return False
 
     def update_versions(self, force: bool = False):
         """Query micromamba for package versions if source!=NA and store sorted."""
         if not force and not self.is_conda():
-            self.versions = None
             return
 
         cmd = Config.get_search_command(self.package)
@@ -350,11 +381,9 @@ class Package:
                 self.source = raw_channels[0] if raw_channels else "NA"  # Ensure conda flag is set to channel if versions found
 
         except subprocess.CalledProcessError as e:
-            print_stderr(f"Error running micromamba search for {self.package}: {e.stderr}")
-            self.versions = None
+            Utils.print_stderr(f"Error running micromamba search for {self.package}: {e.stderr}")
         except json.JSONDecodeError as e:
-            print_stderr(f"Error decoding JSON from micromamba search for {self.package}: {e}")
-            self.versions = None
+            Utils.print_stderr(f"Error decoding JSON from micromamba search for {self.package}: {e}")
 
     def get_latest_version(self) -> Optional[str]:
         """Return the latest version available."""
@@ -372,7 +401,7 @@ class PackageManager:
         if os.path.exists(tsv_path):
             self.load_from_tsv()
         else:
-            print_stderr(f"TSV file {tsv_path} not found. Starting with an empty package database.")
+            Utils.print_stderr(f"TSV file {tsv_path} not found. Starting with an empty package database.")
             os.makedirs(os.path.dirname(tsv_path), exist_ok=True)
             self.update_local_packages()
             self.save_to_tsv(tsv_path)
@@ -392,11 +421,11 @@ class PackageManager:
         Returns True if successful, False otherwise.
         """
         if name in self.packages:
-            print_stderr(f"Package {name} already exists in the database. Updating info...")
+            Utils.print_stderr(f"Package {name} already exists in the database. Updating info...")
             pkg = self.packages[name]
         else:
             pkg = Package.new_from_string(name)
-        print_stderr(f"Fetching information for package {name}...")
+        Utils.print_stderr(f"Fetching information for package {name}...")
         pkg.update_versions(force=True)
         if pkg.whatis == "":
             pkg.update_whatis_url()
@@ -404,7 +433,7 @@ class PackageManager:
             self.update_package(pkg)
             return True
         else:
-            print_stderr(f"Package {name} not found in Anaconda repositories. Please add it manually.")
+            Utils.print_stderr(f"Package {name} not found in Anaconda repositories. Please add it manually.")
             return False
 
     def load_from_tsv(self):
@@ -462,7 +491,7 @@ class PackageManager:
         """
         for pkg in self.packages.values():
             if not pkg.is_local():
-                print_stderr(f"Fetching versions for {pkg.package}...")
+                Utils.print_stderr(f"Fetching versions for {pkg.package}...")
                 pkg.update_versions()
                 if pkg.whatis == "":
                     pkg.update_whatis_url()
@@ -477,7 +506,7 @@ class PackageManager:
         """
         Read build_scripts directory for local packages and add them to the database. It will overwrite existing source entries.
         """
-        print_stderr("Updating local packages from build-scripts folder...")
+        Utils.print_stderr("Updating local packages from build-scripts folder...")
         updated_packages = set()
         script_paths = os.listdir(Config.build_scripts_root)
         script_paths = sorted(script_paths)
@@ -489,35 +518,53 @@ class PackageManager:
                 continue
 
             versions = os.listdir(script_relative_path)
-            versions = [v for v in versions if not v.startswith("template")]
-            versions = Package.version_order(versions)
-
+            versions = [v for v in versions if not (v.startswith("template") or v.endswith("_data"))]
             if len(versions) == 0:
                 continue
+            versions = Package.version_order(versions)
+            
+            # Test if version is a file or directory
+            if os.path.isdir(os.path.join(script_relative_path, versions[0])):
+                Utils.print_stderr(f"Processing reference data package: {script_name}")
+                assembly_data_version = []
+                for assembly_data in versions:
+                    data_version = os.listdir(os.path.join(script_relative_path, assembly_data))
+                    data_version = [v for v in data_version if not v.startswith("template")]
+                    for dv in data_version:
+                        assembly_data_version.append(f"{assembly_data}/{dv}")
+                if len(assembly_data_version) == 0:
+                    Utils.print_stderr(f"Warning: No valid data versions found for reference package {script_name}. Skipping.")
+                    continue
+                pkg = Package.new_from_string(script_name)
+                pkg.versions = Package.version_order(assembly_data_version)
+                pkg.whatis = f"Assembly {script_name} reference and index data"
+                pkg.url = ""
+                pkg.source = "ref"
+                updated_packages.add(script_name)
+            else:
+                Utils.print_stderr(f"Processing executable package: {script_name}")
+                updated_packages.add(script_name)
 
-            print_stderr(f"Processing local package: {script_name}")
-            updated_packages.add(script_name)
+                pkg = Package.new_from_string(script_name)
+                pkg.source = "local"
+                pkg.versions = versions
 
-            pkg = Package.new_from_string(script_name)
-            pkg.source = "local"
-            pkg.versions = versions
-
-            latest_version = versions[0]
-            latest_version_path = os.path.join(script_relative_path, latest_version)
-            #WHATIS example: #WHATIS:GRCh38 GENCODE GTF annotation
-            latest_content = open(latest_version_path, "r").read()
-            whatis_match = re.search(r"#WHATIS:(.*)", latest_content)
-            if whatis_match:
-                pkg.whatis = whatis_match.group(1).strip()
-            url_match = re.search(r"# - (https?://\S+)", latest_content)
-            if url_match:
-                pkg.url = url_match.group(1).strip()
+                latest_version = versions[0]
+                latest_version_path = os.path.join(script_relative_path, latest_version)
+                #WHATIS example: #WHATIS:GRCh38 GENCODE GTF annotation
+                latest_content = open(latest_version_path, "r").read()
+                whatis_match = re.search(r"#WHATIS:(.*)", latest_content)
+                if whatis_match:
+                    pkg.whatis = whatis_match.group(1).strip()
+                url_match = re.search(r"#URL:(.*)", latest_content)
+                if url_match:
+                    pkg.url = url_match.group(1).strip()
             self.update_package(pkg)
         
         # Remove local packages that are no longer present
         existing_local_packages = set(self.get_local_package_names())
         for pkg_name in existing_local_packages - updated_packages:
-            print_stderr(f"Removing local package {Colorize.yellow(pkg_name)} from database as it is no longer present in build-scripts.")
+            Utils.print_stderr(f"Removing local package {Colorize.yellow(pkg_name)} from database as it is no longer present in build-scripts.")
             del self.packages[pkg_name]
 
     def install_conda(self, package_name: str, version: str) -> bool:
@@ -526,24 +573,24 @@ class PackageManager:
         """
         pkg = self.get_package(package_name)
         if pkg is None:
-            print_stderr(f"❌ Package {Colorize.yellow(package_name)} not found in database.")
+            Utils.print_stderr(f"❌ Package {Colorize.yellow(package_name)} not found in database.")
             return False
         if pkg.versions is None or version not in pkg.versions:
-            print_stderr(f"❌ Version {Colorize.yellow(version)} of package {Colorize.yellow(package_name)} not found in database.")
+            Utils.print_stderr(f"❌ Version {Colorize.yellow(version)} of package {Colorize.yellow(package_name)} not found in database.")
             return False
     
-        print_stderr(f"Installing {Colorize.yellow(package_name)}/{Colorize.yellow(version)} via micromamba...")
+        Utils.print_stderr(f"Installing {Colorize.yellow(package_name)}/{Colorize.yellow(version)} via micromamba...")
         cmd = Config.get_create_command(package_name, version)
 
         try:
             subprocess.run(cmd, check=True)
-            print_stderr(f"✅ Package {package_name} version {version} installed successfully via micromamba.")
+            Utils.print_stderr(f"✅ Package {package_name} version {version} installed successfully via micromamba.")
 
-            template_path = os.path.join(Config.build_scripts_root, "manager-template")
+            template_path = os.path.join(Config.build_scripts_root, "apps-template")
             template_lua_path = template_path + ".lua"
 
             # Cat module files to modulefiles/<package>/<version>
-            modulefile_dir = os.path.join(Config.modulefiles_root, package_name)
+            modulefile_dir = os.path.join(Config.apps_modulefiles_root, package_name)
             os.makedirs(modulefile_dir, exist_ok=True)
             modulefile_path = os.path.join(modulefile_dir, version)
             modulefile_lua_path = modulefile_path + ".lua"
@@ -567,10 +614,10 @@ class PackageManager:
                 template_content = template_content.replace("${HELP}", help_text)
                 f_out.write(template_content)
 
-            print_stderr(f"📜 Module files created at {modulefile_path} and {modulefile_lua_path}")
+            Utils.print_stderr(f"📜 Module files created at {modulefile_path} and {modulefile_lua_path}")
             return True
         except subprocess.CalledProcessError as e:
-            print_stderr(f"❌ Error installing {package_name} version {version} via micromamba: {e.stderr}")
+            Utils.print_stderr(f"❌ Error installing {package_name} version {version} via micromamba: {e.stderr}")
             return False
 
     def get_local_dependencies(self, package_name: str, version: str) -> List[tuple[str, Optional[str]]]:
@@ -597,31 +644,31 @@ class PackageManager:
         """
         script_path = os.path.join(Config.build_scripts_root, package_name, version)
         if not os.path.exists(script_path):
-            print_stderr(f"Local build script for {Colorize.yellow(package_name)}/{Colorize.yellow(version)} not found.")
+            Utils.print_stderr(f"Local build script for {Colorize.yellow(package_name)}/{Colorize.yellow(version)} not found.")
             return False
 
-        print_stderr(f"Installing {Colorize.yellow(package_name)}/{Colorize.yellow(version)} from local build script...")
+        Utils.print_stderr(f"Installing {Colorize.yellow(package_name)}/{Colorize.yellow(version)} from local build script...")
 
         try:
             dependencies = self.get_local_dependencies(package_name, version)
         except Exception as e:
-            print_stderr(f"❌ Error parsing dependencies for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}: {e}")
+            Utils.print_stderr(f"❌ Error parsing dependencies for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}: {e}")
             return False
 
         for dep_name, dep_version in dependencies:
-            print_stderr(f"Installing dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}...")
+            Utils.print_stderr(f"Installing dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}...")
             success = self.install_package(dep_name, dep_version)
             if not success:
-                print_stderr(f"❌ Failed to install dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}.")
+                Utils.print_stderr(f"❌ Failed to install dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}.")
                 return False
 
         subprocess_cmd = ["bash", script_path, "-i"]
         exit_code = subprocess.call(subprocess_cmd)
         if exit_code == 0:
-            print_stderr(f"✅ Package {package_name} version {version} installed successfully from local build script.")
+            Utils.print_stderr(f"✅ Package {package_name} version {version} installed successfully from local build script.")
             return True
         else:
-            print_stderr(f"❌ Error installing {package_name} version {version} from local build script.")
+            Utils.print_stderr(f"❌ Error installing {package_name} version {version} from local build script.")
             return False
 
     def install_package(self, package_name: str, version: Optional[str]) -> bool:
@@ -630,18 +677,21 @@ class PackageManager:
         """
         pkg = self.get_package(package_name)
         if pkg is None or pkg.versions is None:
-            print_stderr(f"❌ Package {Colorize.yellow(package_name)} not found in database.")
+            Utils.print_stderr(f"❌ Package {Colorize.yellow(package_name)} not found in database.")
             return False
 
         if version is None:
             version = pkg.get_latest_version()
             if version is None:
-                print_stderr(f"❌ No version specified and no versions available for package {Colorize.yellow(package_name)}.")
+                Utils.print_stderr(f"❌ No version specified and no versions available for package {Colorize.yellow(package_name)}.")
                 return False
         
-        modulefile_path = os.path.join(Config.modulefiles_root, package_name, version)
+        if pkg.is_ref():
+            modulefile_path = os.path.join(Config.ref_modulefiles_root, package_name, version)
+        else:
+            modulefile_path = os.path.join(Config.apps_modulefiles_root, package_name, version)
         if os.path.exists(modulefile_path):
-            print_stderr(f"Module file for {Colorize.yellow(package_name)}/{Colorize.yellow(version)} already exists at {modulefile_path}. Skipping installation.")
+            Utils.print_stderr(f"Module file for {Colorize.yellow(package_name)}/{Colorize.yellow(version)} already exists at {modulefile_path}. Skipping installation.")
             return True
         
         if version not in pkg.versions:
@@ -650,13 +700,13 @@ class PackageManager:
                 matched_versions = [v for v in pkg.versions if v.startswith(prefix)]
                 if matched_versions:
                     version = matched_versions[0]
-                    print_stderr(f"Using version {Colorize.yellow(version)} for package {Colorize.yellow(package_name)} matching prefix {Colorize.yellow(prefix)}*")
+                    Utils.print_stderr(f"Using version {Colorize.yellow(version)} for package {Colorize.yellow(package_name)} matching prefix {Colorize.yellow(prefix)}*")
                 else:
-                    print_stderr(f"❌ No versions found matching prefix {Colorize.yellow(prefix)}* for package {Colorize.yellow(package_name)}.")
+                    Utils.print_stderr(f"❌ No versions found matching prefix {Colorize.yellow(prefix)}* for package {Colorize.yellow(package_name)}.")
                     return False
     
         if os.path.exists(os.path.join(Config.apps_root, package_name, version)):
-            print_stderr(f"Package {Colorize.yellow(package_name)}/{Colorize.yellow(version)} is already installed.")
+            Utils.print_stderr(f"Package {Colorize.yellow(package_name)}/{Colorize.yellow(version)} is already installed.")
             return True
         
         if pkg.is_local():
@@ -664,7 +714,7 @@ class PackageManager:
         elif pkg.is_conda():
             result = self.install_conda(package_name, version)
         else:
-            print_stderr(f"❌ Unknown package type for {Colorize.yellow(package_name)}.")
+            Utils.print_stderr(f"❌ Unknown package type for {Colorize.yellow(package_name)}.")
             return False
 
         if not result:
@@ -677,40 +727,57 @@ class PackageManager:
         """
         Remove the installed package at the specified version.
         """
-        install_path = os.path.join(Config.apps_root, package_name, version)
-        package_path = os.path.join(Config.apps_root, package_name)
-        modulefile_path = os.path.join(Config.modulefiles_root, package_name, version)
+        is_ref = False
+        pkg = self.get_package(package_name)
+        if pkg is None:
+            is_ref = "/" in version
+        else:
+            is_ref = pkg.is_ref()
+
+        if is_ref:
+            install_path = os.path.join(Config.ref_root, package_name, version)
+            package_path = os.path.join(Config.ref_root, package_name)
+            modulefile_path = os.path.join(Config.ref_modulefiles_root, package_name, version)
+            modulefile_package_path = os.path.join(Config.ref_modulefiles_root, package_name)
+        else:
+            install_path = os.path.join(Config.apps_root, package_name, version)
+            package_path = os.path.join(Config.apps_root, package_name)
+            modulefile_path = os.path.join(Config.apps_modulefiles_root, package_name, version)
+            modulefile_package_path = os.path.join(Config.apps_modulefiles_root, package_name)
+        
         modulefile_lua_path = modulefile_path + ".lua"
-        modulefile_package_path = os.path.join(Config.modulefiles_root, package_name)
         try:
-            print_stderr(f"Removing {Colorize.yellow(package_name)}/{Colorize.yellow(version)}...")
+            Utils.print_stderr(f"Removing {Colorize.yellow(package_name)}/{Colorize.yellow(version)}...")
             if os.path.exists(install_path):
                 shutil.rmtree(install_path)
-
-            if os.path.isdir(package_path) and not os.listdir(package_path):
-                os.rmdir(package_path)
-                print_stderr(f"Removed empty package directory at {package_path}.")
+            Utils.rmdir_until_not_empty(os.path.dirname(install_path))
 
             if os.path.exists(modulefile_path):
                 os.remove(modulefile_path)
-
             if os.path.exists(modulefile_lua_path):
                 os.remove(modulefile_lua_path)
-
-            if os.path.isdir(modulefile_package_path) and not os.listdir(modulefile_package_path):
-                os.rmdir(modulefile_package_path)
-                print_stderr(f"Removed empty modulefile package directory at {modulefile_package_path}.")
+            Utils.rmdir_until_not_empty(modulefile_package_path)
 
             return True
         except Exception as e:
-            print_stderr(f"❌ Error cleaning package {Colorize.yellow(self.package)}/{Colorize.yellow(version)}: {e}")
+            Utils.print_stderr(f"❌ Error cleaning package {Colorize.yellow(self.package)}/{Colorize.yellow(version)}: {e}")
             return False
 
     def is_package_installed(self, package_name: str, version: str) -> bool:
         """
         Check if the package at the specified version is installed.
         """
-        install_path = os.path.join(Config.apps_root, package_name, version)
+        pkg = self.get_package(package_name)
+        is_ref = False
+        if pkg is None:
+            is_ref = "/" in version
+        else:
+            is_ref = pkg.is_ref()
+
+        if is_ref:
+            install_path = os.path.join(Config.ref_root, package_name, version)
+        else:
+            install_path = os.path.join(Config.apps_root, package_name, version)
         return os.path.exists(install_path)
 
     def print_info(self, package_name: str):
@@ -719,7 +786,7 @@ class PackageManager:
         """
         pkg = self.get_package(package_name)
         if pkg is None:
-            print_stderr(f"Package {Colorize.yellow(package_name)} not found in database.")
+            Utils.print_stderr(f"Package {Colorize.yellow(package_name)} not found in database.")
             return
 
         print(f"Package: {pkg.package}")
@@ -795,7 +862,7 @@ class PackageManager:
             print(f"{package_name}/{version}")
             sys.exit(0)
         except ValueError as e:
-            print_stderr(str(e))
+            Utils.print_stderr(str(e))
             sys.exit(1)
 
     def print_dependencies(self, package_version_str: str):
@@ -805,7 +872,7 @@ class PackageManager:
         if "/" in package_version_str:
             package_name, version = package_version_str.split("/", 1)
         else:
-            print_stderr(f"❌ Invalid input {Colorize.yellow(package_version_str)}. Expected format: <package>/<version>.")
+            Utils.print_stderr(f"❌ Invalid input {Colorize.yellow(package_version_str)}. Expected format: <package>/<version>.")
             sys.exit(1)
         try:
             dependencies = self.get_local_dependencies(package_name, version)
@@ -818,8 +885,25 @@ class PackageManager:
                     print(f"{dep_name}")
             sys.exit(0)
         except Exception as e:
-            print_stderr(f"❌ Error retrieving dependencies for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}: {e}")
+            Utils.print_stderr(f"❌ Error retrieving dependencies for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}: {e}")
+            Utils.print_stderr("You may need to run -u to update the local package database.")
             sys.exit(1)
+
+    def sort_packages(self):
+        """
+        Sort the internal package dictionary by package name.
+        """
+        local_packages = []
+        conda_packages = []
+        for pkg in self.packages.values():
+            if pkg.is_local():
+                local_packages.append(pkg)
+            else:
+                conda_packages.append(pkg)
+        local_packages.sort(key=lambda p: p.package.lower())
+        conda_packages.sort(key=lambda p: p.package.lower())
+        sorted_packages = local_packages + conda_packages
+        self.packages = {pkg.package: pkg for pkg in sorted_packages}
 
 # Example usage
 if __name__ == "__main__":
