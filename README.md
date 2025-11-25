@@ -1,6 +1,6 @@
 # Environment Module for Bioinfo Research
 
-> [!IMPORTANT] When to use this repo?
+> [!NOTE]
 > Personally, I recommend you to use `conda`, `mamba`, `micromamba`, or `pixi` for manage project environments. 
 > 
 > This repo aims to provide quick and reproducible environment modules for lab-wide use, especially for labs that need to switch between different workstations, servers, and clusters.
