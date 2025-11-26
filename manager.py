@@ -50,7 +50,7 @@ def main():
             package_name, version = pm.get_package_version(args.install)
             success = pm.install_package(package_name, version)
             if success:
-                Utils.print_stderr(f"Successfully installed {Colorize.blue(args.install)}.")
+                Utils.print_stderr(f"Successfully installed {Colorize.yellow(args.install)}.")
             else:
                 Utils.print_stderr(f"Failed to install {Colorize.red(args.install)}.")
         except KeyboardInterrupt:
@@ -69,7 +69,7 @@ def main():
                 sys.exit(0)
             success = pm.delete(package_name, version)
             if success:
-                Utils.print_stderr(f"Successfully deleted {Colorize.blue(args.delete)}.")
+                Utils.print_stderr(f"Successfully deleted {Colorize.yellow(args.delete)}.")
             else:
                 Utils.print_stderr(f"Failed to delete {Colorize.red(args.delete)}.")
         except Exception as e:
@@ -175,7 +175,7 @@ class Config:
             f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" install -c conda-forge -c bioconda $@\n')
         st = os.stat(mm_install_path)
         os.chmod(mm_install_path, st.st_mode | stat.S_IEXEC)
-        Utils.print_stderr(f"Micromamba helper script created at {Colorize.blue(cls.executable_root)}/mm mm-create mm-install ...")
+        Utils.print_stderr(f"Micromamba helper script created at {Colorize.blue(cls.executable_root)}/mm")
 
         return micromamba_path
 
@@ -421,11 +421,11 @@ class PackageManager:
         Returns True if successful, False otherwise.
         """
         if name in self.packages:
-            Utils.print_stderr(f"Package {name} already exists in the database. Updating info...")
+            Utils.print_stderr(f"Package {Colorize.yellow(name)} already exists in the database. Updating info...")
             pkg = self.packages[name]
         else:
             pkg = Package.new_from_string(name)
-        Utils.print_stderr(f"Fetching information for package {name}...")
+        Utils.print_stderr(f"Fetching information for package {Colorize.yellow(name)}...")
         pkg.update_versions(force=True)
         if pkg.whatis == "":
             pkg.update_whatis_url()
@@ -433,7 +433,7 @@ class PackageManager:
             self.update_package(pkg)
             return True
         else:
-            Utils.print_stderr(f"Package {name} not found in Anaconda repositories. Please add it manually.")
+            Utils.print_stderr(f"Package {Colorize.yellow(name)} not found in Anaconda repositories. Please add it manually.")
             return False
 
     def load_from_tsv(self):
@@ -491,7 +491,7 @@ class PackageManager:
         """
         for pkg in self.packages.values():
             if not pkg.is_local():
-                Utils.print_stderr(f"Fetching versions for {pkg.package}...")
+                Utils.print_stderr(f"Fetching versions for {Colorize.yellow(pkg.package)}...")
                 pkg.update_versions()
                 if pkg.whatis == "":
                     pkg.update_whatis_url()
@@ -584,7 +584,7 @@ class PackageManager:
 
         try:
             subprocess.run(cmd, check=True)
-            Utils.print_stderr(f"✅ Package {package_name} version {version} installed successfully via micromamba.")
+            Utils.print_stderr(f"✅ Package {Colorize.yellow(package_name)} version {Colorize.yellow(version)} installed successfully via micromamba.")
 
             template_path = os.path.join(Config.build_scripts_root, "apps-template")
             template_lua_path = template_path + ".lua"
