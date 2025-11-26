@@ -23,14 +23,14 @@ install_app() {
     fi
     # if cellranger-$version.tar.gz not in the url, print error message and exit
     if [[ "$url" != *"cellranger-$version.tar.gz"* ]]; then
-        print_stderr "❌ The download link is invalid or not for cellranger version $version."
+        print_stderr "❌ The download link is invalid or not for version $version."
         return 1
     fi
     print_stderr "Downloading ${YELLOW}${app_name_version}${NC}"
     wget -nv -O "${app_name}_${version}.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    tar xf "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
+    tar_xf_pigz "${app_name}_${version}.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {

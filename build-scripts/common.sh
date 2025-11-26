@@ -245,6 +245,14 @@ pigz_or_gunzip() {
     fi
 }
 
+tar_xf_pigz() {
+    if command -v pigz &> /dev/null; then
+        tar --use-compress-program="pigz -d -p $ncpu" -xf $@
+    else
+        tar -xzf "$1"
+    fi
+}
+
 remove_default_dependencies() {
     dep_name="$1"
 

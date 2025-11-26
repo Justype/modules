@@ -17,7 +17,7 @@ install_app() {
     wget -nv https://github.com/Justype/modules/releases/download/cellranger/cellranger_9.0.1_barcodes.tar.xz
     
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    tar xf cellranger_9.0.1_barcodes.tar.xz -C "$target_dir" --strip-components=1
+    tar xfJ cellranger_9.0.1_barcodes.tar.xz -C "$target_dir" --strip-components=1
 
     # # Or copy from cellranger installation
     # print_stderr "Copying barcodes from cellranger installation"
