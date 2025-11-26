@@ -4,7 +4,7 @@
 -- You can also load other dependency modules by depends_on().
 --     depends_on("openjdk/17.0.12")
 
-local abs_path = myFileName()                   -- absolute path of module, /somewhere/modules/modulefiles/app/x.y.z
+local abs_path = myFileName()                   -- absolute path of module, /somewhere/modules/apps_modulefiles/app/x.y.z
 local app_full_name = myModuleFullName()        -- full name of module, app/x.y.z
 local app_name, app_version = app_full_name:match("([^/]+)/([^/]+)")
 -- local app_version = myModuleVersion()

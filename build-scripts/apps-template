@@ -4,7 +4,7 @@
 # You can also load other modules in this modulefile.
 #   module load openjdk/17.0.12
 
-# abs path of this file, like /somewhere/modules/modulefiles/app/x.x.x
+# abs path of this file, like /somewhere/modules/apps_modulefiles/app/x.x.x
 set abs_path [file normalize [info script]]
 # full name of this module, like app/x.x.x
 set app_full_name [module-info name]

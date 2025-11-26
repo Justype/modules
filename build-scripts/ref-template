@@ -2,7 +2,7 @@
 # Author: Ziyue Cheng
 # Almost all of them are automated, you can modify whatis, ModulesHelp as needed.
 
-# absolute path of module, /somewhere/modules/modulefiles/assembly/data-type/version
+# absolute path of module, /somewhere/modules/ref_modulefiles/assembly/data-type/version
 set abs_path [file normalize [info script]]
 # full name of module, assembly/data-type/version
 set ref_full_name [module-info name]

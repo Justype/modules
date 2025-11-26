@@ -57,7 +57,7 @@ EOF
 
 # - target_base_dir:  modules/ref/assembly/data-type
 # - target_dir:       modules/ref/assembly/data-type/version
-# - script_path:      modules/modulefiles/ref/assembly/data-type/version
+# - script_path:      modules/ref_modulefiles/ref/assembly/data-type/version
 # - tmp_dir:          tmp directory (modules/tmp/assembly/data-type/version)
 
 RED='\033[0;91m'    # Red      WARNING or ERROR

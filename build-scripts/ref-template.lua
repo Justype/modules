@@ -2,7 +2,7 @@
 -- Author: Ziyue Cheng
 -- Almost all of them are automated, you can modify whatis, ModulesHelp as needed.
 
-local abs_path = myFileName()                   -- absolute path of module, /somewhere/modules/modulefiles/assembly/data-type/version
+local abs_path = myFileName()                   -- absolute path of module, /somewhere/modules/ref_modulefiles/assembly/data-type/version
 local ref_full_name = myModuleFullName()        -- full name of module, assembly/data-type/version
 local assembly, data_type, version = ref_full_name:match("([^/]+)/([^/]+)/([^/]+)")
 local module_root = abs_path
