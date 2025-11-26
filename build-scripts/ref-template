@@ -3,7 +3,7 @@
 # Almost all of them are automated, you can modify whatis, ModulesHelp as needed.
 
 # absolute path of module, /somewhere/modules/modulefiles/assembly/data-type/version
-set abs_path [module-info file]
+set abs_path [file normalize [info script]]
 # full name of module, assembly/data-type/version
 set ref_full_name [module-info name]
 regexp {([^/]+)/([^/]+)/([^/]+)} $ref_full_name -> assembly data_type version
@@ -13,14 +13,14 @@ set module_root [file dirname [file dirname [file dirname [file dirname $abs_pat
 set ref_root [file join $module_root ref $ref_full_name]
 set current_datetime [clock format [clock seconds] -format "%Y-%m-%d %H:%M:%S"]
 
-whatis "Loads $ref_full_name"
+module-whatis "Loads $ref_full_name"
 proc ModulesHelp {} {
     global assembly data_type version
     puts stdout "Assembly: $assembly\tData type: $data_type\tVersion: $version"
 }
 
 if {[module-info mode load]} {
-    puts stderr "[$current_datetime] Loading module $ref_full_name"
+    puts stderr "\[$current_datetime\] Loading module $ref_full_name"
 }
 
 # Construct ENV VAR name
