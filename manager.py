@@ -46,6 +46,8 @@ def main():
         if success:
             pm.save_to_tsv()
     elif args.install:
+        package_name = ""
+        version = ""
         try:
             package_name, version = pm.get_package_version(args.install)
             success = pm.install_package(package_name, version)
@@ -55,11 +57,14 @@ def main():
                 Utils.print_stderr(f"Failed to install {Colorize.red(args.install)}.")
         except KeyboardInterrupt:
             Utils.print_stderr(f"Installation of {Colorize.red(args.install)} interrupted by user.")
-            pm.delete(package_name, version)
+            if package_name and version:
+                pm.delete(package_name, version)
         except Exception as e:
             Utils.print_stderr(f"Error installing {Colorize.red(args.install)}: {e}")
-            pm.delete(package_name, version)
-            Utils.print_stderr("For local packages, run -u to refresh the database.")
+            if package_name and version:
+                pm.delete(package_name, version)
+            Utils.print_stderr(f"For conda packages, make sure the {Colorize.yellow(args.install)} exists on Anaconda.org.")
+            Utils.print_stderr(f"For local packages, run {Colorize.yellow('./manager.py -u')} to refresh the database.")
     elif args.delete:
         try:
             package_name, version = pm.get_package_version(args.delete)
@@ -425,7 +430,7 @@ class PackageManager:
             pkg = self.packages[name]
         else:
             pkg = Package.new_from_string(name)
-        Utils.print_stderr(f"Fetching information for package {Colorize.yellow(name)}...")
+        Utils.print_stderr(f"Fetching information for package {Colorize.yellow(name)} from Anaconda.org...")
         pkg.update_versions(force=True)
         if pkg.whatis == "":
             pkg.update_whatis_url()
@@ -433,7 +438,7 @@ class PackageManager:
             self.update_package(pkg)
             return True
         else:
-            Utils.print_stderr(f"Package {Colorize.yellow(name)} not found in Anaconda repositories. Please add it manually.")
+            Utils.print_stderr(f"❌ Package {Colorize.yellow(name)} not found in Anaconda repositories.")
             return False
 
     def load_from_tsv(self):
@@ -886,7 +891,7 @@ class PackageManager:
             sys.exit(0)
         except Exception as e:
             Utils.print_stderr(f"❌ Error retrieving dependencies for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}: {e}")
-            Utils.print_stderr("You may need to run -u to update the local package database.")
+            Utils.print_stderr(f"You may need to run {Colorize.yellow('./manager.py -u')} to update the local package database.")
             sys.exit(1)
 
     def sort_packages(self):

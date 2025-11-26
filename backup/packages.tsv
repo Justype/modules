@@ -1,13 +1,13 @@
 package	tags	whatis	url	source	versions
 cellranger		10X Genomics Single Cell Software Suite	https://www.10xgenomics.com/support/software/cell-ranger/downloads/previous-versions	local	9.0.1,8.0.1
-custom-scripts		GRCh38 reference genome FASTA	https://www.gencodegenes.org/human/	local	mapping
-data-utils		Cell Ranger 9.0.1 Barcodes list	https://kb.10xgenomics.com/s/article/115004506263-What-is-a-barcode-inclusion-list-formerly-barcode-whitelist	local	cellranger-9.0.1-barcodes
-grch38		Assembly grch38 reference and index data		ref	vg-1.61.0/vg-grch38-hprc-gencode47,vcf/hprc-v1.1-decomposed-gencode,vcf/hprc-v1.1-decomposed,transcript/gencode44,star-2.7.11b/gencode44-151,star-2.7.11b/cellranger-2024-A,salmon-1.10.3/gencode44,rmsk/ucsc,gtf/gencode44,genome/gencode,cellranger/2024-A
-grcm39		Assembly grcm39 reference and index data		ref	transcript/gencodeM33,rmsk/ucsc,gtf/gencodeM33,genome/gencode,cellranger/2024-A
+custom-scripts		Custom mapping scripts		local	mapping
+data-utils		Assembly data-utils reference and index data		ref	cellranger/9.0.1-barcodes
+grch38		Assembly grch38 reference and index data		ref	vg-1.61.0/vg-grch38-hprc-gencode47,vcf/hprc-v1.1-decomposed-gencode,vcf/hprc-v1.1-decomposed,transcript/gencode47,transcript/gencode44,star-2.7.11b/gencode47-101,star-2.7.11b/gencode44-101,star-2.7.11b/cellranger-2024-A,salmon-1.10.3/gencode44,rmsk/ucsc,gtf/gencode47,gtf/gencode44,genome/gencode,cellranger/2024-A
+grcm39		Assembly grcm39 reference and index data		ref	transcript/gencodeM36,transcript/gencodeM33,star-2.7.11b/gencodeM36-101,star-2.7.11b/gencodeM33-101,star-2.7.11b/cellranger-2024-A,rmsk/ucsc,gtf/gencodeM36,gtf/gencodeM33,genome/gencode,cellranger/2024-A
 orad		Illumina ORA Decompressor	https://support.illumina.com/sequencing/sequencing_software/DRAGENORA/software-downloads.html	local	2.7.0
-python		Python 3 with pip (conda-forge Build)		local	3.12.12,3.11.14,3.10.19,3.8.20,2.7.15
-rpvg		Inferring the expression VG mpmap results for RNA-seq	https://github.com/jonassibbesen/rpvg/	local	1.0
-vg		Genome Variation Graph tools for pan-genome analysis	https://github.com/vgteam/vg/	local	1.61.0
+python		Python 3 with pip (conda-forge Build)	https://anaconda.org/conda-forge/python	local	3.12.12,3.11.14,3.10.19,3.8.20,2.7.15
+rpvg		Inferring the expression VG mpmap results for RNA-seq	https://github.com/jonassibbesen/rpvg	local	1.0
+vg		Genome Variation Graph tools for pan-genome analysis	https://github.com/vgteam/vg	local	1.61.0
 apptainer		Apptainer: Application containers for Linux	https://apptainer.org/	conda-forge	1.4.4,1.4.2,1.4.1,1.4.0,1.3.6,1.3.2,1.3.1,1.3.0,1.2.5,1.2.2,1.2.1,1.2.0,1.1.9,1.1.7,1.1.5,1.1.4,1.1.3,1.1.2
 bcftools		BCFtools is a set of utilities that manipulate variant calls in the Variant Call Format (VCF) and its binary counterpart BCF. All commands work transp...	https://github.com/samtools/bcftools	bioconda	1.22,1.21,1.20,1.19,1.18,1.17,1.16,1.15.1,1.15,1.14,1.13,1.12,1.11,1.10.2,1.10.1,1.10,1.9,1.8,1.7,1.6,1.5,1.4.1,1.4,1.3.1,1.3,1.2
 bedtools		A powerful toolset for genome arithmetic	http://bedtools.readthedocs.org/	bioconda	2.31.1,2.31.0,2.30.0,2.29.2,2.29.1,2.29.0,2.28.0,2.27.1,2.27.0,2.26.0gx,2.26.0,2.25.0,2.24.0,2.23.0,2.22,2.20.1,2.19.1,2.17.0,2.16.2
