@@ -31,16 +31,16 @@ install_app() {
 
 special_modulefiles() {
     # add custom environment variables and functions to modulefile
-    # app_root is a special variable that points to the app directory in modulefile[.lua]
+    # ref_root is a special variable that points to the app directory in modulefile[.lua]
     # remove_default_dependencies "cellranger/9.0.1"
 
     cat << EOF >> "${script_path}"
-set barcode_3pv1 \$app_root/737K-april-2014_rc.txt
-set barcode_3pv2 \$app_root/737K-august-2016.txt
-set barcode_3pv3 \$app_root/3M-february-2018_TRU.txt
-set barcode_3pv4 \$app_root/3M-3pgex-may-2023_TRU.txt
-set barcode_5pv3 \$app_root/3M-5pgex-jan-2023.txt
-set barcode_arcv1 \$app_root/737K-arc-v1.txt
+set barcode_3pv1 \$ref_root/737K-april-2014_rc.txt
+set barcode_3pv2 \$ref_root/737K-august-2016.txt
+set barcode_3pv3 \$ref_root/3M-february-2018_TRU.txt
+set barcode_3pv4 \$ref_root/3M-3pgex-may-2023_TRU.txt
+set barcode_5pv3 \$ref_root/3M-5pgex-jan-2023.txt
+set barcode_arcv1 \$ref_root/737K-arc-v1.txt
 
 setenv BARCODE_3PV1 \$barcode_3pv1
 setenv BARCODE_3PV2 \$barcode_3pv2
@@ -61,12 +61,12 @@ if { [module-info mode] == "load" } {
 EOF
 
     cat << EOF >> "${script_path}.lua"
-local barcode_3pv1 = pathJoin(app_root, "737K-april-2014_rc.txt")
-local barcode_3pv2 = pathJoin(app_root, "737K-august-2016.txt")
-local barcode_3pv3 = pathJoin(app_root, "3M-february-2018_TRU.txt")
-local barcode_3pv4 = pathJoin(app_root, "3M-3pgex-may-2023_TRU.txt")
-local barcode_5pv3 = pathJoin(app_root, "3M-5pgex-jan-2023.txt")
-local barcode_arcv1 = pathJoin(app_root, "737K-arc-v1.txt")
+local barcode_3pv1 = pathJoin(ref_root, "737K-april-2014_rc.txt")
+local barcode_3pv2 = pathJoin(ref_root, "737K-august-2016.txt")
+local barcode_3pv3 = pathJoin(ref_root, "3M-february-2018_TRU.txt")
+local barcode_3pv4 = pathJoin(ref_root, "3M-3pgex-may-2023_TRU.txt")
+local barcode_5pv3 = pathJoin(ref_root, "3M-5pgex-jan-2023.txt")
+local barcode_arcv1 = pathJoin(ref_root, "737K-arc-v1.txt")
 
 setenv("BARCODE_3PV1", barcode_3pv1)
 setenv("BARCODE_3PV2", barcode_3pv2)
