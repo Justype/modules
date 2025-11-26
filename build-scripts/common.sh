@@ -57,6 +57,7 @@ help_message() {
     echo "  -i  Install the target module with dependencies." 1>&2
     echo "  -l  List the dependencies of the target module." 1>&2
     echo "  -d  Delete the target module." 1>&2
+    echo "  -u  Update the target module." 1>&2
     echo "  -h  Help message." 1>&2
 }
 
@@ -138,6 +139,23 @@ delete() {
     remove_target_directory
     remove_modulefile
     print_stderr "Deletion completed. ${YELLOW}${app_name_version}${NC} is removed."
+    exit
+}
+
+update() {
+    print_stderr "Updating the target module: ${YELLOW}${app_name_version}${NC}"
+    # if target directory does not exist, exit 1
+    if [ ! -d "$target_dir" ]; then
+        print_stderr "${RED}ERROR${NC}: Target app does not exist!"
+        print_stderr "Exit Updating"
+        exit 1
+    fi
+
+    remove_target_directory
+    remove_modulefile
+
+    install
+    print_stderr "Update completed. ${YELLOW}${app_name_version}${NC} is updated."
     exit
 }
 
@@ -327,12 +345,13 @@ main() {
     fi
 
     # Parse the parameters
-    while getopts ":hdil" opt; do
+    while getopts ":hdilu" opt; do
         case ${opt} in
             h ) help_message ; exit;;
             i ) install ;;
             l ) print_dependencies ;;
             d ) delete ;;
+            u ) update ;;
             \? )
                 print_stderr "${RED}ERROR${NC}: Invalid option: $OPTARG"
                 help_message

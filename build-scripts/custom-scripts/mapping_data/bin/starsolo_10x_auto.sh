@@ -53,7 +53,7 @@ REF=$(readlink -f "$REF")
 module load data-utils/cellranger/9.0.1-barcodes
 if [[ -z "$BARCODE_3PV1" || -z "$BARCODE_3PV2" || -z "$BARCODE_3PV3" || -z "$BARCODE_3PV4" || -z "$BARCODE_5PV3" || -z "$BARCODE_ARCV1" ]]; then
     echo "ERROR: Barcode files not found in environment variables."
-    echo "Please load the data-utils/cellranger-9.0.1-barcodes module."
+    echo "Please install and load the data-utils/cellranger/9.0.1-barcodes module."
     exit 1
 fi
 
