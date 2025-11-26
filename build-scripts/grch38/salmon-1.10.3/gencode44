@@ -16,10 +16,7 @@
 #########################################################
 
 install_app() {
-    mkdir -p "$target_dir"       # modules/apps/name/version
-    mkdir -p "$tmp_dir"
-    cd "$tmp_dir"
-    
+    # By default, $target_dir and $tmp_dir are created and we are now in $tmp_dir
     print_stderr "Appending genome to transcriptome and generating decoys..."
 
     pigz_or_gunzip_pipe "$TRANSCRIPT_FASTA_GZ" > gentrome.fa

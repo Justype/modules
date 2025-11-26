@@ -5,14 +5,11 @@
 #########################################################
 # Cell Ranger build script
 # - NOTE: Cell Ranger link only works for one day. 
-# - Please update the link at line 16. Or you can enter it manually when prompted.
+# - Please update the link at line 13. Or you can enter it manually when prompted.
 #########################################################
 
 install_app() {
-    mkdir -p "$target_dir"       # modules/apps/name/version
-    mkdir -p "$tmp_dir"          # tmp directory
-    cd "$tmp_dir"
-
+    # By default, $target_dir and $tmp_dir are created and we are now in $tmp_dir
     url='https://cf.10xgenomics.com/releases/cell-exp/cellranger-8.0.1.tar.gz'
     # if the url do not contain the 'Expires' parameter, read -r url
     if [[ "$url" != *"Expires="* ]]; then

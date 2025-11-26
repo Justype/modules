@@ -75,7 +75,7 @@ install() {
     print_stderr "📜 Modulefile path: $script_path"
     # if target directory exists, exit 1
     if [ -d "$target_dir" ]; then
-        print_stderr "${RED}ERROR${NC}: Target app exists!"
+        print_stderr "${RED}ERROR${NC}: Target app dir exists!"
         print_stderr "Exit Installing"
         exit 1
     fi
@@ -84,6 +84,9 @@ install() {
     install_dependencies
     load_dependencies
 
+    mkdir -p "$target_dir"
+    mkdir -p "$tmp_dir"
+    cd "$tmp_dir"
     install_app
     copy_modulefile
     print_stderr "✅ Installation completed. ${YELLOW}${app_name_version}${NC} is ready to use."

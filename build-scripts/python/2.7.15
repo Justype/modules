@@ -8,6 +8,7 @@
 #########################################################
 
 install_app() {
+    # By default, $target_dir and $tmp_dir are created and we are now in $tmp_dir
     print_stderr "Installing prebuilt ${YELLOW}${app_name_version}${NC} using micromamba"
     bin/mm-create -yq --prefix "$target_dir" ${app_name}=${version} pip virtualenv
 }

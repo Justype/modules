@@ -3,7 +3,7 @@
 #WHATIS:Custom mapping scripts
 
 install_app() {
-    mkdir -p "$target_dir"       # modules/apps/name/version
+    # By default, $target_dir and $tmp_dir are created and we are now in $tmp_dir
     custom_dir="${install_script_path}_data"
 
     print_stderr "Copying custom scripts to ${YELLOW}${app_name_version}${NC}"
