@@ -13,7 +13,7 @@ install_app() {
     mkdir -p "$tmp_dir"
     cd "$tmp_dir"
 
-    pigz -p $ncpu -d "$ANNOTATION_GTF_GZ" -c > annotation.gtf
+    pigz_or_gunzip_pipe "$ANNOTATION_GTF_GZ" > annotation.gtf
     
     print_stderr "Building STAR index for ${YELLOW}${app_name_version}${NC}"
     STAR --runThreadN $ncpu \

@@ -22,7 +22,7 @@ install_app() {
     
     print_stderr "Appending genome to transcriptome and generating decoys..."
 
-    pigz -p $ncpu -d -c "$TRANSCRIPT_FASTA_GZ" > gentrome.fa
+    pigz_or_gunzip_pipe "$TRANSCRIPT_FASTA_GZ" > gentrome.fa
     cat "$GENOME_FASTA" >> gentrome.fa
 
     if [ -f "${GENOME_FASTA}.fai" ]; then

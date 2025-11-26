@@ -28,10 +28,10 @@ install_app() {
         grep -v "^#" | \
         LC_ALL=C sort -k1,1 -k2,2n | \
         cat <(echo "$header") - | \
-        bgzip -c > hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
+        bgzip -c -@ $ncpu > hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
     
     print_stderr "Indexing HPRC v1.1 GRCh38 GENCODE-style VCF"
-    tabix -p vcf hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
+    tabix -p vcf -@ $ncpu hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
 
     print_stderr "Moving files to target directory"
     mv hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz "$target_dir/"

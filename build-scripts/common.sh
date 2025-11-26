@@ -245,6 +245,14 @@ pigz_or_gunzip() {
     fi
 }
 
+pigz_or_gunzip_pipe() {
+    if command -v pigz &> /dev/null; then
+        pigz -d -p $ncpu -c "$1"
+    else
+        gunzip -c "$1"
+    fi
+}
+
 tar_xf_pigz() {
     if command -v pigz &> /dev/null; then
         tar --use-compress-program="pigz -d -p $ncpu" -xf $@

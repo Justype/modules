@@ -12,7 +12,7 @@ install_app() {
     wget -nv -O "refdata-gex.tar.gz" "$url"
 
     print_stderr "Extracting ${YELLOW}${app_name_version}${NC}"
-    tar -xzf "refdata-gex.tar.gz" -C "$target_dir" --strip-components=1
+    tar_xf_pigz  "refdata-gex.tar.gz" -C "$target_dir" --strip-components=1
 }
 
 special_modulefiles() {
