@@ -25,7 +25,7 @@ if {[module-info mode load]} {
 
 # Construct ENV VAR name
 # Convert - → _, / → _, uppercase
-set env_var_name [string toupper [string map {"-" "_" "/" "_" "." "_" } $ref_full_name]]
+set env_var_name [string toupper [string map { - _ . _ / _ } $ref_full_name]]
 set env_var_name "${env_var_name}_HOME"
 
 # Set environment variable

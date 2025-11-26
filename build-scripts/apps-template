@@ -30,7 +30,7 @@ if {[file isdirectory "$app_root/bin"]} {
     puts stderr "WARNING: No bin directory found in $app_full_name"
 }
 
-set env_var_name "[string toupper [string map {- _} $app_name]]_HOME"
+set env_var_name "[string toupper [string map { - _ . _ / _ } $app_name]]_HOME"
 setenv $env_var_name $app_root
 
 # Handle conflicts with other versions

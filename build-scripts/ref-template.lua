@@ -19,6 +19,6 @@ if (mode() == "load") then
     io.stderr:write("[" .. current_datetime .. "] Loading module " .. ref_full_name .. "\n")
 end
 
-local env_var_name = string.upper(ref_full_name:gsub("-", "_"):gsub("/", "_"):gsub("%.", "_")) .. "_HOME"
+local env_var_name = string.upper(ref_full_name:gsub("[-%./]", "_")) .. "_HOME"
 setenv(env_var_name, ref_root)
 

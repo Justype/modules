@@ -29,7 +29,7 @@ elseif (mode() == "load" and os.getenv("SLURM_JOB_ID") == nil) then
     io.stderr:write("WARNING: No bin directory found in " .. app_full_name .. "\n")
 end
 
-local env_var_name = string.upper(app_name:gsub("-", "_")) .. "_HOME"
+local env_var_name = string.upper(app_name:gsub("[-%./]", "_")) .. "_HOME"
 setenv(env_var_name, app_root)
 
 -- Handle conflicts with other versions
