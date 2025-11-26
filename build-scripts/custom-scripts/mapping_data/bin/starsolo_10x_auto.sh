@@ -50,7 +50,7 @@ FQDIR=$(readlink -f "$FQDIR")
 REF=$(readlink -f "$REF")
 
 # Check if barcode files are available in environment variables; if not exit with error
-module load data-utils/cellranger-9.0.1-barcodes
+module load data-utils/cellranger/9.0.1-barcodes
 if [[ -z "$BARCODE_3PV1" || -z "$BARCODE_3PV2" || -z "$BARCODE_3PV3" || -z "$BARCODE_3PV4" || -z "$BARCODE_5PV3" || -z "$BARCODE_ARCV1" ]]; then
     echo "ERROR: Barcode files not found in environment variables."
     echo "Please load the data-utils/cellranger-9.0.1-barcodes module."
