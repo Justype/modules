@@ -163,21 +163,21 @@ class Config:
         mm_path = os.path.join(os.path.abspath(cls.executable_root), "mm")
         with open(mm_path, "w", encoding="utf-8") as f:
             f.write(f"#!/bin/bash\n")
-            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix {os.path.abspath(cls.micromamba_root)} $@\n')
+            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" "$@"\n')
         st = os.stat(mm_path)
         os.chmod(mm_path, st.st_mode | stat.S_IEXEC)
 
         mm_create_path = os.path.join(os.path.abspath(cls.executable_root), "mm-create")
         with open(mm_create_path, "w", encoding="utf-8") as f:
             f.write(f"#!/bin/bash\n")
-            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" create -c conda-forge -c bioconda $@\n')
+            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" create -c conda-forge -c bioconda "$@"\n')
         st = os.stat(mm_create_path)
         os.chmod(mm_create_path, st.st_mode | stat.S_IEXEC)
 
         mm_install_path = os.path.join(os.path.abspath(cls.executable_root), "mm-install")
         with open(mm_install_path, "w", encoding="utf-8") as f:
             f.write(f"#!/bin/bash\n")
-            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" install -c conda-forge -c bioconda $@\n')
+            f.write(f'"{os.path.abspath(micromamba_path)}" --root-prefix "{os.path.abspath(cls.micromamba_root)}" install -c conda-forge -c bioconda "$@"\n')
         st = os.stat(mm_install_path)
         os.chmod(mm_install_path, st.st_mode | stat.S_IEXEC)
         Utils.print_stderr(f"Micromamba helper script created at {Colorize.blue(cls.executable_root)}/mm")

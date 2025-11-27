@@ -279,7 +279,7 @@ pigz_or_gunzip_pipe() {
 
 tar_xf_pigz() {
     if command -v pigz &> /dev/null; then
-        tar --use-compress-program="pigz -d -p $ncpu" -xf $@
+        tar --use-compress-program="pigz -d -p $ncpu" -xf "$@"
     else
         tar -xzf "$1"
     fi

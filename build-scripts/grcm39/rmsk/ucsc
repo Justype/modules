@@ -65,4 +65,4 @@ if ! [ -d build-scripts ]; then
 fi
 
 source "build-scripts/common.sh"
-main $@
+main "$@"
