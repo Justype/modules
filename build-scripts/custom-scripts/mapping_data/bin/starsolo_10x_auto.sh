@@ -186,7 +186,7 @@ elif (( $NBC5 > 50000 ))
 then
   BC=$BARCODE_5PV3
 else 
-  >&2 echo "ERROR: No whitelist has matched a random selection of 200,000 barcodes! Match counts: $NBC1 (v1), $NBC2 (v2), $NBC3 (v3), $NBC4 (v4-3p), $NBC5 (v4-5p), $NBCA (multiome)."
+  >&2 echo "ERROR: No whitelist has matched a random selection of 200,000 barcodes! Match counts: $NBC1 (v1), $NBC2 (v2), $NBC3 (v3), $NBC4 (v4-3p), $NBC5 (v3-5p), $NBCA (multiome)."
   exit 1
 fi 
 
@@ -300,15 +300,24 @@ fi
 echo "[`date +'%Y-%m-%d %T'`] Done setting up the STARsolo run; here are final processing options:"
 echo "============================================================================="
 echo "Sample: $TAG" | tee strand.txt
+echo "Detected Chemistry: $CHEM" | tee -a strand.txt
 echo "Paired-end mode: $PAIRED" | tee -a strand.txt
 echo "Strand (Forward = 3', Reverse = 5'): $STRAND, %reads mapped to GeneFull: forward = $PCTFWD , reverse = $PCTREV" | tee -a strand.txt
-echo "CB whitelist: $BC, matches out of 200,000: $NBC3 (v3), $NBC2 (v2), $NBC1 (v1), $NBCA (multiome) " | tee -a strand.txt
+echo "CB whitelist: $BC" | tee -a strand.txt
+echo "-----------------------------------------------------------------------------" | tee -a strand.txt
+echo "Matches out of 200,000:" | tee -a strand.txt
+echo "    3 prime v1: $NBC1" | tee -a strand.txt
+echo "    3 prime v2: $NBC2" | tee -a strand.txt
+echo "    3 prime v3: $NBC3" | tee -a strand.txt
+echo "    3 prime v4: $NBC4" | tee -a strand.txt
+echo "    5 prime v3: $NBC5" | tee -a strand.txt
+echo "    ATAC + RNA: $NBCA" | tee -a strand.txt
+echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 echo "CB length: $CBLEN" | tee -a strand.txt
 echo "UMI length: $UMILEN" | tee -a strand.txt
 echo "GZIP: $GZIP" | tee -a strand.txt
 echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 echo "Read 1 files: $R1" | tee -a strand.txt
-echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 echo "Read 2 files: $R2" | tee -a strand.txt
 echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 
