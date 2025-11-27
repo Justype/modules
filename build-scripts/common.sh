@@ -339,6 +339,7 @@ clean_up () {
 print_error_message() {
     # Custom error message can be defined in the build script
     # print_stderr "Possible Reason: Missing dependencies or Expired links"
+    return 0
 }
 #endregion
 
