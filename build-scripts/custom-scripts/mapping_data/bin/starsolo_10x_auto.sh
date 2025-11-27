@@ -9,6 +9,7 @@ print_help() {
   echo "Usage: $0 -i <fastq_dir> -s <sample_id> -r <reference_dir> [-t <threads>] [-o <output_dir>] [-n]"
   echo ""
   echo "This script automatically detects 10x chemistry version and runs STARsolo accordingly."
+  echo "The output will be in the <output_dir>/<sample_id>/ directory."
   echo ""
   echo "Arguments:"
   echo "  -i    fastq directory containing FASTQ files"
@@ -311,9 +312,6 @@ echo "--------------------------------------------------------------------------
 echo "Read 2 files: $R2" | tee -a strand.txt
 echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 
-#TESTING ONLY
-exit 0
-
 if [[ $PAIRED == "True" ]]
 then
   ## note the R1/R2 order of input fastq reads and --soloStrand Forward for 5' paired-end experiment
@@ -336,19 +334,15 @@ then
   $CMD samtools index -@ $CPUS Aligned.sortedByCoord.out.bam
 fi
 
-## gzip the unmapped reads
-pigz -p $CPUS Unmapped.out.mate1
-pigz -p $CPUS Unmapped.out.mate2
+# ## gzip the unmapped reads
+# pigz -p $CPUS Unmapped.out.mate1
+# pigz -p $CPUS Unmapped.out.mate2
 
 ## remove test files 
-rm -rf test.R?.fastq test_forward test_reverse
+rm -rf test*
+rm -rf _STARtmp
 
-cd output
-for i in Gene/raw Gene/filtered GeneFull/raw GeneFull/filtered Velocyto/raw Velocyto/filtered
-do 
-  cd $i; for j in *; do pigz -p $CPUS $j & done
-  cd ../../
-done
+pigz -p $CPUS output/*/*/*.tsv
+pigz -p $CPUS output/*/*/*.mtx
 
-wait
 echo "ALL DONE!"
