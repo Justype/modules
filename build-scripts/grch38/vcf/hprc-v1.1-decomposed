@@ -25,8 +25,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    
-    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
 set hprc_vcf_gz \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz
 set hprc_vcf_gz_tbi \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.vcf.gz.tbi

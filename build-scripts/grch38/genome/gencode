@@ -21,9 +21,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    remove_default_dependencies "samtools"
-    
-    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
 set genome_fasta \$ref_root/GRCh38.primary_assembly.genome.fa
 setenv GENOME_FASTA \$genome_fasta

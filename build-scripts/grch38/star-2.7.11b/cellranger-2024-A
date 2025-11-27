@@ -23,8 +23,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    remove_default_dependencies "grch38"
-
     cat << EOF >> "${script_path}"
 set star_index_dir \$ref_root
 setenv STAR_INDEX_DIR \$star_index_dir

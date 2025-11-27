@@ -39,11 +39,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the app directory in modulefile[.lua]
-    remove_default_dependencies "vg"
-    remove_default_dependencies "grch38"
-
-    # add custom environment variables and functions to modulefile
-    # ref_root is a special variable that points to the app directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
 set vg_xg \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.xg
 set vg_dist \$ref_root/hprc-v1.1-mc-grch38-gencode47.spliced.dist

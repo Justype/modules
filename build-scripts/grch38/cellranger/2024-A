@@ -13,7 +13,7 @@ install_app() {
 }
 
 special_modulefiles() {
-    # add custom environment variables and functions to modulefile
+    # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
     cat << EOF >> "${script_path}"
 set cellranger_ref_dir \$ref_root

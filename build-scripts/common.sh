@@ -224,16 +224,19 @@ copy_modulefile() {
         cat "${modules_root}/build-scripts/${target}-template.lua" > "${script_path}.lua"
     fi
 
-    print_stderr "Editing the modulefile to include the dependencies"
-    for dep in $dependencies; do
-        dep_name="${dep%/*}"
-        dep_version="${dep#*/}"
-        print_stderr "Adding dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
-        echo "# Dependency: ${dep_name}/${dep_version}" >> "${script_path}"
-        echo "module load ${dep_name}/${dep_version}" >> "${script_path}"
-        echo "-- Dependency: ${dep_name}/${dep_version}" >> "${script_path}.lua"
-        echo "depends_on(\"${dep_name}/${dep_version}\")" >> "${script_path}.lua"
-    done
+    # Only add dependencies if target is apps
+    if [ "$target" = "apps" ]; then
+        print_stderr "Editing the modulefile to include the dependencies"
+        for dep in $dependencies; do
+            dep_name="${dep%/*}"
+            dep_version="${dep#*/}"
+            print_stderr "Adding dependency: ${BLUE}${dep_name}/${dep_version}${NC}"
+            echo "# Dependency: ${dep_name}/${dep_version}" >> "${script_path}"
+            echo "module load ${dep_name}/${dep_version}" >> "${script_path}"
+            echo "-- Dependency: ${dep_name}/${dep_version}" >> "${script_path}.lua"
+            echo "depends_on(\"${dep_name}/${dep_version}\")" >> "${script_path}.lua"
+        done
+    fi
 
     # edit whatis if #WHATIS: is found in the script
     whatis=$(grep -oP "^#WHATIS:\K.*" "$install_script_path" || true)
@@ -335,7 +338,7 @@ clean_up () {
 
 print_error_message() {
     # Custom error message can be defined in the build script
-    print_stderr "Possible Reason: Missing dependencies or Expired links"
+    # print_stderr "Possible Reason: Missing dependencies or Expired links"
 }
 #endregion
 

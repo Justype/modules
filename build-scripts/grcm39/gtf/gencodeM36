@@ -17,8 +17,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    
-    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
 set annotation_gtf_gz \$ref_root/gencode.v${gencode_version}.primary_assembly.annotation.gtf.gz
 setenv ANNOTATION_GTF_GZ \$annotation_gtf_gz

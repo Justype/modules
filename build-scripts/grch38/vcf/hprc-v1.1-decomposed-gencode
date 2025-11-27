@@ -38,11 +38,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    remove_default_dependencies "bcftools"
-    remove_default_dependencies "htslib"
-    remove_default_dependencies "grch38"
-    
-    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
 set hprc_gencode_vcf_gz \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz
 set hprc_gencode_vcf_gz_tbi \$ref_root/hprc-v1.1-mc-grch38.vcfbub.a100k.wave.gencode.vcf.gz.tbi

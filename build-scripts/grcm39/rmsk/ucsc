@@ -19,8 +19,6 @@ install_app() {
 special_modulefiles() {
     # Any additional modulefile operations: add environment variables, aliases, etc.
     # ref_root is a special variable that points to the ref directory in modulefile[.lua]
-    
-    # add custom environment variables and functions to modulefile
     cat << EOF >> "${script_path}"
 set RMSK_gtf_gz \$ref_root/mm39_rmsk.gtf.gz
 setenv RMSK_GTF_GZ \$RMSK_gtf_gz
