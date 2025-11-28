@@ -302,7 +302,7 @@ echo "==========================================================================
 echo "Sample: $TAG" | tee strand.txt
 echo "Detected Chemistry: $CHEM" | tee -a strand.txt
 echo "Paired-end mode: $PAIRED" | tee -a strand.txt
-echo "Strand (Forward = 3', Reverse = 5'): $STRAND, %reads mapped to GeneFull: forward = $PCTFWD , reverse = $PCTREV" | tee -a strand.txt
+echo "Strand (Forward = 3', Reverse = 5'): $STRAND" | tee -a strand.txt
 echo "CB whitelist: $BC" | tee -a strand.txt
 echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 echo "Matches out of 200,000:" | tee -a strand.txt
@@ -312,6 +312,10 @@ echo "    3 prime v3: $NBC3" | tee -a strand.txt
 echo "    3 prime v4: $NBC4" | tee -a strand.txt
 echo "    5 prime v3: $NBC5" | tee -a strand.txt
 echo "    ATAC + RNA: $NBCA" | tee -a strand.txt
+echo "-----------------------------------------------------------------------------" | tee -a strand.txt
+echo "%reads mapped to GeneFull in test mapping:" | tee -a strand.txt
+echo "    Forward strand: $PCTFWD" | tee -a strand.txt
+echo "    Reverse strand: $PCTREV" | tee -a strand.txt
 echo "-----------------------------------------------------------------------------" | tee -a strand.txt
 echo "CB length: $CBLEN" | tee -a strand.txt
 echo "UMI length: $UMILEN" | tee -a strand.txt
@@ -348,9 +352,11 @@ fi
 # pigz -p $CPUS Unmapped.out.mate2
 
 ## remove test files 
+echo [`date +"%Y-%m-%d %T"`] Cleaning up temporary files...
 rm -rf test*
 rm -rf _STARtmp
 
+echo [`date +"%Y-%m-%d %T"`] Compressing output matrices...
 pigz -p $CPUS output/*/*/*.tsv
 pigz -p $CPUS output/*/*/*.mtx
 
