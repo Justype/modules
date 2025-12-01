@@ -917,9 +917,17 @@ class PackageManager:
         List all packages in the database.
         """
         self.sort_packages()
-        max_len = max(len(pkg.package) for pkg in self.packages.values()) if self.packages else 10
+        name_max_len = max(len(pkg.package) for pkg in self.packages.values()) if self.packages else 10
+        screen_width = shutil.get_terminal_size().columns
+        whatis_len = screen_width - name_max_len - 2
         for pkg in self.packages.values():
-            print(f"{Colorize.yellow(pkg.package.ljust(max_len))}: {pkg.whatis}")
+            if len(pkg.whatis) > whatis_len:
+                # split whatis by whatis_len
+                # whatis = ("\n" + " " * (name_max_len + 4)).join(textwrap.wrap(pkg.whatis, whatis_len))
+                whatis = pkg.whatis[:whatis_len-3] + "..."
+            else:
+                whatis = pkg.whatis
+            print(f"{Colorize.yellow(pkg.package.ljust(name_max_len))}: {whatis}")
 
 # Example usage
 if __name__ == "__main__":
