@@ -20,8 +20,8 @@ def main():
     parser.add_argument("-U", "--update", action="store_true", help="Update package versions in the database")
     parser.add_argument("-a", "--add", type=str, help="Add a new <package> to the database")
     parser.add_argument("-s", "--search", type=str, help="Search for <term> in package names and descriptions")
-    parser.add_argument("-l", "--list", action="store_true", help="List all packages (not implemented)")
-    parser.add_argument("-li", "--list-installed", action="store_true", help="List installed packages (not implemented)")
+    parser.add_argument("-l", "--list", action="store_true", help="List all packages")
+    parser.add_argument("-li", "--list-installed", action="store_true", help="List installed packages (not implemented, please use ml av)")
     parser.add_argument("-I", "--info", type=str, help="<package> to show detailed info")
     parser.add_argument("-d", "--delete", type=str, help="<package>/<version> to delete")
     parser.add_argument("--print-package-version", type=str, help="INPUT: <package>/<version> or <package>, STDOUT: matched package/version (internal use)")
@@ -87,6 +87,8 @@ def main():
                 print(f"{Colorize.yellow(pkg.package.ljust(max_len))}: {pkg.whatis}")
         else:
             Utils.print_stderr(f"No packages found matching {Colorize.yellow(args.search)}.")
+    elif args.list:
+        pm.list_packages()
     elif args.info:
         pm.print_info(args.info)
     elif args.print_package_version:
@@ -909,6 +911,15 @@ class PackageManager:
         conda_packages.sort(key=lambda p: p.package.lower())
         sorted_packages = local_packages + conda_packages
         self.packages = {pkg.package: pkg for pkg in sorted_packages}
+    
+    def list_packages(self):
+        """
+        List all packages in the database.
+        """
+        self.sort_packages()
+        max_len = max(len(pkg.package) for pkg in self.packages.values()) if self.packages else 10
+        for pkg in self.packages.values():
+            print(f"{Colorize.yellow(pkg.package.ljust(max_len))}: {pkg.whatis}")
 
 # Example usage
 if __name__ == "__main__":
