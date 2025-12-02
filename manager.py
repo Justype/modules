@@ -24,6 +24,7 @@ def main():
     parser.add_argument("-li", "--list-installed", action="store_true", help="List installed packages (not implemented, please use ml av)")
     parser.add_argument("-I", "--info", type=str, help="<package> to show detailed info")
     parser.add_argument("-d", "--delete", type=str, help="<package>/<version> to delete")
+    parser.add_argument("-y", "--yes", action="store_true", help="Automatic yes to prompts (use with caution)")
     parser.add_argument("--print-package-version", type=str, help="INPUT: <package>/<version> or <package>, STDOUT: matched package/version (internal use)")
     parser.add_argument("--print-dependencies", type=str, help="<package>/<version> to print dependencies (internal use)")
     args = parser.parse_args()
@@ -50,7 +51,7 @@ def main():
         version = ""
         try:
             package_name, version = pm.get_package_version(args.install)
-            success = pm.install_package(package_name, version)
+            success = pm.install_package(package_name, version, yes=args.yes)
             if success:
                 Utils.print_stderr(f"Successfully installed {Colorize.yellow(args.install)}.")
             else:
@@ -68,10 +69,11 @@ def main():
     elif args.delete:
         try:
             package_name, version = pm.get_package_version(args.delete)
-            ready = input(f"Are you sure you want to delete {Colorize.yellow(package_name)}/{Colorize.yellow(version)}? [y/N]: ")
-            if ready.lower() != 'y':
-                Utils.print_stderr("Deletion cancelled by user.")
-                sys.exit(0)
+            if not args.yes:
+                ready = input(f"Are you sure you want to delete {Colorize.yellow(package_name)}/{Colorize.yellow(version)}? [y/N]: ")
+                if ready.lower() != 'y':
+                    Utils.print_stderr("Deletion cancelled by user.")
+                    sys.exit(0)
             success = pm.delete(package_name, version)
             if success:
                 Utils.print_stderr(f"Successfully deleted {Colorize.yellow(args.delete)}.")
@@ -524,6 +526,8 @@ class PackageManager:
             if not os.path.isdir(script_relative_path):
                 continue
 
+            script_tags = self.get_package(script_name).tags if self.get_package(script_name) else []
+
             versions = os.listdir(script_relative_path)
             versions = [v for v in versions if not (v.startswith("template") or v.endswith("_data"))]
             if len(versions) == 0:
@@ -543,6 +547,7 @@ class PackageManager:
                     Utils.print_stderr(f"Warning: No valid data versions found for reference package {script_name}. Skipping.")
                     continue
                 pkg = Package.new_from_string(script_name)
+                pkg.tags = script_tags
                 pkg.versions = Package.version_order(assembly_data_version)
                 pkg.whatis = f"Assembly {script_name} reference and index data"
                 pkg.url = ""
@@ -553,6 +558,7 @@ class PackageManager:
                 updated_packages.add(script_name)
 
                 pkg = Package.new_from_string(script_name)
+                pkg.tags = script_tags
                 pkg.source = "local"
                 pkg.versions = versions
 
@@ -664,7 +670,7 @@ class PackageManager:
 
         for dep_name, dep_version in dependencies:
             Utils.print_stderr(f"Installing dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}...")
-            success = self.install_package(dep_name, dep_version)
+            success = self.install_package(dep_name, dep_version, yes=True)
             if not success:
                 Utils.print_stderr(f"❌ Failed to install dependency {Colorize.yellow(dep_name)}/{Colorize.yellow(dep_version if dep_version else 'latest')} for {Colorize.yellow(package_name)}/{Colorize.yellow(version)}.")
                 return False
@@ -678,7 +684,7 @@ class PackageManager:
             Utils.print_stderr(f"❌ Error installing {package_name} version {version} from local build script.")
             return False
 
-    def install_package(self, package_name: str, version: Optional[str]) -> bool:
+    def install_package(self, package_name: str, version: Optional[str], yes: bool = False) -> bool:
         """
         Install the package at the specified version using micromamba.
         """
@@ -716,6 +722,12 @@ class PackageManager:
             Utils.print_stderr(f"Package {Colorize.yellow(package_name)}/{Colorize.yellow(version)} is already installed.")
             return True
         
+        if not yes:
+            ready = input(f"Are you sure you want to install {Colorize.yellow(package_name)}/{Colorize.yellow(version)}? [Y/n]: ")
+            if ready.lower() == 'n':
+                Utils.print_stderr("Installation cancelled by user.")
+                return False
+
         if pkg.is_local():
             result = self.install_local(package_name, version)
         elif pkg.is_conda():
