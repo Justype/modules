@@ -21,7 +21,7 @@ def main():
     parser.add_argument("-a", "--add", type=str, help="Add a new <package> to the database")
     parser.add_argument("-s", "--search", type=str, help="Search for <term> in package names and descriptions")
     parser.add_argument("-l", "--list", action="store_true", help="List all packages")
-    parser.add_argument("-li", "--list-installed", action="store_true", help="List installed packages (not implemented, please use ml av)")
+    # parser.add_argument("-li", "--list-installed", action="store_true", help="List installed packages (not implemented, please use ml av)")
     parser.add_argument("-I", "--info", type=str, help="<package> to show detailed info")
     parser.add_argument("-d", "--delete", type=str, help="<package>/<version> to delete")
     parser.add_argument("-y", "--yes", action="store_true", help="Automatic yes to prompts (use with caution)")
