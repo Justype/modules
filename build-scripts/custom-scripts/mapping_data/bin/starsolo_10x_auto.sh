@@ -261,19 +261,31 @@ fi
 echo [`date +"%Y-%m-%d %T"`] Determining strand info by test mapping...
 STRAND=Forward
 
+echo [`date +"%Y-%m-%d %T"`] Testing Forward strand mapping...
 $CMD STAR --runThreadN $CPUS --genomeDir $REF --readFilesIn test.R2.fastq test.R1.fastq --runDirPerm All_RWX --outSAMtype None \
      --soloType CB_UMI_Simple --soloCBwhitelist $BC --soloBarcodeReadLength 0 --soloCBlen $CBLEN --soloUMIstart $((CBLEN+1)) \
      --soloUMIlen $UMILEN --soloStrand Forward --genomeLoad LoadAndKeep \
      --soloUMIdedup 1MM_CR --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts --soloUMIfiltering MultiGeneUMI_CR \
      --soloCellFilter EmptyDrops_CR --clipAdapterType CellRanger4 --outFilterScoreMin 30 \
-     --soloFeatures Gene GeneFull --soloOutFileNames test_forward/ features.tsv barcodes.tsv matrix.mtx &> /dev/null 
+     --soloFeatures Gene GeneFull --soloOutFileNames test_forward/ features.tsv barcodes.tsv matrix.mtx &> test_forward.log
 
+if [ $? -ne 0 ]; then
+  >&2 echo "ERROR: STAR failed during forward strand test mapping! Check test_forward.log for details."
+  exit 1
+fi
+
+echo [`date +"%Y-%m-%d %T"`] Testing Reverse strand mapping...
 $CMD STAR --runThreadN $CPUS --genomeDir $REF --readFilesIn test.R2.fastq test.R1.fastq --runDirPerm All_RWX --outSAMtype None \
      --soloType CB_UMI_Simple --soloCBwhitelist $BC --soloBarcodeReadLength 0 --soloCBlen $CBLEN --soloUMIstart $((CBLEN+1)) \
      --soloUMIlen $UMILEN --soloStrand Reverse --genomeLoad LoadAndKeep \
      --soloUMIdedup 1MM_CR --soloCBmatchWLtype 1MM_multi_Nbase_pseudocounts --soloUMIfiltering MultiGeneUMI_CR \
      --soloCellFilter EmptyDrops_CR --clipAdapterType CellRanger4 --outFilterScoreMin 30 \
-     --soloFeatures Gene GeneFull --soloOutFileNames test_reverse/ features.tsv barcodes.tsv matrix.mtx &> /dev/null
+     --soloFeatures Gene GeneFull --soloOutFileNames test_reverse/ features.tsv barcodes.tsv matrix.mtx &> test_reverse.log
+
+if [ $? -ne 0 ]; then
+  >&2 echo "ERROR: STAR failed during reverse strand test mapping! Check test_reverse.log for details."
+  exit 1
+fi
 
 echo [`date +"%Y-%m-%d %T"`] Calculating mapping percentages...
 
@@ -357,7 +369,10 @@ rm -rf test*
 rm -rf _STARtmp
 
 echo [`date +"%Y-%m-%d %T"`] Compressing output matrices...
-pigz -p $CPUS output/*/*/*.tsv
+# SJ/raw/features.tsv is a abs symlink to SJ.out.tab; which is not safe if we copy/move the output dir
+find output -name '*.tsv' -exec sh -c '
+  pigz -p "$0" "$1" -c > "$1.gz" && rm "$1"
+' "$CPUS" {} \;
 pigz -p $CPUS output/*/*/*.mtx
 
 echo "ALL DONE!"
