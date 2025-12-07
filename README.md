@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This repo is archived. For new implementation, please go to [CondaTainer](https://github.com/Justype/condatainer).
+
 # Environment Module for Bioinfo Research
 
 > [!NOTE]
