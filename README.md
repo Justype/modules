@@ -1,5 +1,5 @@
 > [!CAUTION]
-> This repo is archived. For new implementation, please go to [CondaTainer](https://github.com/Justype/condatainer).
+> This repo is archived. For new implementation, please go to [ModGen - CondaTainer](https://github.com/Justype/condatainer/tree/main/assets/modgen).
 
 # Environment Module for Bioinfo Research
 
